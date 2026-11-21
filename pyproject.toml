@@ -36,10 +36,10 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://thorwhalen.github.io/skill/"
-Repository = "https://github.com/thorwhalen/skill"
-Issues = "https://github.com/thorwhalen/skill/issues"
-Changelog = "https://github.com/thorwhalen/skill/blob/master/CHANGELOG.md"
+Homepage = "https://addaix.github.io/skill/"
+Repository = "https://github.com/addaix/skill"
+Issues = "https://github.com/addaix/skill/issues"
+Changelog = "https://github.com/addaix/skill/blob/master/CHANGELOG.md"
 
 [project.scripts]
 skill = "skill.__main__:main"

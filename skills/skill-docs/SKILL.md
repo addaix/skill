@@ -104,7 +104,7 @@ skill link-skills /path/to/{pkg_name} --target ~/.claude/skills
 
 > **Tip:** Symlinking keeps the single source of truth in the package repo.
 > When the package updates its skills, your linked copies update too.
-> See the [`skill` package docs](https://github.com/thorwhalen/skill) for
+> See the [`skill` package docs](https://github.com/addaix/skill) for
 > more on managing skills, scoping, and multi-agent support.
 
 **After `pip install {pkg_name}`:**
@@ -126,7 +126,7 @@ The template above is a starting point. Adapt it:
   or a link to CONTRIBUTING.md.
 - **Link to further reading:**
   - [Agent Skills spec](https://agentskills.io)
-  - [skill package](https://github.com/thorwhalen/skill) for managing skills
+  - [skill package](https://github.com/addaix/skill) for managing skills
   - The project's own skill files for the full instructions
 
 ### 5. Other documentation surfaces
