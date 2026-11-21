@@ -3,9 +3,12 @@
 from collections.abc import Callable
 from pathlib import Path
 
+import yaml
+
 from skill.base import Skill, SkillMeta, parse_frontmatter
 from skill.stores import LocalSkillStore
 from skill.util import ParsedKey
+from skill.profiles import check_profile, check_yaml_safety
 from skill.registry import Registry
 
 
@@ -183,11 +186,17 @@ def scaffold(
     return path
 
 
-def validate(path_or_key: str) -> list[str]:
+def validate(path_or_key: str, *, profile: str = "spec") -> list[str]:
     """Validate a skill, returning a list of issue strings (empty = valid).
 
     Runs all registered validators. Accepts a filesystem path to a skill
     directory, or a canonical key to look up in the local store.
+
+    ``profile`` adds the checks of one host (``'spec'``, the open spec, is the
+    default; ``'portable'``: spec keys only and a 200-character description;
+    ``'claude-code'``; see :mod:`skill.profiles`). For a skill given as a
+    directory, unquoted frontmatter values that YAML would misread are also
+    reported, whatever the profile.
 
     >>> import tempfile
     >>> from skill.base import Skill, SkillMeta
@@ -207,7 +216,14 @@ def validate(path_or_key: str) -> list[str]:
         skill_md = path / "SKILL.md"
         if not skill_md.exists():
             return [f"Missing SKILL.md in {path}"]
-        skill = Skill.from_path(path)
+        raw = skill_md.read_text().lstrip()
+        fm = raw[3:].split("---", 1)[0] if raw.startswith("---") else ""
+        unsafe = check_yaml_safety(fm)
+        try:
+            skill = Skill.from_path(path)
+        except yaml.YAMLError as e:  # often the very thing check_yaml_safety names
+            return unsafe + [f"Frontmatter is not valid YAML: {e}".splitlines()[0]]
+        return _validate_skill(skill, profile=profile) + unsafe
     else:
         store = LocalSkillStore()
         try:
@@ -215,14 +231,21 @@ def validate(path_or_key: str) -> list[str]:
         except KeyError:
             return [f"Not a valid path or skill key: {path_or_key}"]
 
-    return _validate_skill(skill)
+    return _validate_skill(skill, profile=profile)
 
 
-def _validate_skill(skill: Skill) -> list[str]:
-    """Run all registered validators against a Skill."""
+def _validate_skill(skill: Skill, *, profile: str = "spec") -> list[str]:
+    """Run all registered validators, then the host ``profile``'s checks, on a Skill."""
     issues = []
     for validator in validators.values():
         issues.extend(validator(skill))
+    issues.extend(
+        check_profile(
+            keys=skill.meta.to_dict(),
+            description=skill.meta.description,
+            profile=profile,
+        )
+    )
     return issues
 
 
