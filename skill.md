@@ -1,4 +1,4 @@
-> built 2026-11-21 15:33 UTC from b61bb5f (master) · skill 0.1.20. Details: build_info.json
+> built 2026-11-21 22:35 UTC from ab3bc7a (master) · skill 0.1.20. Details: build_info.json
 
 # index.html.md
 
@@ -1026,20 +1026,21 @@ True
 
 ### Modules
 
-| [`ai`](_autosummary/skill.ai.html.md#module-skill.ai)                                             | Optional AI facade for semantic search and LLM-powered features.   |
-|-----------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------|
-| [`backends`](_autosummary/skill.backends.html.md#module-skill.backends)                                 | Backend protocols and local filesystem backend.                    |
-| [`base`](_autosummary/skill.base.html.md#module-skill.base)                                         | Core data model and SKILL.md parsing.                              |
-| [`cli_format`](_autosummary/skill.cli_format.html.md#module-skill.cli_format)                             | Terminal-friendly formatting for CLI output.                       |
-| [`completion`](_autosummary/skill.completion.html.md#module-skill.completion)                             | Shell completion setup and diagnostics.                            |
-| [`config`](_autosummary/skill.config.html.md#module-skill.config)                                     | Configuration management via platformdirs and TOML.                |
-| [`create`](_autosummary/skill.create.html.md#skill.create)(name, \*[, description, body, owner, ...]) | Create a new skill and store it locally.                           |
-| [`install`](_autosummary/skill.install.html.md#skill.install)(key, \*[, agent_targets, scope, ...])    | Install a skill into one or more agent target directories.         |
-| [`registry`](_autosummary/skill.registry.html.md#module-skill.registry)                                 | Generic plugin registry with entry point discovery.                |
-| [`search`](_autosummary/skill.search.html.md#skill.search)(query, \*[, max_results, local_only, ...]) | Search for skills across local index and remote backends.          |
-| [`stores`](_autosummary/skill.stores.html.md#module-skill.stores)                                     | Storage layer: LocalSkillStore and SourcedSkillStore via dol.      |
-| [`translate`](_autosummary/skill.translate.html.md#module-skill.translate)                               | Format translators: SKILL.md <-> agent-specific formats.           |
-| [`util`](_autosummary/skill.util.html.md#module-skill.util)                                         | Pure helpers with zero internal imports.                           |
+| [`ai`](_autosummary/skill.ai.html.md#module-skill.ai)                                             | Optional AI facade for semantic search and LLM-powered features.    |
+|-----------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
+| [`backends`](_autosummary/skill.backends.html.md#module-skill.backends)                                 | Backend protocols and local filesystem backend.                     |
+| [`base`](_autosummary/skill.base.html.md#module-skill.base)                                         | Core data model and SKILL.md parsing.                               |
+| [`cli_format`](_autosummary/skill.cli_format.html.md#module-skill.cli_format)                             | Terminal-friendly formatting for CLI output.                        |
+| [`completion`](_autosummary/skill.completion.html.md#module-skill.completion)                             | Shell completion setup and diagnostics.                             |
+| [`config`](_autosummary/skill.config.html.md#module-skill.config)                                     | Configuration management via platformdirs and TOML.                 |
+| [`create`](_autosummary/skill.create.html.md#skill.create)(name, \*[, description, body, owner, ...]) | Create a new skill and store it locally.                            |
+| [`install`](_autosummary/skill.install.html.md#skill.install)(key, \*[, agent_targets, scope, ...])    | Install a skill into one or more agent target directories.          |
+| [`profiles`](_autosummary/skill.profiles.html.md#module-skill.profiles)                                 | Per-host validation profiles for SKILL.md, and a YAML-safety check. |
+| [`registry`](_autosummary/skill.registry.html.md#module-skill.registry)                                 | Generic plugin registry with entry point discovery.                 |
+| [`search`](_autosummary/skill.search.html.md#skill.search)(query, \*[, max_results, local_only, ...]) | Search for skills across local index and remote backends.           |
+| [`stores`](_autosummary/skill.stores.html.md#module-skill.stores)                                     | Storage layer: LocalSkillStore and SourcedSkillStore via dol.       |
+| [`translate`](_autosummary/skill.translate.html.md#module-skill.translate)                               | Format translators: SKILL.md <-> agent-specific formats.            |
+| [`util`](_autosummary/skill.util.html.md#module-skill.util)                                         | Pure helpers with zero internal imports.                            |
 
 
 # _autosummary/skill.install.html.md
@@ -1063,6 +1064,108 @@ was installed.
   * **store** ([`LocalSkillStore`](_autosummary/skill.stores.html.md#skill.stores.LocalSkillStore) | [`None`](https://docs.python.org/3/builtins/constants.html#None)) – Skill store to read from. Uses default if None.
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Path`](https://docs.python.org/3/library/pathlib.html#pathlib.Path)]
+
+
+# _autosummary/skill.profiles.html.md
+
+# skill.profiles
+
+Per-host validation profiles for SKILL.md, and a YAML-safety check.
+
+The open spec’s limits (what `skill.validate()` always checks) are not what
+every host enforces. A skill can pass them and still be rejected or truncated by
+the host it is shipped to. A [`Profile`](_autosummary/skill.profiles.html.md#skill.profiles.Profile) is data: the frontmatter keys a
+host accepts and its description cap. `validate(path, profile='portable')`
+adds the checks of that profile on top of the registered validators.
+
+```pycon
+>>> sorted(PROFILES)
+['claude-code', 'portable', 'spec']
+>>> PROFILES['portable'].max_description
+200
+```
+
+### Module Attributes
+
+| [`SPEC_KEYS`](_autosummary/skill.profiles.html.md#skill.profiles.SPEC_KEYS)   | Frontmatter keys of the open agent-skills specification.   |
+|--------------------------------------------------------------|------------------------------------------------------------|
+
+### Functions
+
+| [`check_profile`](_autosummary/skill.profiles.html.md#skill.profiles.check_profile)(\*, keys, description, profile)   | Issues a host profile finds in a skill's top-level `keys` and `description`.                         |
+|--------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|
+| [`check_yaml_safety`](_autosummary/skill.profiles.html.md#skill.profiles.check_yaml_safety)(frontmatter)                  | Flag unquoted top-level values that YAML reads differently from what was meant.                      |
+| [`get_profile`](_autosummary/skill.profiles.html.md#skill.profiles.get_profile)(profile)                            | Resolve a profile name (or pass a [`Profile`](_autosummary/skill.profiles.html.md#skill.profiles.Profile) through). |
+
+### Classes
+
+| [`Profile`](_autosummary/skill.profiles.html.md#skill.profiles.Profile)(name[, allowed_keys, max_description])   | What one host enforces on SKILL.md frontmatter.   |
+|---------------------------------------------------------------------------------------------------|---------------------------------------------------|
+
+### *class* skill.profiles.Profile(name, allowed_keys=None, max_description=None)
+
+Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
+
+What one host enforces on SKILL.md frontmatter.
+
+`allowed_keys=None` means the host does not restrict top-level keys.
+`max_description=None` means no cap beyond the open spec’s 1024.
+
+### skill.profiles.SPEC_KEYS *= frozenset({'allowed-tools', 'compatibility', 'description', 'license', 'metadata', 'name'})*
+
+Frontmatter keys of the open agent-skills specification.
+
+### skill.profiles.check_profile(, keys, description, profile)
+
+Issues a host profile finds in a skill’s top-level `keys` and `description`.
+
+```pycon
+>>> check_profile(keys=['name', 'description', 'model'], description='x' * 201,
+...               profile='portable')
+['Description exceeds 200 characters for profile portable (201)', "Key 'model' is not accepted by profile portable"]
+>>> check_profile(keys=['name'], description='ok', profile='spec')
+[]
+```
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
+
+### skill.profiles.check_yaml_safety(frontmatter)
+
+Flag unquoted top-level values that YAML reads differently from what was meant.
+
+A value holding `": "` is read as a new key; one holding `" #"` as a comment
+(everything after it is dropped). Quoted values and block scalars are safe.
+
+```pycon
+>>> check_yaml_safety('name: x\ndescription: Use when: the user asks')
+["description: unquoted value contains ': ' (YAML reads a new key); quote it"]
+>>> check_yaml_safety('name: x\ndescription: Fix issue#12 now')
+[]
+>>> check_yaml_safety('description: Fix this #12')
+["description: unquoted value contains ' #' (YAML reads a comment); quote it"]
+>>> check_yaml_safety('description: "Use when: fine #1"\nname: x')
+[]
+```
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
+
+### skill.profiles.get_profile(profile)
+
+Resolve a profile name (or pass a [`Profile`](_autosummary/skill.profiles.html.md#skill.profiles.Profile) through).
+
+```pycon
+>>> get_profile('spec').name
+'spec'
+>>> get_profile('nope')
+Traceback (most recent call last):
+...
+ValueError: Unknown profile 'nope'; known: claude-code, portable, spec
+```
+
+* **Return type:**
+  [`Profile`](_autosummary/skill.profiles.html.md#skill.profiles.Profile)
 
 
 # _autosummary/skill.registry.html.md
@@ -1490,16 +1593,18 @@ Resolve `$VAR` and `${VAR}` references from environment variables.
 
 # About this build
 
-This documentation was built on **2026-11-21 15:33 UTC** from commit <a href="https://github.com/addaix/skill/commit/b61bb5ff3670679e64b669ba3f61e52b1495e99f"><code>b61bb5f</code></a> on branch <code>master</code>, for **skill 0.1.20** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-21 22:35 UTC** from commit <a href="https://github.com/addaix/skill/commit/ab3bc7ad9a064fa81c774409b8b2aa176732d46a"><code>ab3bc7a</code></a> on branch <code>master</code>, for **skill 0.1.20** (from <code>pyproject.toml</code>).
 
-#### NOTE
-Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
+#### WARNING
+The documentation and the package may be misaligned:
+
+- The documented version (0.1.20) is behind the latest release on PyPI (0.1.21): `pip install skill` gives newer code than these docs describe.
 
 ## Source
 
 |                     |                                                                                                                                                     |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/addaix/skill/commit/b61bb5ff3670679e64b669ba3f61e52b1495e99f"><code>b61bb5ff3670679e64b669ba3f61e52b1495e99f</code></a> |
+| Commit              | <a href="https://github.com/addaix/skill/commit/ab3bc7ad9a064fa81c774409b8b2aa176732d46a"><code>ab3bc7ad9a064fa81c774409b8b2aa176732d46a</code></a> |
 | Branch              | <code>master</code>                                                                                                                                 |
 | Tags at this commit | none                                                                                                                                                |
 | Working tree        | clean                                                                                                                                               |
@@ -1510,15 +1615,15 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>addaix/skill</code>                                                                  |
-| Run          | <a href="https://github.com/addaix/skill/actions/runs/44919636679">44919636679</a>         |
+| Run          | <a href="https://github.com/addaix/skill/actions/runs/44957400979">44957400979</a>         |
 | Ref          | <code>refs/heads/master</code>                                                             |
-| Event commit | <code>b61bb5ff3670679e64b669ba3f61e52b1495e99f</code> (in the history of the built commit) |
+| Event commit | <code>ab3bc7ad9a064fa81c774409b8b2aa176732d46a</code> (in the history of the built commit) |
 
 ## Tools
 
 |          |         |
 |----------|---------|
-| epythet  | 0.2.22  |
+| epythet  | 0.2.23  |
 | Sphinx   | 9.1.1   |
 | docutils | 0.22.4  |
 | Python   | 3.12.16 |
@@ -1537,14 +1642,14 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/skill/0.1.20/">0.1.20</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/skill/0.1.21/">0.1.21</a>, newer than the documented version (0.1.20).
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/addaix/skill && cd skill
-git checkout b61bb5ff3670679e64b669ba3f61e52b1495e99f
-pip install "epythet==0.2.22"
+git checkout ab3bc7ad9a064fa81c774409b8b2aa176732d46a
+pip install "epythet==0.2.23"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
 

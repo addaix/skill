@@ -1,0 +1,26 @@
+skill.profiles
+==============
+
+.. automodule:: skill.profiles
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      SPEC_KEYS
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      check_profile
+      check_yaml_safety
+      get_profile
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Profile
+   

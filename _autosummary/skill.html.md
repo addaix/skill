@@ -68,17 +68,18 @@ True
 
 ### Modules
 
-| [`ai`](skill.ai.html.md#module-skill.ai)                                             | Optional AI facade for semantic search and LLM-powered features.   |
-|-----------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------|
-| [`backends`](skill.backends.html.md#module-skill.backends)                                 | Backend protocols and local filesystem backend.                    |
-| [`base`](skill.base.html.md#module-skill.base)                                         | Core data model and SKILL.md parsing.                              |
-| [`cli_format`](skill.cli_format.html.md#module-skill.cli_format)                             | Terminal-friendly formatting for CLI output.                       |
-| [`completion`](skill.completion.html.md#module-skill.completion)                             | Shell completion setup and diagnostics.                            |
-| [`config`](skill.config.html.md#module-skill.config)                                     | Configuration management via platformdirs and TOML.                |
-| [`create`](skill.create.html.md#skill.create)(name, \*[, description, body, owner, ...]) | Create a new skill and store it locally.                           |
-| [`install`](skill.install.html.md#skill.install)(key, \*[, agent_targets, scope, ...])    | Install a skill into one or more agent target directories.         |
-| [`registry`](skill.registry.html.md#module-skill.registry)                                 | Generic plugin registry with entry point discovery.                |
-| [`search`](skill.search.html.md#skill.search)(query, \*[, max_results, local_only, ...]) | Search for skills across local index and remote backends.          |
-| [`stores`](skill.stores.html.md#module-skill.stores)                                     | Storage layer: LocalSkillStore and SourcedSkillStore via dol.      |
-| [`translate`](skill.translate.html.md#module-skill.translate)                               | Format translators: SKILL.md <-> agent-specific formats.           |
-| [`util`](skill.util.html.md#module-skill.util)                                         | Pure helpers with zero internal imports.                           |
+| [`ai`](skill.ai.html.md#module-skill.ai)                                             | Optional AI facade for semantic search and LLM-powered features.    |
+|-----------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
+| [`backends`](skill.backends.html.md#module-skill.backends)                                 | Backend protocols and local filesystem backend.                     |
+| [`base`](skill.base.html.md#module-skill.base)                                         | Core data model and SKILL.md parsing.                               |
+| [`cli_format`](skill.cli_format.html.md#module-skill.cli_format)                             | Terminal-friendly formatting for CLI output.                        |
+| [`completion`](skill.completion.html.md#module-skill.completion)                             | Shell completion setup and diagnostics.                             |
+| [`config`](skill.config.html.md#module-skill.config)                                     | Configuration management via platformdirs and TOML.                 |
+| [`create`](skill.create.html.md#skill.create)(name, \*[, description, body, owner, ...]) | Create a new skill and store it locally.                            |
+| [`install`](skill.install.html.md#skill.install)(key, \*[, agent_targets, scope, ...])    | Install a skill into one or more agent target directories.          |
+| [`profiles`](skill.profiles.html.md#module-skill.profiles)                                 | Per-host validation profiles for SKILL.md, and a YAML-safety check. |
+| [`registry`](skill.registry.html.md#module-skill.registry)                                 | Generic plugin registry with entry point discovery.                 |
+| [`search`](skill.search.html.md#skill.search)(query, \*[, max_results, local_only, ...]) | Search for skills across local index and remote backends.           |
+| [`stores`](skill.stores.html.md#module-skill.stores)                                     | Storage layer: LocalSkillStore and SourcedSkillStore via dol.       |
+| [`translate`](skill.translate.html.md#module-skill.translate)                               | Format translators: SKILL.md <-> agent-specific formats.            |
+| [`util`](skill.util.html.md#module-skill.util)                                         | Pure helpers with zero internal imports.                            |

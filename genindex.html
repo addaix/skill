@@ -122,6 +122,7 @@
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/skill.config.html">skill.config</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/skill.create.html">skill.create</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/skill.install.html">skill.install</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/skill.profiles.html">skill.profiles</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/skill.registry.html">skill.registry</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/skill.search.html">skill.search</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/skill.stores.html">skill.stores</a></li>
@@ -192,10 +193,14 @@
 </li>
       <li><a href="_autosummary/skill.ai.html#skill.ai.chat">chat() (in module skill.ai)</a>
 </li>
-      <li><a href="_autosummary/skill.backends.composio.html#skill.backends.composio.ComposioSkillSource">ComposioSkillSource (class in skill.backends.composio)</a>
+      <li><a href="_autosummary/skill.profiles.html#skill.profiles.check_profile">check_profile() (in module skill.profiles)</a>
+</li>
+      <li><a href="_autosummary/skill.profiles.html#skill.profiles.check_yaml_safety">check_yaml_safety() (in module skill.profiles)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
+      <li><a href="_autosummary/skill.backends.composio.html#skill.backends.composio.ComposioSkillSource">ComposioSkillSource (class in skill.backends.composio)</a>
+</li>
       <li><a href="_autosummary/skill.config.html#skill.config.config_dir">config_dir() (in module skill.config)</a>
 </li>
       <li><a href="_autosummary/skill.config.html#skill.config.config_path">config_path() (in module skill.config)</a>
@@ -262,10 +267,12 @@
   <h2 id="G">G</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
-      <li><a href="_autosummary/skill.stores.html#skill.stores.LocalSkillStore.get_source_meta">get_source_meta() (skill.stores.LocalSkillStore method)</a>
+      <li><a href="_autosummary/skill.profiles.html#skill.profiles.get_profile">get_profile() (in module skill.profiles)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
+      <li><a href="_autosummary/skill.stores.html#skill.stores.LocalSkillStore.get_source_meta">get_source_meta() (skill.stores.LocalSkillStore method)</a>
+</li>
       <li><a href="_autosummary/skill.backends.github.html#skill.backends.github.GitHubSkillSource">GitHubSkillSource (class in skill.backends.github)</a>
 </li>
   </ul></td>
@@ -354,6 +361,8 @@
 </li>
         <li><a href="_autosummary/skill.config.html#module-skill.config">skill.config</a>
 </li>
+        <li><a href="_autosummary/skill.profiles.html#module-skill.profiles">skill.profiles</a>
+</li>
         <li><a href="_autosummary/skill.registry.html#module-skill.registry">skill.registry</a>
 </li>
         <li><a href="_autosummary/skill.stores.html#module-skill.stores">skill.stores</a>
@@ -381,11 +390,13 @@
   <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
       <li><a href="_autosummary/skill.base.html#skill.base.parse_frontmatter">parse_frontmatter() (in module skill.base)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
       <li><a href="_autosummary/skill.base.html#skill.base.parse_skill_md">parse_skill_md() (in module skill.base)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
       <li><a href="_autosummary/skill.util.html#skill.util.ParsedKey">ParsedKey (class in skill.util)</a>
+</li>
+      <li><a href="_autosummary/skill.profiles.html#skill.profiles.Profile">Profile (class in skill.profiles)</a>
 </li>
   </ul></td>
   </tr>
@@ -486,8 +497,6 @@
         <li><a href="_autosummary/skill.backends.skillsdirectory.html#module-skill.backends.skillsdirectory">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
       <li>
     skill.backends.smithery
 
@@ -495,6 +504,8 @@
         <li><a href="_autosummary/skill.backends.smithery.html#module-skill.backends.smithery">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
       <li>
     skill.base
 
@@ -521,6 +532,13 @@
 
       <ul style="list-style-type:none">
         <li><a href="_autosummary/skill.config.html#module-skill.config">module</a>
+</li>
+      </ul></li>
+      <li>
+    skill.profiles
+
+      <ul style="list-style-type:none">
+        <li><a href="_autosummary/skill.profiles.html#module-skill.profiles">module</a>
 </li>
       </ul></li>
       <li>
@@ -566,6 +584,8 @@
       <li><a href="_autosummary/skill.backends.smithery.html#skill.backends.smithery.SmitherySkillSource">SmitherySkillSource (class in skill.backends.smithery)</a>
 </li>
       <li><a href="_autosummary/skill.html#skill.sources">sources() (in module skill)</a>
+</li>
+      <li><a href="_autosummary/skill.profiles.html#skill.profiles.SPEC_KEYS">SPEC_KEYS (in module skill.profiles)</a>
 </li>
   </ul></td>
   </tr>
