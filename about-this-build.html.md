@@ -2,29 +2,29 @@
 
 # About this build
 
-This documentation was built on **2026-10-20 19:51 UTC** from commit <a href="https://github.com/thorwhalen/skill/commit/4e0cdb0f215a4ed259b97a4c16f7915387dfb809"><code>4e0cdb0</code></a> on branch <code>master</code>, for **skill 0.1.19** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-21 15:33 UTC** from commit <a href="https://github.com/addaix/skill/commit/b61bb5ff3670679e64b669ba3f61e52b1495e99f"><code>b61bb5f</code></a> on branch <code>master</code>, for **skill 0.1.20** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
 
 ## Source
 
-|                     |                                                                                                                                                         |
-|---------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/skill/commit/4e0cdb0f215a4ed259b97a4c16f7915387dfb809"><code>4e0cdb0f215a4ed259b97a4c16f7915387dfb809</code></a> |
-| Branch              | <code>master</code>                                                                                                                                     |
-| Tags at this commit | none                                                                                                                                                    |
-| Working tree        | clean                                                                                                                                                   |
-| Remote              | <code>https://github.com/thorwhalen/skill</code>                                                                                                        |
+|                     |                                                                                                                                                     |
+|---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| Commit              | <a href="https://github.com/addaix/skill/commit/b61bb5ff3670679e64b669ba3f61e52b1495e99f"><code>b61bb5ff3670679e64b669ba3f61e52b1495e99f</code></a> |
+| Branch              | <code>master</code>                                                                                                                                 |
+| Tags at this commit | none                                                                                                                                                |
+| Working tree        | clean                                                                                                                                               |
+| Remote              | <code>https://github.com/addaix/skill</code>                                                                                                        |
 
 ## Continuous integration
 
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
-| Repository   | <code>thorwhalen/skill</code>                                                              |
-| Run          | <a href="https://github.com/thorwhalen/skill/actions/runs/39486724642">39486724642</a>     |
+| Repository   | <code>addaix/skill</code>                                                                  |
+| Run          | <a href="https://github.com/addaix/skill/actions/runs/44919636679">44919636679</a>         |
 | Ref          | <code>refs/heads/master</code>                                                             |
-| Event commit | <code>4e0cdb0f215a4ed259b97a4c16f7915387dfb809</code> (in the history of the built commit) |
+| Event commit | <code>b61bb5ff3670679e64b669ba3f61e52b1495e99f</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -33,7 +33,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 | epythet  | 0.2.22  |
 | Sphinx   | 9.1.1   |
 | docutils | 0.22.4  |
-| Python   | 3.12.15 |
+| Python   | 3.12.16 |
 
 ## Configuration as resolved
 
@@ -49,13 +49,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/skill/0.1.19/">0.1.19</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/skill/0.1.20/">0.1.20</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
-git clone https://github.com/thorwhalen/skill && cd skill
-git checkout 4e0cdb0f215a4ed259b97a4c16f7915387dfb809
+git clone https://github.com/addaix/skill && cd skill
+git checkout b61bb5ff3670679e64b669ba3f61e52b1495e99f
 pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

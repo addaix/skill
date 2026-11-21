@@ -1,4 +1,4 @@
-> built 2026-10-20 19:51 UTC from 4e0cdb0 (master) · skill 0.1.19. Details: build_info.json
+> built 2026-11-21 15:33 UTC from b61bb5f (master) · skill 0.1.20. Details: build_info.json
 
 # index.html.md
 
@@ -1490,29 +1490,29 @@ Resolve `$VAR` and `${VAR}` references from environment variables.
 
 # About this build
 
-This documentation was built on **2026-10-20 19:51 UTC** from commit <a href="https://github.com/thorwhalen/skill/commit/4e0cdb0f215a4ed259b97a4c16f7915387dfb809"><code>4e0cdb0</code></a> on branch <code>master</code>, for **skill 0.1.19** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-21 15:33 UTC** from commit <a href="https://github.com/addaix/skill/commit/b61bb5ff3670679e64b669ba3f61e52b1495e99f"><code>b61bb5f</code></a> on branch <code>master</code>, for **skill 0.1.20** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
 
 ## Source
 
-|                     |                                                                                                                                                         |
-|---------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/skill/commit/4e0cdb0f215a4ed259b97a4c16f7915387dfb809"><code>4e0cdb0f215a4ed259b97a4c16f7915387dfb809</code></a> |
-| Branch              | <code>master</code>                                                                                                                                     |
-| Tags at this commit | none                                                                                                                                                    |
-| Working tree        | clean                                                                                                                                                   |
-| Remote              | <code>https://github.com/thorwhalen/skill</code>                                                                                                        |
+|                     |                                                                                                                                                     |
+|---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| Commit              | <a href="https://github.com/addaix/skill/commit/b61bb5ff3670679e64b669ba3f61e52b1495e99f"><code>b61bb5ff3670679e64b669ba3f61e52b1495e99f</code></a> |
+| Branch              | <code>master</code>                                                                                                                                 |
+| Tags at this commit | none                                                                                                                                                |
+| Working tree        | clean                                                                                                                                               |
+| Remote              | <code>https://github.com/addaix/skill</code>                                                                                                        |
 
 ## Continuous integration
 
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
-| Repository   | <code>thorwhalen/skill</code>                                                              |
-| Run          | <a href="https://github.com/thorwhalen/skill/actions/runs/39486724642">39486724642</a>     |
+| Repository   | <code>addaix/skill</code>                                                                  |
+| Run          | <a href="https://github.com/addaix/skill/actions/runs/44919636679">44919636679</a>         |
 | Ref          | <code>refs/heads/master</code>                                                             |
-| Event commit | <code>4e0cdb0f215a4ed259b97a4c16f7915387dfb809</code> (in the history of the built commit) |
+| Event commit | <code>b61bb5ff3670679e64b669ba3f61e52b1495e99f</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -1521,7 +1521,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 | epythet  | 0.2.22  |
 | Sphinx   | 9.1.1   |
 | docutils | 0.22.4  |
-| Python   | 3.12.15 |
+| Python   | 3.12.16 |
 
 ## Configuration as resolved
 
@@ -1537,13 +1537,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/skill/0.1.19/">0.1.19</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/skill/0.1.20/">0.1.20</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
-git clone https://github.com/thorwhalen/skill && cd skill
-git checkout 4e0cdb0f215a4ed259b97a4c16f7915387dfb809
+git clone https://github.com/addaix/skill && cd skill
+git checkout b61bb5ff3670679e64b669ba3f61e52b1495e99f
 pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
@@ -1570,69 +1570,69 @@ Skills are folders holding a `SKILL.md` (the [Agent Skills](https://agentskills.
 Skill-building tooling for the skill package. Build AI agent skills for any Python package by analyzing its code, tests, and docs. Use this skill when the user wants to create skills for a package, analyze a codebase to suggest what skills would be useful, generate SKILL.md files from existing code/tests/docs, or when someone says things like “make skills for this package”, “what skills should this project have”, “create a skill from this module”, or “generate skills”. Also trigger when the user points at a package and asks for AI-powered interfaces to it.
 
 ```bash
-gh skill install thorwhalen/skill skill-build --agent claude-code
+gh skill install addaix/skill skill-build --agent claude-code
 ```
 
-Source: [`skills/skill-build`](https://github.com/thorwhalen/skill/tree/HEAD/skills/skill-build).
+Source: [`skills/skill-build`](https://github.com/addaix/skill/tree/HEAD/skills/skill-build).
 
 ### `skill-docs`
 
 Skill documentation tooling for the skill package. Document a project’s AI agent skills in the README and other formats. Use this skill when the user wants to add skills documentation to a README, explain what skills a project offers, write a “Skills” section, generate skill installation instructions, or when asked things like “document the skills”, “add skills to the README”, “how should I present skills to users”, or “write skill usage examples”. Also trigger when updating a README for a package that has skills in .claude/skills/ or {pkg}/data/skills/.
 
 ```bash
-gh skill install thorwhalen/skill skill-docs --agent claude-code
+gh skill install addaix/skill skill-docs --agent claude-code
 ```
 
-Source: [`skills/skill-docs`](https://github.com/thorwhalen/skill/tree/HEAD/skills/skill-docs).
+Source: [`skills/skill-docs`](https://github.com/addaix/skill/tree/HEAD/skills/skill-docs).
 
 ### `skill-enable`
 
 Ship a Python package’s AI agent skills with `pip install` — and decide WHICH skills to ship. Use when the user asks how to include skills in their package distribution, make skills available after `pip install`, ship SKILL.md files with their package, set up `{pkg}/data/skills/`, configure package-data, add a skills installer/convenience function, or says “how do users get my skills after pip install”, “ship skills with my package”, “distribute skills”, “package skills”, or “enable skills in my library”. Also trigger when working on pyproject.toml and the project has skills to distribute. The overall layout decision (where real files live, the `.claude/skills/` symlink bridge, spec compliance) is owned by **skill-package-setup**; this skill covers the pip-distribution mechanics and audience classification.
 
 ```bash
-gh skill install thorwhalen/skill skill-enable --agent claude-code
+gh skill install addaix/skill skill-enable --agent claude-code
 ```
 
-Source: [`skills/skill-enable`](https://github.com/thorwhalen/skill/tree/HEAD/skills/skill-enable).
+Source: [`skills/skill-enable`](https://github.com/addaix/skill/tree/HEAD/skills/skill-enable).
 
 ### `skill-manage`
 
 Skill management tooling for the skill package. Search, list, inspect, and manage AI agent skills across agents and projects. Use this skill when the user wants to find skills, see what skills are installed, check where skills are linked, inspect a skill’s contents, install or uninstall skills, compare skills across agents (Claude Code, Cursor, Copilot), or says things like “what skills do I have”, “find a skill for X”, “show me the skill”, “where are my skills”, “install this skill”, “remove that skill”, “list skills”, or “search skills”. Trigger on any skill inventory, discovery, or housekeeping request.
 
 ```bash
-gh skill install thorwhalen/skill skill-manage --agent claude-code
+gh skill install addaix/skill skill-manage --agent claude-code
 ```
 
-Source: [`skills/skill-manage`](https://github.com/thorwhalen/skill/tree/HEAD/skills/skill-manage).
+Source: [`skills/skill-manage`](https://github.com/addaix/skill/tree/HEAD/skills/skill-manage).
 
 ### `skill-package-setup`
 
 Canonical, agent-agnostic policy for WHERE a package’s AI agent skills live and HOW they are distributed so they’re discoverable by `gh skill` (and any agent host — Copilot, Cursor, Codex, Gemini, Claude) AND, where wanted, shipped with `pip install`. Use this skill to set up skills for a new package, migrate an existing repo to the canonical layout, consolidate skills scattered across `.claude/skills/` / `skills/` / `{pkg}/data/skills/`, make every SKILL.md spec-clean, or answer “where should my package’s skills live”. Also the authority other skills defer to (e.g. wads-skillify). Triggers on “set up skills”, “where should skills live”, “make skills gh-skill installable”, “migrate/restructure the skills layout”, “skillify this repo”. Maintainer skill.
 
 ```bash
-gh skill install thorwhalen/skill skill-package-setup --agent claude-code
+gh skill install addaix/skill skill-package-setup --agent claude-code
 ```
 
-Source: [`skills/skill-package-setup`](https://github.com/thorwhalen/skill/tree/HEAD/skills/skill-package-setup).
+Source: [`skills/skill-package-setup`](https://github.com/addaix/skill/tree/HEAD/skills/skill-package-setup).
 
 ### `skill-sync`
 
 Skill maintenance tooling for the skill package. Keep AI agent skills in sync with their source package code. Use this skill when a package’s code, API, or behavior has changed and its skills may be outdated, when the user says “update the skills”, “skills are stale”, “sync skills with code”, “refresh skills”, or when you notice that skill instructions reference functions/classes/patterns that no longer exist in the codebase. Also use after major refactors, API changes, or version bumps.
 
 ```bash
-gh skill install thorwhalen/skill skill-sync --agent claude-code
+gh skill install addaix/skill skill-sync --agent claude-code
 ```
 
-Source: [`skills/skill-sync`](https://github.com/thorwhalen/skill/tree/HEAD/skills/skill-sync).
+Source: [`skills/skill-sync`](https://github.com/addaix/skill/tree/HEAD/skills/skill-sync).
 
 ## Machine-readable documentation
 
 This site publishes the same documentation in forms that fit an agent’s context window:
 
-- [`llms.txt`](https://thorwhalen.github.io/skill/llms.txt): an index of every page with a one-line description ([llms.txt](https://llmstxt.org) format)
-- [`skill.md`](https://thorwhalen.github.io/skill/skill.md): the whole documentation as one Markdown file
+- [`llms.txt`](https://addaix.github.io/skill/llms.txt): an index of every page with a one-line description ([llms.txt](https://llmstxt.org) format)
+- [`skill.md`](https://addaix.github.io/skill/skill.md): the whole documentation as one Markdown file
 - `<page>.html.md`: a rendered Markdown twin of every page, advertised from each page’s `<head>` with `<link rel="alternate" type="text/markdown">`
-- [`objects.inv`](https://thorwhalen.github.io/skill/objects.inv): the Sphinx inventory: a symbol-to-URL index (`sphobjinv convert plain objects.inv -`)
+- [`objects.inv`](https://addaix.github.io/skill/objects.inv): the Sphinx inventory: a symbol-to-URL index (`sphobjinv convert plain objects.inv -`)
 
 
 # api.html.md

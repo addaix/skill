@@ -1,39 +1,39 @@
 {
   "schema_version": 1,
-  "built_at": "2026-10-20T19:51:05Z",
+  "built_at": "2026-11-21T15:33:08Z",
   "package": {
     "name": "skill",
-    "version": "0.1.19",
+    "version": "0.1.20",
     "display_name": "skill",
     "source": "pyproject.toml"
   },
   "git": {
     "available": true,
-    "commit": "4e0cdb0f215a4ed259b97a4c16f7915387dfb809",
-    "short_commit": "4e0cdb0",
+    "commit": "b61bb5ff3670679e64b669ba3f61e52b1495e99f",
+    "short_commit": "b61bb5f",
     "branch": "master",
     "tags": [],
     "dirty": false,
-    "remote_url": "https://github.com/thorwhalen/skill",
-    "commit_url": "https://github.com/thorwhalen/skill/commit/4e0cdb0f215a4ed259b97a4c16f7915387dfb809",
+    "remote_url": "https://github.com/addaix/skill",
+    "commit_url": "https://github.com/addaix/skill/commit/b61bb5ff3670679e64b669ba3f61e52b1495e99f",
     "error": null
   },
   "ci": {
     "provider": "github",
-    "repository": "thorwhalen/skill",
-    "sha": "4e0cdb0f215a4ed259b97a4c16f7915387dfb809",
+    "repository": "addaix/skill",
+    "sha": "b61bb5ff3670679e64b669ba3f61e52b1495e99f",
     "sha_in_history": true,
     "ref": "refs/heads/master",
     "ref_name": "master",
-    "run_id": "39486724642",
-    "run_url": "https://github.com/thorwhalen/skill/actions/runs/39486724642",
+    "run_id": "44919636679",
+    "run_url": "https://github.com/addaix/skill/actions/runs/44919636679",
     "server_url": "https://github.com"
   },
   "tools": {
     "epythet": "0.2.22",
     "sphinx": "9.1.1",
     "docutils": "0.22.4",
-    "python": "3.12.15"
+    "python": "3.12.16"
   },
   "config": {
     "theme": "auto",
@@ -60,11 +60,11 @@
   },
   "pypi": {
     "checked": true,
-    "latest": "0.1.19",
+    "latest": "0.1.20",
     "relation": "same",
     "error": null
   },
-  "reproduce": "git clone https://github.com/thorwhalen/skill && cd skill\ngit checkout 4e0cdb0f215a4ed259b97a4c16f7915387dfb809\npip install \"epythet==0.2.22\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
+  "reproduce": "git clone https://github.com/addaix/skill && cd skill\ngit checkout b61bb5ff3670679e64b669ba3f61e52b1495e99f\npip install \"epythet==0.2.22\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
   "warnings": [],
   "alignment": {
     "aligned": true,
