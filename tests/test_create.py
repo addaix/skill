@@ -91,3 +91,45 @@ class TestIsValidName:
         assert not _is_valid_name('my_skill')
         assert not _is_valid_name('')
         assert not _is_valid_name('-leading-dash')
+
+
+class TestValidateProfiles:
+    """Host profiles and the YAML-safety rule (#20)."""
+
+    @staticmethod
+    def _write(tmp_path, front):
+        d = tmp_path / "s"
+        d.mkdir()
+        (d / "SKILL.md").write_text(f"---\n{front}\n---\nbody\n")
+        return str(d)
+
+    def test_default_profile_is_the_open_spec(self, tmp_path):
+        from skill import validate
+
+        d = self._write(tmp_path, f"name: s\ndescription: {'x' * 300}\nmodel: opus")
+        assert validate(d) == []
+
+    def test_portable_caps_description_and_keys(self, tmp_path):
+        from skill import validate
+
+        d = self._write(tmp_path, f"name: s\ndescription: {'x' * 300}\nmodel: opus")
+        issues = validate(d, profile="portable")
+        assert any("200" in i for i in issues) and any("'model'" in i for i in issues)
+
+    def test_claude_code_accepts_its_keys(self, tmp_path):
+        from skill import validate
+
+        d = self._write(tmp_path, f"name: s\ndescription: {'x' * 300}\nmodel: opus")
+        assert validate(d, profile="claude-code") == []
+
+    def test_unknown_profile_is_an_error(self, tmp_path):
+        from skill import validate
+
+        with pytest.raises(ValueError, match="Unknown profile"):
+            validate(self._write(tmp_path, "name: s\ndescription: d"), profile="nope")
+
+    def test_yaml_safety_flags_unquoted_colon_and_hash(self, tmp_path):
+        from skill import validate
+
+        d = self._write(tmp_path, "name: s\ndescription: Use when: asked # now")
+        assert any("quote it" in i for i in validate(d))
