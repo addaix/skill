@@ -1,4 +1,4 @@
-> built 2026-11-22 18:12 UTC from 485e065 (master) · skill 0.1.22. Details: build_info.json
+> built 2026-11-22 20:45 UTC from 91d50a7 (master) · skill 0.1.23. Details: build_info.json
 
 # index.html.md
 
@@ -1669,7 +1669,7 @@ Resolve `$VAR` and `${VAR}` references from environment variables.
 
 # About this build
 
-This documentation was built on **2026-11-22 18:12 UTC** from commit <a href="https://github.com/addaix/skill/commit/485e0657d0c06af1eb59bd712d4de3f1467d4f93"><code>485e065</code></a> on branch <code>master</code>, for **skill 0.1.22** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-22 20:45 UTC** from commit <a href="https://github.com/addaix/skill/commit/91d50a7186d4975efe8da2784f76ad29eb12df9e"><code>91d50a7</code></a> on branch <code>master</code>, for **skill 0.1.23** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -1678,7 +1678,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                     |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/addaix/skill/commit/485e0657d0c06af1eb59bd712d4de3f1467d4f93"><code>485e0657d0c06af1eb59bd712d4de3f1467d4f93</code></a> |
+| Commit              | <a href="https://github.com/addaix/skill/commit/91d50a7186d4975efe8da2784f76ad29eb12df9e"><code>91d50a7186d4975efe8da2784f76ad29eb12df9e</code></a> |
 | Branch              | <code>master</code>                                                                                                                                 |
 | Tags at this commit | none                                                                                                                                                |
 | Working tree        | clean                                                                                                                                               |
@@ -1689,9 +1689,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>addaix/skill</code>                                                                  |
-| Run          | <a href="https://github.com/addaix/skill/actions/runs/45053613066">45053613066</a>         |
+| Run          | <a href="https://github.com/addaix/skill/actions/runs/45068083231">45068083231</a>         |
 | Ref          | <code>refs/heads/master</code>                                                             |
-| Event commit | <code>485e0657d0c06af1eb59bd712d4de3f1467d4f93</code> (in the history of the built commit) |
+| Event commit | <code>91d50a7186d4975efe8da2784f76ad29eb12df9e</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -1716,13 +1716,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/skill/0.1.22/">0.1.22</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/skill/0.1.23/">0.1.23</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/addaix/skill && cd skill
-git checkout 485e0657d0c06af1eb59bd712d4de3f1467d4f93
+git checkout 91d50a7186d4975efe8da2784f76ad29eb12df9e
 pip install "epythet==0.2.23"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

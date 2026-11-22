@@ -227,7 +227,7 @@
 </span><span id="line-41">        <span class="o">*</span><span class="p">,</span>
 </span><span id="line-42">        <span class="n">token</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 </span><span id="line-43">        <span class="n">http_get</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="line-44">    <span class="p">):</span>
+</span><span id="line-44">    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="line-45">        <span class="bp">self</span><span class="o">.</span><span class="n">_token</span> <span class="o">=</span> <span class="n">token</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"COMPOSIO_API_KEY"</span><span class="p">)</span>
 </span><span id="line-46">        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_token</span><span class="p">:</span>
 </span><span id="line-47">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -360,7 +360,7 @@
 </footer>
     </div>
     
-    <script src="../../../_static/documentation_options.js?v=842aa08f"></script>
+    <script src="../../../_static/documentation_options.js?v=20522496"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>

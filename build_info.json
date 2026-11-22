@@ -1,32 +1,32 @@
 {
   "schema_version": 1,
-  "built_at": "2026-11-22T18:12:33Z",
+  "built_at": "2026-11-22T20:45:20Z",
   "package": {
     "name": "skill",
-    "version": "0.1.22",
+    "version": "0.1.23",
     "display_name": "skill",
     "source": "pyproject.toml"
   },
   "git": {
     "available": true,
-    "commit": "485e0657d0c06af1eb59bd712d4de3f1467d4f93",
-    "short_commit": "485e065",
+    "commit": "91d50a7186d4975efe8da2784f76ad29eb12df9e",
+    "short_commit": "91d50a7",
     "branch": "master",
     "tags": [],
     "dirty": false,
     "remote_url": "https://github.com/addaix/skill",
-    "commit_url": "https://github.com/addaix/skill/commit/485e0657d0c06af1eb59bd712d4de3f1467d4f93",
+    "commit_url": "https://github.com/addaix/skill/commit/91d50a7186d4975efe8da2784f76ad29eb12df9e",
     "error": null
   },
   "ci": {
     "provider": "github",
     "repository": "addaix/skill",
-    "sha": "485e0657d0c06af1eb59bd712d4de3f1467d4f93",
+    "sha": "91d50a7186d4975efe8da2784f76ad29eb12df9e",
     "sha_in_history": true,
     "ref": "refs/heads/master",
     "ref_name": "master",
-    "run_id": "45053613066",
-    "run_url": "https://github.com/addaix/skill/actions/runs/45053613066",
+    "run_id": "45068083231",
+    "run_url": "https://github.com/addaix/skill/actions/runs/45068083231",
     "server_url": "https://github.com"
   },
   "tools": {
@@ -60,11 +60,11 @@
   },
   "pypi": {
     "checked": true,
-    "latest": "0.1.22",
+    "latest": "0.1.23",
     "relation": "same",
     "error": null
   },
-  "reproduce": "git clone https://github.com/addaix/skill && cd skill\ngit checkout 485e0657d0c06af1eb59bd712d4de3f1467d4f93\npip install \"epythet==0.2.23\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
+  "reproduce": "git clone https://github.com/addaix/skill && cd skill\ngit checkout 91d50a7186d4975efe8da2784f76ad29eb12df9e\npip install \"epythet==0.2.23\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
   "warnings": [],
   "alignment": {
     "aligned": true,
