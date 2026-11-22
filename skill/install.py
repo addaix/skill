@@ -336,7 +336,11 @@ def _is_install_of(dest: Path, source: Path) -> bool:
             return dest.resolve() == source.resolve()
         if dest.is_dir():
             ours, theirs = dest / "SKILL.md", source / "SKILL.md"
-            return ours.is_file() and theirs.is_file() and ours.read_bytes() == theirs.read_bytes()
+            return (
+                ours.is_file()
+                and theirs.is_file()
+                and ours.read_bytes() == theirs.read_bytes()
+            )
     except OSError:
         return False
     return False
@@ -346,12 +350,16 @@ def _legacy_artifacts(host: str, project_dir, skill_name: str) -> list[Path]:
     """Rules-file installs an earlier version wrote for ``host`` that still exist."""
     found = []
     for t in AGENT_TARGETS.values():
-        if not (t.needs_translation and t.host_name == host and project_dir is not None):
+        if not (
+            t.needs_translation and t.host_name == host and project_dir is not None
+        ):
             continue
         dest = t.format_project_path(project_dir, skill_name)
         if dest is None or not dest.is_file():
             continue
-        if not t.appends or f"<!-- skill:{skill_name} -->" in dest.read_text(errors="replace"):
+        if not t.appends or f"<!-- skill:{skill_name} -->" in dest.read_text(
+            errors="replace"
+        ):
             found.append(dest)
     return found
 
@@ -532,7 +540,11 @@ def install(
 def _legacy_target_name(host: str) -> str:
     """The registered rules-file target for ``host`` (for messages)."""
     return next(
-        (n for n, t in AGENT_TARGETS.items() if t.needs_translation and t.host_name == host),
+        (
+            n
+            for n, t in AGENT_TARGETS.items()
+            if t.needs_translation and t.host_name == host
+        ),
         host,
     )
 
