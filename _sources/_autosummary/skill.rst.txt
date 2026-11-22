@@ -21,6 +21,7 @@
    ai
    backends
    base
+   bundled
    cli_format
    completion
    config

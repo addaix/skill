@@ -1,4 +1,4 @@
-> built 2026-11-21 22:35 UTC from ab3bc7a (master) · skill 0.1.20. Details: build_info.json
+> built 2026-11-22 14:33 UTC from 927f14b (master) · skill 0.1.21. Details: build_info.json
 
 # index.html.md
 
@@ -668,6 +668,76 @@ True
   [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 
+# _autosummary/skill.bundled.html.md
+
+# skill.bundled
+
+Link a package’s bundled skills and agents into one or more Claude homes.
+
+Packages that ship `<pkg>/data/skills/<name>/` (and `<pkg>/data/agents/<name>.md`)
+all need the same ~25 lines: link each into `~/.claude/skills` (or several Claude
+homes, e.g. a second account’s `CLAUDE_CONFIG_DIR`), idempotently, reporting `ok` /
+`install` / `conflict` per asset and never overwriting something that is not ours
+without `force`. This is that mechanism, once.
+
+**Pure standard library and self-contained on purpose**: a package that keeps zero
+runtime dependencies can copy this file instead of depending on `skill`.
+
+```pycon
+>>> import tempfile, pathlib
+>>> root = pathlib.Path(tempfile.mkdtemp())
+>>> (root / "data/skills/demo").mkdir(parents=True)
+>>> _ = (root / "data/skills/demo/SKILL.md").write_text("---\nname: demo\n---\n")
+>>> home = root / "home"
+>>> [r["action"] for r in install_bundled(root / "data", homes=[home])]
+['install']
+>>> [r["action"] for r in install_bundled(root / "data", homes=[home])]
+['ok']
+```
+
+### Functions
+
+| [`claude_homes`](_autosummary/skill.bundled.html.md#skill.bundled.claude_homes)()                                | Every Claude Code home on this machine: `~/.claude` and `~/.claude-*`.   |
+|------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------|
+| [`install_bundled`](_autosummary/skill.bundled.html.md#skill.bundled.install_bundled)(source_dir, \*[, homes, ...]) | Install a package's bundled skills and agents into each Claude home.     |
+
+### skill.bundled.claude_homes()
+
+Every Claude Code home on this machine: `~/.claude` and `~/.claude-*`.
+
+A home counts when it has a `skills` folder. `CLAUDE_CONFIG_DIR`, when set, is
+included even if it has none yet.
+
+```pycon
+>>> all(isinstance(h, Path) for h in claude_homes())
+True
+```
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`Path`](https://docs.python.org/3/library/pathlib.html#pathlib.Path)]
+
+### skill.bundled.install_bundled(source_dir, , homes=None, force=False, dry_run=False)
+
+Install a package’s bundled skills and agents into each Claude home.
+
+`source_dir` holds `skills/<name>/` directories and/or `agents/<name>.md` files
+(a package’s `data` folder). `homes` defaults to [`claude_homes()`](_autosummary/skill.bundled.html.md#skill.bundled.claude_homes). Returns one
+row per (home, asset): `{"home", "name", "action"}` with `action` one of
+
+- `"ok"`: already installed (a link to the source, or an identical copy);
+- `"install"`: installed now (or would be, under `dry_run`); a `"method"` key
+  says `symlink` or `copy`;
+- `"conflict"`: something else is at that name; left alone unless `force`.
+
+```pycon
+>>> install_bundled("/no/such/folder", homes=["/tmp/never-used"])
+[]
+```
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)]
+
+
 # _autosummary/skill.cli_format.html.md
 
 # skill.cli_format
@@ -1026,21 +1096,22 @@ True
 
 ### Modules
 
-| [`ai`](_autosummary/skill.ai.html.md#module-skill.ai)                                             | Optional AI facade for semantic search and LLM-powered features.    |
-|-----------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
-| [`backends`](_autosummary/skill.backends.html.md#module-skill.backends)                                 | Backend protocols and local filesystem backend.                     |
-| [`base`](_autosummary/skill.base.html.md#module-skill.base)                                         | Core data model and SKILL.md parsing.                               |
-| [`cli_format`](_autosummary/skill.cli_format.html.md#module-skill.cli_format)                             | Terminal-friendly formatting for CLI output.                        |
-| [`completion`](_autosummary/skill.completion.html.md#module-skill.completion)                             | Shell completion setup and diagnostics.                             |
-| [`config`](_autosummary/skill.config.html.md#module-skill.config)                                     | Configuration management via platformdirs and TOML.                 |
-| [`create`](_autosummary/skill.create.html.md#skill.create)(name, \*[, description, body, owner, ...]) | Create a new skill and store it locally.                            |
-| [`install`](_autosummary/skill.install.html.md#skill.install)(key, \*[, agent_targets, scope, ...])    | Install a skill into one or more agent target directories.          |
-| [`profiles`](_autosummary/skill.profiles.html.md#module-skill.profiles)                                 | Per-host validation profiles for SKILL.md, and a YAML-safety check. |
-| [`registry`](_autosummary/skill.registry.html.md#module-skill.registry)                                 | Generic plugin registry with entry point discovery.                 |
-| [`search`](_autosummary/skill.search.html.md#skill.search)(query, \*[, max_results, local_only, ...]) | Search for skills across local index and remote backends.           |
-| [`stores`](_autosummary/skill.stores.html.md#module-skill.stores)                                     | Storage layer: LocalSkillStore and SourcedSkillStore via dol.       |
-| [`translate`](_autosummary/skill.translate.html.md#module-skill.translate)                               | Format translators: SKILL.md <-> agent-specific formats.            |
-| [`util`](_autosummary/skill.util.html.md#module-skill.util)                                         | Pure helpers with zero internal imports.                            |
+| [`ai`](_autosummary/skill.ai.html.md#module-skill.ai)                                             | Optional AI facade for semantic search and LLM-powered features.          |
+|-----------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
+| [`backends`](_autosummary/skill.backends.html.md#module-skill.backends)                                 | Backend protocols and local filesystem backend.                           |
+| [`base`](_autosummary/skill.base.html.md#module-skill.base)                                         | Core data model and SKILL.md parsing.                                     |
+| [`bundled`](_autosummary/skill.bundled.html.md#module-skill.bundled)                                   | Link a package's bundled skills and agents into one or more Claude homes. |
+| [`cli_format`](_autosummary/skill.cli_format.html.md#module-skill.cli_format)                             | Terminal-friendly formatting for CLI output.                              |
+| [`completion`](_autosummary/skill.completion.html.md#module-skill.completion)                             | Shell completion setup and diagnostics.                                   |
+| [`config`](_autosummary/skill.config.html.md#module-skill.config)                                     | Configuration management via platformdirs and TOML.                       |
+| [`create`](_autosummary/skill.create.html.md#skill.create)(name, \*[, description, body, owner, ...]) | Create a new skill and store it locally.                                  |
+| [`install`](_autosummary/skill.install.html.md#skill.install)(key, \*[, agent_targets, scope, ...])    | Install a skill into one or more agent target directories.                |
+| [`profiles`](_autosummary/skill.profiles.html.md#module-skill.profiles)                                 | Per-host validation profiles for SKILL.md, and a YAML-safety check.       |
+| [`registry`](_autosummary/skill.registry.html.md#module-skill.registry)                                 | Generic plugin registry with entry point discovery.                       |
+| [`search`](_autosummary/skill.search.html.md#skill.search)(query, \*[, max_results, local_only, ...]) | Search for skills across local index and remote backends.                 |
+| [`stores`](_autosummary/skill.stores.html.md#module-skill.stores)                                     | Storage layer: LocalSkillStore and SourcedSkillStore via dol.             |
+| [`translate`](_autosummary/skill.translate.html.md#module-skill.translate)                               | Format translators: SKILL.md <-> agent-specific formats.                  |
+| [`util`](_autosummary/skill.util.html.md#module-skill.util)                                         | Pure helpers with zero internal imports.                                  |
 
 
 # _autosummary/skill.install.html.md
@@ -1593,18 +1664,16 @@ Resolve `$VAR` and `${VAR}` references from environment variables.
 
 # About this build
 
-This documentation was built on **2026-11-21 22:35 UTC** from commit <a href="https://github.com/addaix/skill/commit/ab3bc7ad9a064fa81c774409b8b2aa176732d46a"><code>ab3bc7a</code></a> on branch <code>master</code>, for **skill 0.1.20** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-22 14:33 UTC** from commit <a href="https://github.com/addaix/skill/commit/927f14b0640af88c3eadaf5458b79c4f547ed001"><code>927f14b</code></a> on branch <code>master</code>, for **skill 0.1.21** (from <code>pyproject.toml</code>).
 
-#### WARNING
-The documentation and the package may be misaligned:
-
-- The documented version (0.1.20) is behind the latest release on PyPI (0.1.21): `pip install skill` gives newer code than these docs describe.
+#### NOTE
+Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
 
 ## Source
 
 |                     |                                                                                                                                                     |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/addaix/skill/commit/ab3bc7ad9a064fa81c774409b8b2aa176732d46a"><code>ab3bc7ad9a064fa81c774409b8b2aa176732d46a</code></a> |
+| Commit              | <a href="https://github.com/addaix/skill/commit/927f14b0640af88c3eadaf5458b79c4f547ed001"><code>927f14b0640af88c3eadaf5458b79c4f547ed001</code></a> |
 | Branch              | <code>master</code>                                                                                                                                 |
 | Tags at this commit | none                                                                                                                                                |
 | Working tree        | clean                                                                                                                                               |
@@ -1615,9 +1684,9 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>addaix/skill</code>                                                                  |
-| Run          | <a href="https://github.com/addaix/skill/actions/runs/44957400979">44957400979</a>         |
+| Run          | <a href="https://github.com/addaix/skill/actions/runs/45033367432">45033367432</a>         |
 | Ref          | <code>refs/heads/master</code>                                                             |
-| Event commit | <code>ab3bc7ad9a064fa81c774409b8b2aa176732d46a</code> (in the history of the built commit) |
+| Event commit | <code>927f14b0640af88c3eadaf5458b79c4f547ed001</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -1642,13 +1711,13 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/skill/0.1.21/">0.1.21</a>, newer than the documented version (0.1.20).
+Latest release: <a href="https://pypi.org/project/skill/0.1.21/">0.1.21</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/addaix/skill && cd skill
-git checkout ab3bc7ad9a064fa81c774409b8b2aa176732d46a
+git checkout 927f14b0640af88c3eadaf5458b79c4f547ed001
 pip install "epythet==0.2.23"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

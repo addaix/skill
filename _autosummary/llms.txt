@@ -14,6 +14,7 @@
 - [skill.backends.skillsdirectory](skill.backends.skillsdirectory.html.md): SkillsDirectory backend for skill discovery and fetching.
 - [skill.backends.smithery](skill.backends.smithery.html.md): Smithery backend for skill discovery and fetching.
 - [skill.base](skill.base.html.md): Core data model and SKILL.md parsing.
+- [skill.bundled](skill.bundled.html.md): Link a package’s bundled skills and agents into one or more Claude homes.
 - [skill.cli_format](skill.cli_format.html.md): Terminal-friendly formatting for CLI output.
 - [skill.completion](skill.completion.html.md): Shell completion setup and diagnostics.
 - [skill.config](skill.config.html.md): Configuration management via platformdirs and TOML.

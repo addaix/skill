@@ -1,0 +1,13 @@
+skill.bundled
+=============
+
+.. automodule:: skill.bundled
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      claude_homes
+      install_bundled
+   

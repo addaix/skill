@@ -87,6 +87,7 @@
 <li class="toctree-l3"><a class="reference internal" href="skill.ai.html">skill.ai</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skill.backends.html">skill.backends</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skill.base.html">skill.base</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skill.bundled.html">skill.bundled</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skill.cli_format.html">skill.cli_format</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skill.completion.html">skill.completion</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skill.config.html">skill.config</a></li>
@@ -214,37 +215,40 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="skill.base.html#module-skill.base" title="skill.base"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base</span></code></a></p></td>
 <td><p>Core data model and SKILL.md parsing.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="skill.cli_format.html#module-skill.cli_format" title="skill.cli_format"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cli_format</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="skill.bundled.html#module-skill.bundled" title="skill.bundled"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bundled</span></code></a></p></td>
+<td><p>Link a package's bundled skills and agents into one or more Claude homes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="skill.cli_format.html#module-skill.cli_format" title="skill.cli_format"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cli_format</span></code></a></p></td>
 <td><p>Terminal-friendly formatting for CLI output.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="skill.completion.html#module-skill.completion" title="skill.completion"><code class="xref py py-obj docutils literal notranslate"><span class="pre">completion</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="skill.completion.html#module-skill.completion" title="skill.completion"><code class="xref py py-obj docutils literal notranslate"><span class="pre">completion</span></code></a></p></td>
 <td><p>Shell completion setup and diagnostics.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="skill.config.html#module-skill.config" title="skill.config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">config</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="skill.config.html#module-skill.config" title="skill.config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">config</span></code></a></p></td>
 <td><p>Configuration management via platformdirs and TOML.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="skill.create.html#skill.create" title="skill.create"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create</span></code></a>(name, *[, description, body, owner, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="skill.create.html#skill.create" title="skill.create"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create</span></code></a>(name, *[, description, body, owner, ...])</p></td>
 <td><p>Create a new skill and store it locally.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="skill.install.html#skill.install" title="skill.install"><code class="xref py py-obj docutils literal notranslate"><span class="pre">install</span></code></a>(key, *[, agent_targets, scope, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="skill.install.html#skill.install" title="skill.install"><code class="xref py py-obj docutils literal notranslate"><span class="pre">install</span></code></a>(key, *[, agent_targets, scope, ...])</p></td>
 <td><p>Install a skill into one or more agent target directories.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="skill.profiles.html#module-skill.profiles" title="skill.profiles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">profiles</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="skill.profiles.html#module-skill.profiles" title="skill.profiles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">profiles</span></code></a></p></td>
 <td><p>Per-host validation profiles for SKILL.md, and a YAML-safety check.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="skill.registry.html#module-skill.registry" title="skill.registry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">registry</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="skill.registry.html#module-skill.registry" title="skill.registry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">registry</span></code></a></p></td>
 <td><p>Generic plugin registry with entry point discovery.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="skill.search.html#skill.search" title="skill.search"><code class="xref py py-obj docutils literal notranslate"><span class="pre">search</span></code></a>(query, *[, max_results, local_only, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="skill.search.html#skill.search" title="skill.search"><code class="xref py py-obj docutils literal notranslate"><span class="pre">search</span></code></a>(query, *[, max_results, local_only, ...])</p></td>
 <td><p>Search for skills across local index and remote backends.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="skill.stores.html#module-skill.stores" title="skill.stores"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stores</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="skill.stores.html#module-skill.stores" title="skill.stores"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stores</span></code></a></p></td>
 <td><p>Storage layer: LocalSkillStore and SourcedSkillStore via dol.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="skill.translate.html#module-skill.translate" title="skill.translate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">translate</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="skill.translate.html#module-skill.translate" title="skill.translate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">translate</span></code></a></p></td>
 <td><p>Format translators: SKILL.md &lt;-&gt; agent-specific formats.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="skill.util.html#module-skill.util" title="skill.util"><code class="xref py py-obj docutils literal notranslate"><span class="pre">util</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="skill.util.html#module-skill.util" title="skill.util"><code class="xref py py-obj docutils literal notranslate"><span class="pre">util</span></code></a></p></td>
 <td><p>Pure helpers with zero internal imports.</p></td>
 </tr>
 </tbody>
@@ -269,7 +273,7 @@
 </div>
 </footer>
 </div>
-<script src="../_static/documentation_options.js?v=17aaaefc"></script>
+<script src="../_static/documentation_options.js?v=b3d22ae5"></script>
 <script src="../_static/doctools.js?v=fd6eb6e6"></script>
 <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="../_static/clipboard.min.js?v=a7894cd8"></script>

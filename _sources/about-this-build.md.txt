@@ -5,19 +5,17 @@ orphan: true
 
 # About this build
 
-This documentation was built on **2026-11-21 22:35 UTC** from commit <a href="https://github.com/addaix/skill/commit/ab3bc7ad9a064fa81c774409b8b2aa176732d46a"><code>ab3bc7a</code></a> on branch <code>master</code>, for **skill 0.1.20** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-22 14:33 UTC** from commit <a href="https://github.com/addaix/skill/commit/927f14b0640af88c3eadaf5458b79c4f547ed001"><code>927f14b</code></a> on branch <code>master</code>, for **skill 0.1.21** (from <code>pyproject.toml</code>).
 
-:::{warning}
-The documentation and the package may be misaligned:
-
-- The documented version (0.1.20) is behind the latest release on PyPI (0.1.21): `pip install skill` gives newer code than these docs describe.
+:::{note}
+Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
 :::
 
 ## Source
 
 | | |
 |---|---|
-| Commit | <a href="https://github.com/addaix/skill/commit/ab3bc7ad9a064fa81c774409b8b2aa176732d46a"><code>ab3bc7ad9a064fa81c774409b8b2aa176732d46a</code></a> |
+| Commit | <a href="https://github.com/addaix/skill/commit/927f14b0640af88c3eadaf5458b79c4f547ed001"><code>927f14b0640af88c3eadaf5458b79c4f547ed001</code></a> |
 | Branch | <code>master</code> |
 | Tags at this commit | none |
 | Working tree | clean |
@@ -28,9 +26,9 @@ The documentation and the package may be misaligned:
 | | |
 |---|---|
 | Repository | <code>addaix/skill</code> |
-| Run | <a href="https://github.com/addaix/skill/actions/runs/44957400979">44957400979</a> |
+| Run | <a href="https://github.com/addaix/skill/actions/runs/45033367432">45033367432</a> |
 | Ref | <code>refs/heads/master</code> |
-| Event commit | <code>ab3bc7ad9a064fa81c774409b8b2aa176732d46a</code> (in the history of the built commit) |
+| Event commit | <code>927f14b0640af88c3eadaf5458b79c4f547ed001</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -55,13 +53,13 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/skill/0.1.21/">0.1.21</a>, newer than the documented version (0.1.20).
+Latest release: <a href="https://pypi.org/project/skill/0.1.21/">0.1.21</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/addaix/skill && cd skill
-git checkout ab3bc7ad9a064fa81c774409b8b2aa176732d46a
+git checkout 927f14b0640af88c3eadaf5458b79c4f547ed001
 pip install "epythet==0.2.23"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

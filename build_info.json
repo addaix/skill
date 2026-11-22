@@ -1,32 +1,32 @@
 {
   "schema_version": 1,
-  "built_at": "2026-11-21T22:35:06Z",
+  "built_at": "2026-11-22T14:33:52Z",
   "package": {
     "name": "skill",
-    "version": "0.1.20",
+    "version": "0.1.21",
     "display_name": "skill",
     "source": "pyproject.toml"
   },
   "git": {
     "available": true,
-    "commit": "ab3bc7ad9a064fa81c774409b8b2aa176732d46a",
-    "short_commit": "ab3bc7a",
+    "commit": "927f14b0640af88c3eadaf5458b79c4f547ed001",
+    "short_commit": "927f14b",
     "branch": "master",
     "tags": [],
     "dirty": false,
     "remote_url": "https://github.com/addaix/skill",
-    "commit_url": "https://github.com/addaix/skill/commit/ab3bc7ad9a064fa81c774409b8b2aa176732d46a",
+    "commit_url": "https://github.com/addaix/skill/commit/927f14b0640af88c3eadaf5458b79c4f547ed001",
     "error": null
   },
   "ci": {
     "provider": "github",
     "repository": "addaix/skill",
-    "sha": "ab3bc7ad9a064fa81c774409b8b2aa176732d46a",
+    "sha": "927f14b0640af88c3eadaf5458b79c4f547ed001",
     "sha_in_history": true,
     "ref": "refs/heads/master",
     "ref_name": "master",
-    "run_id": "44957400979",
-    "run_url": "https://github.com/addaix/skill/actions/runs/44957400979",
+    "run_id": "45033367432",
+    "run_url": "https://github.com/addaix/skill/actions/runs/45033367432",
     "server_url": "https://github.com"
   },
   "tools": {
@@ -55,21 +55,19 @@
     "docs_dir": "docsrc"
   },
   "site": {
-    "modules_documented": 20,
-    "objects_documented": 80
+    "modules_documented": 21,
+    "objects_documented": 82
   },
   "pypi": {
     "checked": true,
     "latest": "0.1.21",
-    "relation": "behind",
+    "relation": "same",
     "error": null
   },
-  "reproduce": "git clone https://github.com/addaix/skill && cd skill\ngit checkout ab3bc7ad9a064fa81c774409b8b2aa176732d46a\npip install \"epythet==0.2.23\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
+  "reproduce": "git clone https://github.com/addaix/skill && cd skill\ngit checkout 927f14b0640af88c3eadaf5458b79c4f547ed001\npip install \"epythet==0.2.23\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
   "warnings": [],
   "alignment": {
-    "aligned": false,
-    "notes": [
-      "The documented version (0.1.20) is behind the latest release on PyPI (0.1.21): `pip install skill` gives newer code than these docs describe."
-    ]
+    "aligned": true,
+    "notes": []
   }
 }

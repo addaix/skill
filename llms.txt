@@ -16,6 +16,7 @@
 - [skill.backends.skillsdirectory](_autosummary/skill.backends.skillsdirectory.html.md): SkillsDirectory backend for skill discovery and fetching.
 - [skill.backends.smithery](_autosummary/skill.backends.smithery.html.md): Smithery backend for skill discovery and fetching.
 - [skill.base](_autosummary/skill.base.html.md): Core data model and SKILL.md parsing.
+- [skill.bundled](_autosummary/skill.bundled.html.md): Link a package’s bundled skills and agents into one or more Claude homes.
 - [skill.cli_format](_autosummary/skill.cli_format.html.md): Terminal-friendly formatting for CLI output.
 - [skill.completion](_autosummary/skill.completion.html.md): Shell completion setup and diagnostics.
 - [skill.config](_autosummary/skill.config.html.md): Configuration management via platformdirs and TOML.
@@ -28,7 +29,7 @@
 - [skill.translate](_autosummary/skill.translate.html.md): Format translators: SKILL.md &lt;-&gt; agent-specific formats.
 - [skill.util](_autosummary/skill.util.html.md): Pure helpers with zero internal imports.
 - [For AI agents](ai-agents.html.md): &#96;skill&#96; ships artifacts for coding agents alongside its code. This page lists
-- [About this build](about-this-build.html.md): This documentation was built on &#42;&#42;2026-11-21 22:35 UTC&#42;&#42; from commit &lt;a href="https://github.com/add...
+- [About this build](about-this-build.html.md): This documentation was built on &#42;&#42;2026-11-22 14:33 UTC&#42;&#42; from commit &lt;a href="https://github.com/add...
 
 ## Optional
 
