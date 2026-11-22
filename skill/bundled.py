@@ -65,7 +65,7 @@ def _assets(source_dir: Path) -> list[tuple[Path, str]]:
 def _is_ours(dest: Path, src: Path) -> bool:
     """``dest`` already is a link to ``src`` (or a faithful copy of it)."""
     if dest.is_symlink():
-        return Path(os.readlink(dest)).resolve() == src.resolve()
+        return dest.resolve() == src.resolve()  # (os.readlink can carry a \\?\ prefix on Windows)
     if dest.is_file() and src.is_file():
         return dest.read_bytes() == src.read_bytes()
     if dest.is_dir() and src.is_dir() and not dest.is_symlink():
