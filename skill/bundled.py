@@ -65,7 +65,9 @@ def _assets(source_dir: Path) -> list[tuple[Path, str]]:
 def _is_ours(dest: Path, src: Path) -> bool:
     """``dest`` already is a link to ``src`` (or a faithful copy of it)."""
     if dest.is_symlink():
-        return dest.resolve() == src.resolve()  # (os.readlink can carry a \\?\ prefix on Windows)
+        return (
+            dest.resolve() == src.resolve()
+        )  # (os.readlink can carry a \\?\ prefix on Windows)
     if dest.is_file() and src.is_file():
         return dest.read_bytes() == src.read_bytes()
     if dest.is_dir() and src.is_dir() and not dest.is_symlink():
@@ -75,7 +77,11 @@ def _is_ours(dest: Path, src: Path) -> bool:
 
 def _tree(root: Path) -> dict[str, bytes]:
     """``{relative path: bytes}`` of every file under ``root``."""
-    return {str(p.relative_to(root)): p.read_bytes() for p in sorted(root.rglob("*")) if p.is_file()}
+    return {
+        str(p.relative_to(root)): p.read_bytes()
+        for p in sorted(root.rglob("*"))
+        if p.is_file()
+    }
 
 
 def _remove(dest: Path) -> None:
@@ -121,7 +127,9 @@ def install_bundled(
     []
     """
     source_dir = Path(source_dir)
-    homes = [Path(h).expanduser() for h in (homes if homes is not None else claude_homes())]
+    homes = [
+        Path(h).expanduser() for h in (homes if homes is not None else claude_homes())
+    ]
     rows: list[dict] = []
     for home in homes:
         for src, rel in _assets(source_dir):
@@ -131,7 +139,11 @@ def install_bundled(
                 action = "ok"
             else:
                 action = "conflict" if exists and not force else "install"
-            row = {"home": str(home), "name": src.stem if src.is_file() else src.name, "action": action}
+            row = {
+                "home": str(home),
+                "name": src.stem if src.is_file() else src.name,
+                "action": action,
+            }
             if action == "install" and not dry_run:
                 if exists:
                     _remove(dest)
