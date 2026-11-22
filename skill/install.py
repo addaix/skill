@@ -43,6 +43,21 @@ class AgentTarget:
     needs_translation: bool = False
     # True: the translation is one ``## name`` section of a shared file (Copilot, Gemini)
     appends: bool = False
+    # The host this target installs for, when it differs from ``name`` (the rules-file
+    # target ``cursor-rules`` is for host ``cursor``). Lets a caller find every way a
+    # skill can be installed for one host.
+    host: str | None = None
+
+    @property
+    def host_name(self) -> str:
+        """The host this target serves: ``host`` when set, else ``name``.
+
+        >>> AgentTarget(name='cursor-rules', host='cursor').host_name
+        'cursor'
+        >>> AgentTarget(name='codex').host_name
+        'codex'
+        """
+        return self.host or self.name
 
     def format_global_path(self, name: str) -> Path | None:
         if self.global_path is None:
@@ -79,19 +94,47 @@ agent_targets.register(
         format="skill.md",
     ),
 )
+# Hosts that now read SKILL.md folders natively (per each host's own skills docs, as
+# tabulated by `npx skills` 1.9.0: https://github.com/vercel-labs/skills/blob/main/docs/agents.md).
+# Cursor, Copilot, Gemini CLI and Cline share the cross-host ``.agents/skills`` project
+# folder with Codex, so one install serves all of them; their user-level folders differ.
+_NATIVE_HOSTS = {
+    # name: (global_path, project_path)
+    "cursor": ("{home}/.cursor/skills/{name}", "{project}/.agents/skills/{name}"),
+    "copilot": ("{home}/.copilot/skills/{name}", "{project}/.agents/skills/{name}"),
+    "gemini": ("{home}/.gemini/skills/{name}", "{project}/.agents/skills/{name}"),
+    "cline": ("{home}/.agents/skills/{name}", "{project}/.agents/skills/{name}"),
+    "windsurf": (
+        "{home}/.codeium/windsurf/skills/{name}",
+        "{project}/.windsurf/skills/{name}",
+    ),
+}
+for _name, (_global, _project) in _NATIVE_HOSTS.items():
+    agent_targets.register(
+        _name,
+        AgentTarget(
+            name=_name, global_path=_global, project_path=_project, format="skill.md"
+        ),
+    )
+
+# The older rules-file translations, kept reachable under explicit names for anyone
+# who wants a rules file (or to uninstall one an earlier version wrote). They are lossy:
+# ``skill.translate`` warns about the fields it drops.
 agent_targets.register(
-    "cursor",
+    "cursor-rules",
     AgentTarget(
-        name="cursor",
+        name="cursor-rules",
+        host="cursor",
         project_path="{project}/.cursor/rules/{name}.mdc",
         format="mdc",
         needs_translation=True,
     ),
 )
 agent_targets.register(
-    "copilot",
+    "copilot-instructions",
     AgentTarget(
-        name="copilot",
+        name="copilot-instructions",
+        host="copilot",
         project_path="{project}/.github/copilot-instructions.md",
         format="copilot_md",
         needs_translation=True,
@@ -99,27 +142,30 @@ agent_targets.register(
     ),
 )
 agent_targets.register(
-    "windsurf",
+    "windsurf-rules",
     AgentTarget(
-        name="windsurf",
+        name="windsurf-rules",
+        host="windsurf",
         project_path="{project}/.windsurf/rules/{name}.md",
         format="windsurf_md",
         needs_translation=True,
     ),
 )
 agent_targets.register(
-    "cline",
+    "cline-rules",
     AgentTarget(
-        name="cline",
+        name="cline-rules",
+        host="cline",
         project_path="{project}/.clinerules/{name}.md",
         format="clinerules_md",
         needs_translation=True,
     ),
 )
 agent_targets.register(
-    "gemini",
+    "gemini-md",
     AgentTarget(
-        name="gemini",
+        name="gemini-md",
+        host="gemini",
         project_path="{project}/GEMINI.md",
         format="gemini_md",
         needs_translation=True,
@@ -145,6 +191,7 @@ def install_from_github(
     *,
     agent: str = "claude-code",
     preview: bool = False,
+    pin: str | None = None,
 ) -> list[dict]:
     """Install (or preview) skills published on GitHub via the ``gh skill`` CLI.
 
@@ -163,6 +210,10 @@ def install_from_github(
         The agent host to install into (default ``'claude-code'``). Ignored for previews.
     preview : bool
         If True, run ``gh skill preview`` instead of ``gh skill install``.
+    pin : str | None
+        A tag or commit SHA to install, passed as ``gh skill install --pin``, so the
+        install is reproducible and ``gh skill update`` leaves it alone. ``None``
+        (default) installs the latest. Ignored for previews.
 
     Returns
     -------
@@ -183,6 +234,11 @@ def install_from_github(
     """
     if isinstance(names, str):
         names = [names]
+    if pin is not None and (inline := [n for n in names if "@" in n]):
+        raise ValueError(
+            f"pin={pin!r} cannot be combined with an inline @version in {inline}: "
+            "use one or the other"
+        )
 
     if shutil.which("gh") is None:
         raise RuntimeError(
@@ -196,6 +252,8 @@ def install_from_github(
         argv = ["gh", "skill", verb, repo, name]
         if not preview:
             argv += ["--agent", agent]
+            if pin is not None:
+                argv += ["--pin", pin]
         try:
             proc = subprocess.run(
                 argv,
@@ -264,6 +322,40 @@ def _check_existing(target: Path) -> str:
     return "file"
 
 
+def _is_install_of(dest: Path, source: Path) -> bool:
+    """True when ``dest`` is a link to ``source`` or a copy of it (same SKILL.md).
+
+    Several hosts share one folder (``.agents/skills``), and a skill installed for one
+    of them in an earlier call must be recognised, not refused or deleted as foreign.
+
+    >>> _is_install_of(Path('/nonexistent/a'), Path('/nonexistent/b'))
+    False
+    """
+    try:
+        if dest.is_symlink():
+            return dest.resolve() == source.resolve()
+        if dest.is_dir():
+            ours, theirs = dest / "SKILL.md", source / "SKILL.md"
+            return ours.is_file() and theirs.is_file() and ours.read_bytes() == theirs.read_bytes()
+    except OSError:
+        return False
+    return False
+
+
+def _legacy_artifacts(host: str, project_dir, skill_name: str) -> list[Path]:
+    """Rules-file installs an earlier version wrote for ``host`` that still exist."""
+    found = []
+    for t in AGENT_TARGETS.values():
+        if not (t.needs_translation and t.host_name == host and project_dir is not None):
+            continue
+        dest = t.format_project_path(project_dir, skill_name)
+        if dest is None or not dest.is_file():
+            continue
+        if not t.appends or f"<!-- skill:{skill_name} -->" in dest.read_text(errors="replace"):
+            found.append(dest)
+    return found
+
+
 def _create_link(
     source: Path,
     target: Path,
@@ -276,6 +368,8 @@ def _create_link(
     On Windows, uses a directory junction instead of symlink.
     """
     existing = _check_existing(target)
+    if existing != "none" and not force and _is_install_of(target, source):
+        return target  # this skill is already there (another host sharing the folder)
     if existing == "our_symlink":
         # Already linked by us — update if source changed
         target.unlink()
@@ -387,6 +481,11 @@ def install(
             )
             continue
 
+        if dest in installed.values():
+            # Several hosts share one folder (``.agents/skills``): installed once
+            installed[target_name] = dest
+            continue
+
         if target.appends and dest.is_symlink():
             # Typically GEMINI.md -> AGENTS.md: appending would edit the canonical
             warnings.warn(
@@ -417,8 +516,25 @@ def install(
             source = skill.source_path or store._key_to_path(key)
             _create_link(source, dest, copy=copy, force=force)
             installed[target_name] = dest
+            if scope == "project":
+                for old in _legacy_artifacts(target.host_name, project_dir, skill_name):
+                    warnings.warn(
+                        f"{old} is an older rules-file install of {skill_name!r} for "
+                        f"{target.host_name}; the host may now load the skill twice. "
+                        f"Remove it with uninstall({key!r}, agent_targets="
+                        f"[{_legacy_target_name(target.host_name)!r}])",
+                        stacklevel=2,
+                    )
 
     return installed
+
+
+def _legacy_target_name(host: str) -> str:
+    """The registered rules-file target for ``host`` (for messages)."""
+    return next(
+        (n for n, t in AGENT_TARGETS.items() if t.needs_translation and t.host_name == host),
+        host,
+    )
 
 
 def _append_or_create(path: Path, content: str, skill_name: str) -> None:
@@ -454,6 +570,13 @@ def uninstall(
     """Remove a skill's installation from agent target directories.
 
     Returns a dict mapping agent target names to the paths that were removed.
+
+    Hosts that share a folder (Codex, Cursor, Copilot, Gemini CLI and Cline all read
+    ``<project>/.agents/skills``) share one installation, so removing it for one of
+    them removes it for all (a warning names the others). Only an installation of this
+    skill (a link to it or a copy of it) is removed; anything else at that path, such
+    as a skill of the same name written by hand or by another installer, is left alone
+    with a warning.
     """
     if store is None:
         store = LocalSkillStore()
@@ -497,7 +620,36 @@ def uninstall(
                 )
             elif dest.is_file() and _remove_section(dest, skill_name):
                 removed[target_name] = dest
+        elif dest in removed.values():
+            removed[target_name] = dest  # a shared folder, already removed in this call
         elif dest.exists() or dest.is_symlink():
+            source = skill.source_path or store._key_to_path(key)
+            if not target.needs_translation and not (
+                _check_existing(dest) == "our_symlink" or _is_install_of(dest, source)
+            ):
+                warnings.warn(
+                    f"{dest} is not an installation of {key!r}; leaving it alone",
+                    stacklevel=2,
+                )
+                continue
+            sharing = sorted(
+                n
+                for n, t in AGENT_TARGETS.items()
+                if n not in targets
+                and not t.needs_translation
+                and (
+                    t.format_project_path(project_dir, skill_name)
+                    if scope == "project"
+                    else t.format_global_path(skill_name)
+                )
+                == dest
+            )
+            if sharing:
+                warnings.warn(
+                    f"{dest} is shared: removing it also removes {skill_name!r} for "
+                    f"{', '.join(sharing)}",
+                    stacklevel=2,
+                )
             if dest.is_symlink() or dest.is_file():
                 dest.unlink()
             elif dest.is_dir():
@@ -584,8 +736,8 @@ def _iter_skill_dirs(source: Path):
 def _known_target_parents() -> set[Path]:
     """Return the set of resolved parent directories for all known agent targets.
 
-    For example, ``~/.claude/skills`` for claude-code global,
-    ``.cursor/rules`` for cursor project, etc.
+    Only user-level (global) paths are read: for example ``~/.claude/skills`` for
+    claude-code and ``~/.cursor/skills`` for cursor.
     """
     parents = set()
     home = str(Path.home())

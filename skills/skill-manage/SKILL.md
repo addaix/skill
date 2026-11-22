@@ -171,8 +171,9 @@ Skills can exist in several places:
 | `~/.local/share/skill/skills/` | Local skill store (downloaded/created) | User-wide |
 | `~/.claude/skills/` | Claude Code global skills | All projects |
 | `.claude/skills/` | Claude Code project skills | This project |
-| `.cursor/rules/` | Cursor rules (translated from SKILL.md) | This project |
-| `.github/copilot-instructions.md` | Copilot instructions (appended) | This project |
+| `.agents/skills/` | Codex, Cursor, Copilot, Gemini CLI, Cline (one shared folder) | This project |
+| `.windsurf/skills/` | Windsurf skills | This project |
+| `.cursor/rules/`, `.github/copilot-instructions.md`, … | Older rules-file translations (`cursor-rules`, `copilot-instructions`, `windsurf-rules`, `cline-rules`, `gemini-md` targets) | This project |
 | `{pkg}/data/skills/` | Package-shipped skills | Distributed |
 
 When helping the user understand their skill landscape, check all relevant
@@ -204,10 +205,12 @@ may point to different locations.
 - **`install()` requires the skill to be in the local store first.** If you
   searched remotely, you need to fetch/create it locally before installing.
   The `create()` function can be used to add a skill to the store.
-- **Cursor and Copilot need format translation.** When installing to these
-  targets, the skill is automatically converted — but some metadata is lost
-  (Cursor doesn't support all frontmatter fields, Copilot appends to a
-  single file).
+- **Every built-in host now reads SKILL.md folders natively.** `cursor`, `copilot`,
+  `gemini` and `cline` share `.agents/skills` with `codex`, so one install serves
+  them all, and uninstalling for one removes it for all. The lossy rules-file
+  translations remain as `cursor-rules`, `copilot-instructions`, `windsurf-rules`,
+  `cline-rules` and `gemini-md`; an older install under those is flagged when the
+  native one is added, and removed with `uninstall(key, agent_targets=['cursor-rules'])`.
 - **Symlinks break if the source moves.** If a user reorganizes their project,
   skill symlinks may dangle. Check with `ls -la` and re-link if needed.
 - **`scope='project'` requires being in a project.** If `find_project_root()`

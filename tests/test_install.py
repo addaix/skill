@@ -105,13 +105,13 @@ class TestInstall:
         store, project = _setup_store_and_project(tmp_path)
         result = install(
             'alice/greet',
-            agent_targets=['cursor'],
+            agent_targets=['cursor-rules'],
             scope='project',
             project_dir=project,
             store=store,
         )
-        assert 'cursor' in result
-        content = result['cursor'].read_text()
+        assert 'cursor-rules' in result
+        content = result['cursor-rules'].read_text()
         assert 'description: Say hello' in content
         assert 'alwaysApply' in content
 
@@ -119,13 +119,13 @@ class TestInstall:
         store, project = _setup_store_and_project(tmp_path)
         result = install(
             'alice/greet',
-            agent_targets=['copilot'],
+            agent_targets=['copilot-instructions'],
             scope='project',
             project_dir=project,
             store=store,
         )
-        assert 'copilot' in result
-        content = result['copilot'].read_text()
+        assert 'copilot-instructions' in result
+        content = result['copilot-instructions'].read_text()
         assert '## greet' in content
         assert 'skill:greet' in content  # marker
 
@@ -159,14 +159,14 @@ class TestUninstall:
         store, project = _setup_store_and_project(tmp_path)
         install(
             'alice/greet',
-            agent_targets=['copilot'],
+            agent_targets=['copilot-instructions'],
             scope='project',
             project_dir=project,
             store=store,
         )
         uninstall(
             'alice/greet',
-            agent_targets=['copilot'],
+            agent_targets=['copilot-instructions'],
             scope='project',
             project_dir=project,
             store=store,
@@ -182,7 +182,7 @@ class TestAgentTargets:
 
     def test_cursor_exists(self):
         assert 'cursor' in AGENT_TARGETS
-        assert AGENT_TARGETS['cursor'].needs_translation
+        assert AGENT_TARGETS['cursor-rules'].needs_translation
 
     def test_copilot_exists(self):
         assert 'copilot' in AGENT_TARGETS
@@ -207,9 +207,9 @@ def test_install_codex_links_into_agents_skills(tmp_path):
 @pytest.mark.parametrize(
     'target, rel, expected',
     [
-        ('windsurf', '.windsurf/rules/greet.md', 'trigger: model_decision'),
-        ('cline', '.clinerules/greet.md', '# greet'),
-        ('gemini', 'GEMINI.md', 'skill:greet'),
+        ('windsurf-rules', '.windsurf/rules/greet.md', 'trigger: model_decision'),
+        ('cline-rules', '.clinerules/greet.md', '# greet'),
+        ('gemini-md', 'GEMINI.md', 'skill:greet'),
     ],
 )
 def test_install_and_uninstall_new_hosts(tmp_path, target, rel, expected):
@@ -230,7 +230,7 @@ def test_appending_never_writes_through_a_symlink(tmp_path):
     (project / 'GEMINI.md').symlink_to('AGENTS.md')
     with pytest.warns(UserWarning, match='symlink'):
         result = install(
-            'alice/greet', agent_targets=['gemini'], scope='project',
+            'alice/greet', agent_targets=['gemini-md'], scope='project',
             project_dir=project, store=store,
         )
     assert result == {} and (project / 'AGENTS.md').read_text() == '# canonical\n'
@@ -243,7 +243,7 @@ def test_uninstall_never_edits_or_deletes_a_symlinked_shared_file(tmp_path):
     canonical = '# c\n<!-- skill:greet -->\nx\n<!-- /skill:greet -->\n'
     (project / 'AGENTS.md').write_text(canonical)
     (project / 'GEMINI.md').symlink_to('AGENTS.md')
-    kw = dict(agent_targets=['gemini'], scope='project', project_dir=project, store=store)
+    kw = dict(agent_targets=['gemini-md'], scope='project', project_dir=project, store=store)
     with pytest.warns(UserWarning, match='symlink'):
         assert uninstall('alice/greet', **kw) == {}
     assert (project / 'AGENTS.md').read_text() == canonical
@@ -255,3 +255,102 @@ def test_uninstall_never_edits_or_deletes_a_symlinked_shared_file(tmp_path):
     (project / 'GEMINI.md').unlink()
     (project / 'GEMINI.md').write_text('# mine\n')
     assert uninstall('alice/greet', **kw) == {}  # no section: nothing removed
+
+
+# -- native SKILL.md folders for the hosts that used to need translation (addaix/skill#24) --
+
+
+@pytest.mark.parametrize(
+    'target, rel',
+    [
+        ('cursor', '.agents/skills/greet'),
+        ('copilot', '.agents/skills/greet'),
+        ('gemini', '.agents/skills/greet'),
+        ('cline', '.agents/skills/greet'),
+        ('windsurf', '.windsurf/skills/greet'),
+    ],
+)
+def test_former_translating_hosts_now_link_the_skill_folder(tmp_path, target, rel):
+    store, project = _setup_store_and_project(tmp_path)
+    result = install(
+        'alice/greet', agent_targets=[target], scope='project',
+        project_dir=project, store=store,
+    )
+    assert result[target] == project / rel
+    assert (project / rel / 'SKILL.md').is_file()
+    assert not AGENT_TARGETS[target].needs_translation
+    assert AGENT_TARGETS[target].global_path  # user-level install is possible now
+
+
+def test_hosts_sharing_a_folder_install_it_once(tmp_path):
+    store, project = _setup_store_and_project(tmp_path)
+    hosts = ['codex', 'cursor', 'copilot', 'gemini', 'cline']
+    result = install(
+        'alice/greet', agent_targets=hosts, scope='project', copy=True,
+        project_dir=project, store=store,
+    )
+    assert set(result) == set(hosts)
+    assert set(result.values()) == {project / '.agents' / 'skills' / 'greet'}
+
+
+def test_the_rules_file_translations_stay_reachable():
+    for name, fmt in [
+        ('cursor-rules', 'mdc'), ('copilot-instructions', 'copilot_md'),
+        ('windsurf-rules', 'windsurf_md'), ('cline-rules', 'clinerules_md'),
+        ('gemini-md', 'gemini_md'),
+    ]:
+        assert AGENT_TARGETS[name].needs_translation
+        assert AGENT_TARGETS[name].format == fmt
+
+
+# -- review findings on addaix/skill#24: shared folders, ownership, legacy installs --
+
+
+def test_uninstall_leaves_a_folder_it_did_not_install(tmp_path):
+    from skill.install import uninstall
+
+    store, project = _setup_store_and_project(tmp_path)
+    own = project / '.agents' / 'skills' / 'greet'
+    own.mkdir(parents=True)
+    (own / 'SKILL.md').write_text('---\nname: greet\ndescription: mine\n---\nhand-written\n')
+    with pytest.warns(UserWarning, match='not an installation'):
+        removed = uninstall(
+            'alice/greet', agent_targets=['gemini'], scope='project',
+            project_dir=project, store=store,
+        )
+    assert removed == {} and (own / 'SKILL.md').is_file()
+
+
+def test_uninstalling_a_shared_folder_names_the_other_hosts(tmp_path):
+    from skill.install import uninstall
+
+    store, project = _setup_store_and_project(tmp_path)
+    kw = dict(scope='project', project_dir=project, store=store)
+    install('alice/greet', agent_targets=['codex', 'cursor'], **kw)
+    with pytest.warns(UserWarning, match='also removes .* for .*codex'):
+        removed = uninstall('alice/greet', agent_targets=['cursor'], **kw)
+    assert not removed['cursor'].exists()
+
+
+def test_a_second_host_reuses_an_earlier_install_of_the_same_skill(tmp_path):
+    store, project = _setup_store_and_project(tmp_path)
+    kw = dict(scope='project', project_dir=project, store=store)
+    install('alice/greet', agent_targets=['codex'], copy=True, **kw)
+    result = install('alice/greet', agent_targets=['cursor'], **kw)  # no FileExistsError
+    assert (result['cursor'] / 'SKILL.md').is_file()
+
+
+def test_a_leftover_rules_file_install_is_flagged(tmp_path):
+    store, project = _setup_store_and_project(tmp_path)
+    kw = dict(scope='project', project_dir=project, store=store)
+    install('alice/greet', agent_targets=['cursor-rules'], **kw)
+    with pytest.warns(UserWarning, match="cursor-rules"):
+        install('alice/greet', agent_targets=['cursor'], **kw)
+
+
+def test_every_rules_file_target_names_its_host():
+    rules = {n: t for n, t in AGENT_TARGETS.items() if t.needs_translation}
+    assert {t.host_name for t in rules.values()} == {
+        'cursor', 'copilot', 'windsurf', 'cline', 'gemini'
+    }
+    assert all(t.host_name in AGENT_TARGETS for t in rules.values())
