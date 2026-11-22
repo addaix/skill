@@ -129,6 +129,7 @@
 </section>
 <section id="quick-start">
 <h2>Quick Start<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#quick-start" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#quick-start'">¶</a></h2>
+
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="kn">from</span><span class="w"> </span><span class="nn">skill</span><span class="w"> </span><span class="kn">import</span> <span class="n">search</span><span class="p">,</span> <span class="n">create</span><span class="p">,</span> <span class="n">install</span><span class="p">,</span> <span class="n">validate</span>
 </span><span id="line-2">
 </span><span id="line-3"><span class="c1"># Create a skill locally</span>
@@ -152,6 +153,7 @@
 <p>If a project ships skills (in <code class="docutils literal notranslate"><span class="pre">.claude/skills/</span></code>, <code class="docutils literal notranslate"><span class="pre">{pkg}/data/skills/</span></code>, or a
 dedicated folder), you can symlink them all into your agent’s skills directory
 in one shot:</p>
+
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="kn">from</span><span class="w"> </span><span class="nn">skill</span><span class="w"> </span><span class="kn">import</span> <span class="n">link_skills</span>
 </span><span id="line-2">
 </span><span id="line-3"><span class="c1"># Point at a project root — it finds the skills automatically</span>
@@ -299,7 +301,7 @@ a thin wrapper over the <code class="docutils literal notranslate"><span class="
 
 </section>
 </section>
-<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-11-22 20:45 UTC from <a href="https://github.com/addaix/skill/commit/91d50a7186d4975efe8da2784f76ad29eb12df9e">91d50a7</a> (master) · skill 0.1.23 · <a href="about-this-build.html">about this build</a></p>
+<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-11-22 22:08 UTC from <a href="https://github.com/addaix/skill/commit/9d88c1c985f9412e4306da6fe9f165e71f35a165">9d88c1c</a> (master) · skill 0.1.23 · <a href="about-this-build.html">about this build</a></p>
 </div></div><aside class="hidden text-sm xl:block" id="right-sidebar">
 <div class="sticky top-16 -mt-10 max-h-[calc(100vh-5rem)] h-full overflow-y-auto pt-6 space-y-2"><p class="font-medium">On this page</p>
 <ul>

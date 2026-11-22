@@ -14,6 +14,7 @@ pip install skill
 
 ## Quick Start
 
+<!-- wads-docs: skip placeholder path /path/to/skill-dir -->
 ```python
 from skill import search, create, install, validate
 
@@ -39,6 +40,7 @@ If a project ships skills (in `.claude/skills/`, `{pkg}/data/skills/`, or a
 dedicated folder), you can symlink them all into your agent’s skills directory
 in one shot:
 
+<!-- wads-docs: skip placeholder path /path/to/my-project -->
 ```python
 from skill import link_skills
 
