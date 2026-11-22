@@ -1,4 +1,4 @@
-> built 2026-11-22 14:38 UTC from 39f51a5 (master) · skill 0.1.22. Details: build_info.json
+> built 2026-11-22 18:12 UTC from 485e065 (master) · skill 0.1.22. Details: build_info.json
 
 # index.html.md
 
@@ -32,7 +32,9 @@ results = search("react best practices", local_only=True)
 
 # Install to an agent target
 install("_local/my-skill", agent_targets=["claude-code"], scope="project")
-# built-in targets: claude-code, codex (symlink), cursor, copilot, windsurf, cline, gemini (translated)
+# built-in targets: claude-code, codex, cursor, copilot, gemini, cline, windsurf (all link the SKILL.md folder;
+# codex, cursor, copilot, gemini and cline share <project>/.agents/skills, so one install serves them all)
+# rules-file translations, if you want them: cursor-rules, copilot-instructions, windsurf-rules, cline-rules, gemini-md
 ```
 
 ### Link skills from a project
@@ -121,8 +123,10 @@ them with `gh skill` as above. See `skill-package-setup` for the layout policy
 this repo follows (real files in `skills/`, relative symlinks in `.claude/skills/`).
 
 Packages can also install their own GitHub-published skills programmatically via
-[`skill.install_from_github(repo, names, agent='claude-code')`](),
-a thin wrapper over the `gh skill` CLI.
+[`skill.install_from_github(repo, names, agent='claude-code', pin=None)`](),
+a thin wrapper over the `gh skill` CLI (GitHub CLI 2.90 or later). Pass `pin='v1.2.0'` (a tag or a commit SHA) for a reproducible install that `gh skill update` leaves alone.
+
+`skill` does not try to be an installer for every host: `gh skill` and [`npx skills`](https://github.com/vercel-labs/skills) cover dozens of hosts, with pinning and lockfiles. What they do not do is check a skill: `npx skills add` installs a skill whose `name` is invalid. Run `skill validate` before either.
 
 ## Plugin System
 
@@ -141,10 +145,11 @@ Register at runtime:
 from skill.install import agent_targets, AgentTarget
 
 agent_targets.register(
-    "windsurf",
+    "my-host",
     AgentTarget(
-        name="windsurf",
-        project_path="{project}/.windsurf/rules/{name}.md",
+        name="my-host",
+        global_path="{home}/.my-host/skills/{name}",
+        project_path="{project}/.my-host/skills/{name}",
         format="skill.md",
     ),
 )
@@ -154,7 +159,7 @@ Or via entry points in your `pyproject.toml`:
 
 ```toml
 [project.entry-points."skill.agent_targets"]
-windsurf = "my_package:windsurf_target"
+my-host = "my_package:my_host_target"
 ```
 
 See [Plugin System Documentation]() for full details on contracts, interfaces, and built-in registrations.
@@ -1664,7 +1669,7 @@ Resolve `$VAR` and `${VAR}` references from environment variables.
 
 # About this build
 
-This documentation was built on **2026-11-22 14:38 UTC** from commit <a href="https://github.com/addaix/skill/commit/39f51a55cd0a99a5f8cb37efe45b6c83e06e014d"><code>39f51a5</code></a> on branch <code>master</code>, for **skill 0.1.22** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-22 18:12 UTC** from commit <a href="https://github.com/addaix/skill/commit/485e0657d0c06af1eb59bd712d4de3f1467d4f93"><code>485e065</code></a> on branch <code>master</code>, for **skill 0.1.22** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -1673,7 +1678,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                     |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/addaix/skill/commit/39f51a55cd0a99a5f8cb37efe45b6c83e06e014d"><code>39f51a55cd0a99a5f8cb37efe45b6c83e06e014d</code></a> |
+| Commit              | <a href="https://github.com/addaix/skill/commit/485e0657d0c06af1eb59bd712d4de3f1467d4f93"><code>485e0657d0c06af1eb59bd712d4de3f1467d4f93</code></a> |
 | Branch              | <code>master</code>                                                                                                                                 |
 | Tags at this commit | none                                                                                                                                                |
 | Working tree        | clean                                                                                                                                               |
@@ -1684,9 +1689,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>addaix/skill</code>                                                                  |
-| Run          | <a href="https://github.com/addaix/skill/actions/runs/45033825780">45033825780</a>         |
+| Run          | <a href="https://github.com/addaix/skill/actions/runs/45053613066">45053613066</a>         |
 | Ref          | <code>refs/heads/master</code>                                                             |
-| Event commit | <code>39f51a55cd0a99a5f8cb37efe45b6c83e06e014d</code> (in the history of the built commit) |
+| Event commit | <code>485e0657d0c06af1eb59bd712d4de3f1467d4f93</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -1717,7 +1722,7 @@ Latest release: <a href="https://pypi.org/project/skill/0.1.22/">0.1.22</a>, the
 
 ```bash
 git clone https://github.com/addaix/skill && cd skill
-git checkout 39f51a55cd0a99a5f8cb37efe45b6c83e06e014d
+git checkout 485e0657d0c06af1eb59bd712d4de3f1467d4f93
 pip install "epythet==0.2.23"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

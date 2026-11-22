@@ -142,7 +142,9 @@
 </span><span id="line-11">
 </span><span id="line-12"><span class="c1"># Install to an agent target</span>
 </span><span id="line-13"><span class="n">install</span><span class="p">(</span><span class="s2">"_local/my-skill"</span><span class="p">,</span> <span class="n">agent_targets</span><span class="o">=</span><span class="p">[</span><span class="s2">"claude-code"</span><span class="p">],</span> <span class="n">scope</span><span class="o">=</span><span class="s2">"project"</span><span class="p">)</span>
-</span><span id="line-14"><span class="c1"># built-in targets: claude-code, codex (symlink), cursor, copilot, windsurf, cline, gemini (translated)</span>
+</span><span id="line-14"><span class="c1"># built-in targets: claude-code, codex, cursor, copilot, gemini, cline, windsurf (all link the SKILL.md folder;</span>
+</span><span id="line-15"><span class="c1"># codex, cursor, copilot, gemini and cline share &lt;project&gt;/.agents/skills, so one install serves them all)</span>
+</span><span id="line-16"><span class="c1"># rules-file translations, if you want them: cursor-rules, copilot-instructions, windsurf-rules, cline-rules, gemini-md</span>
 </span></code></pre></div>
 </div>
 <section id="link-skills-from-a-project">
@@ -240,8 +242,9 @@ see a one-time hint reminding you to run <code class="docutils literal notransla
 them with <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">skill</span></code> as above. See <code class="docutils literal notranslate"><span class="pre">skill-package-setup</span></code> for the layout policy
 this repo follows (real files in <code class="docutils literal notranslate"><span class="pre">skills/</span></code>, relative symlinks in <code class="docutils literal notranslate"><span class="pre">.claude/skills/</span></code>).</p>
 <p>Packages can also install their own GitHub-published skills programmatically via
-<a class="reference internal" href="#skill/install.py"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">skill.install_from_github(repo,</span> <span class="pre">names,</span> <span class="pre">agent='claude-code')</span></code></span></a>,
-a thin wrapper over the <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">skill</span></code> CLI.</p>
+<a class="reference internal" href="#skill/install.py"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">skill.install_from_github(repo,</span> <span class="pre">names,</span> <span class="pre">agent='claude-code',</span> <span class="pre">pin=None)</span></code></span></a>,
+a thin wrapper over the <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">skill</span></code> CLI (GitHub CLI 2.90 or later). Pass <code class="docutils literal notranslate"><span class="pre">pin='v1.2.0'</span></code> (a tag or a commit SHA) for a reproducible install that <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">skill</span> <span class="pre">update</span></code> leaves alone.</p>
+<p><code class="docutils literal notranslate"><span class="pre">skill</span></code> does not try to be an installer for every host: <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">skill</span></code> and <a class="reference external" href="https://github.com/vercel-labs/skills" rel="nofollow noopener"><code class="docutils literal notranslate"><span class="pre">npx</span> <span class="pre">skills</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a> cover dozens of hosts, with pinning and lockfiles. What they do not do is check a skill: <code class="docutils literal notranslate"><span class="pre">npx</span> <span class="pre">skills</span> <span class="pre">add</span></code> installs a skill whose <code class="docutils literal notranslate"><span class="pre">name</span></code> is invalid. Run <code class="docutils literal notranslate"><span class="pre">skill</span> <span class="pre">validate</span></code> before either.</p>
 </section>
 <section id="plugin-system">
 <h2>Plugin System<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#plugin-system" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#plugin-system'">¶</a></h2>
@@ -276,18 +279,19 @@ a thin wrapper over the <code class="docutils literal notranslate"><span class="
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="kn">from</span><span class="w"> </span><span class="nn">skill.install</span><span class="w"> </span><span class="kn">import</span> <span class="n">agent_targets</span><span class="p">,</span> <span class="n">AgentTarget</span>
 </span><span id="line-2">
 </span><span id="line-3"><span class="n">agent_targets</span><span class="o">.</span><span class="n">register</span><span class="p">(</span>
-</span><span id="line-4">    <span class="s2">"windsurf"</span><span class="p">,</span>
+</span><span id="line-4">    <span class="s2">"my-host"</span><span class="p">,</span>
 </span><span id="line-5">    <span class="n">AgentTarget</span><span class="p">(</span>
-</span><span id="line-6">        <span class="n">name</span><span class="o">=</span><span class="s2">"windsurf"</span><span class="p">,</span>
-</span><span id="line-7">        <span class="n">project_path</span><span class="o">=</span><span class="s2">"</span><span class="si">{project}</span><span class="s2">/.windsurf/rules/</span><span class="si">{name}</span><span class="s2">.md"</span><span class="p">,</span>
-</span><span id="line-8">        <span class="nb">format</span><span class="o">=</span><span class="s2">"skill.md"</span><span class="p">,</span>
-</span><span id="line-9">    <span class="p">),</span>
-</span><span id="line-10"><span class="p">)</span>
+</span><span id="line-6">        <span class="n">name</span><span class="o">=</span><span class="s2">"my-host"</span><span class="p">,</span>
+</span><span id="line-7">        <span class="n">global_path</span><span class="o">=</span><span class="s2">"</span><span class="si">{home}</span><span class="s2">/.my-host/skills/</span><span class="si">{name}</span><span class="s2">"</span><span class="p">,</span>
+</span><span id="line-8">        <span class="n">project_path</span><span class="o">=</span><span class="s2">"</span><span class="si">{project}</span><span class="s2">/.my-host/skills/</span><span class="si">{name}</span><span class="s2">"</span><span class="p">,</span>
+</span><span id="line-9">        <span class="nb">format</span><span class="o">=</span><span class="s2">"skill.md"</span><span class="p">,</span>
+</span><span id="line-10">    <span class="p">),</span>
+</span><span id="line-11"><span class="p">)</span>
 </span></code></pre></div>
 </div>
 <p>Or via entry points in your <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>:</p>
 <div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="k">[project.entry-points.</span><span class="s2">"skill.agent_targets"</span><span class="k">]</span>
-</span><span id="line-2"><span class="n">windsurf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"my_package:windsurf_target"</span>
+</span><span id="line-2"><span class="n">my-host</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"my_package:my_host_target"</span>
 </span></code></pre></div>
 </div>
 <p>See <a class="reference internal" href="#misc/docs/plugin_system.md"><span class="xref myst">Plugin System Documentation</span></a> for full details on contracts, interfaces, and built-in registrations.</p>
@@ -295,7 +299,7 @@ a thin wrapper over the <code class="docutils literal notranslate"><span class="
 
 </section>
 </section>
-<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-11-22 14:38 UTC from <a href="https://github.com/addaix/skill/commit/39f51a55cd0a99a5f8cb37efe45b6c83e06e014d">39f51a5</a> (master) · skill 0.1.22 · <a href="about-this-build.html">about this build</a></p>
+<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-11-22 18:12 UTC from <a href="https://github.com/addaix/skill/commit/485e0657d0c06af1eb59bd712d4de3f1467d4f93">485e065</a> (master) · skill 0.1.22 · <a href="about-this-build.html">about this build</a></p>
 </div></div><aside class="hidden text-sm xl:block" id="right-sidebar">
 <div class="sticky top-16 -mt-10 max-h-[calc(100vh-5rem)] h-full overflow-y-auto pt-6 space-y-2"><p class="font-medium">On this page</p>
 <ul>

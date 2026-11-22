@@ -28,7 +28,9 @@ results = search("react best practices", local_only=True)
 
 # Install to an agent target
 install("_local/my-skill", agent_targets=["claude-code"], scope="project")
-# built-in targets: claude-code, codex (symlink), cursor, copilot, windsurf, cline, gemini (translated)
+# built-in targets: claude-code, codex, cursor, copilot, gemini, cline, windsurf (all link the SKILL.md folder;
+# codex, cursor, copilot, gemini and cline share <project>/.agents/skills, so one install serves them all)
+# rules-file translations, if you want them: cursor-rules, copilot-instructions, windsurf-rules, cline-rules, gemini-md
 ```
 
 ### Link skills from a project
@@ -117,8 +119,10 @@ them with `gh skill` as above. See `skill-package-setup` for the layout policy
 this repo follows (real files in `skills/`, relative symlinks in `.claude/skills/`).
 
 Packages can also install their own GitHub-published skills programmatically via
-[`skill.install_from_github(repo, names, agent='claude-code')`](),
-a thin wrapper over the `gh skill` CLI.
+[`skill.install_from_github(repo, names, agent='claude-code', pin=None)`](),
+a thin wrapper over the `gh skill` CLI (GitHub CLI 2.90 or later). Pass `pin='v1.2.0'` (a tag or a commit SHA) for a reproducible install that `gh skill update` leaves alone.
+
+`skill` does not try to be an installer for every host: `gh skill` and [`npx skills`](https://github.com/vercel-labs/skills) cover dozens of hosts, with pinning and lockfiles. What they do not do is check a skill: `npx skills add` installs a skill whose `name` is invalid. Run `skill validate` before either.
 
 ## Plugin System
 
@@ -137,10 +141,11 @@ Register at runtime:
 from skill.install import agent_targets, AgentTarget
 
 agent_targets.register(
-    "windsurf",
+    "my-host",
     AgentTarget(
-        name="windsurf",
-        project_path="{project}/.windsurf/rules/{name}.md",
+        name="my-host",
+        global_path="{home}/.my-host/skills/{name}",
+        project_path="{project}/.my-host/skills/{name}",
         format="skill.md",
     ),
 )
@@ -150,7 +155,7 @@ Or via entry points in your `pyproject.toml`:
 
 ```toml
 [project.entry-points."skill.agent_targets"]
-windsurf = "my_package:windsurf_target"
+my-host = "my_package:my_host_target"
 ```
 
 See [Plugin System Documentation]() for full details on contracts, interfaces, and built-in registrations.
