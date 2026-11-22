@@ -44,7 +44,7 @@ class ParsedKey:
         else:
             raise ValueError(f"Invalid key format: {raw!r} (expected 1-3 parts)")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.owner}/{self.name}"
 
 

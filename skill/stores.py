@@ -25,7 +25,7 @@ class LocalSkillStore(MutableMapping):
     []
     """
 
-    def __init__(self, root: Path | None = None):
+    def __init__(self, root: Path | None = None) -> None:
         self.root = Path(root) if root is not None else skills_dir()
         self.root.mkdir(parents=True, exist_ok=True)
 

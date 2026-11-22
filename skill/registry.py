@@ -29,7 +29,7 @@ class Registry(MutableMapping, Generic[T]):
     0
     """
 
-    def __init__(self, name: str, *, entry_point_group: str | None = None):
+    def __init__(self, name: str, *, entry_point_group: str | None = None) -> None:
         self._name = name
         self._items: dict[str, T] = {}
         self._entry_point_group = (

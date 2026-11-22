@@ -32,6 +32,7 @@ from skill.cli_format import (
     format_path_dict,
     format_sources,
 )
+from typing import NoReturn
 
 
 # ---------------------------------------------------------------------------
@@ -163,7 +164,7 @@ COMMANDS = [
 ]
 
 
-def main():
+def main() -> NoReturn:
     """Entry point for the ``skill`` console script and ``python -m skill``."""
     maybe_hint_completion()
     raise SystemExit(cw.dispatch(COMMANDS))

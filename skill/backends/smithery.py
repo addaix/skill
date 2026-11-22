@@ -42,7 +42,7 @@ class SmitherySkillSource:
         *,
         token: str | None = None,
         http_get: Callable[..., Any] | None = None,
-    ):
+    ) -> None:
         self._token = token or os.environ.get("SMITHERY_API_KEY")
         self._http_get = http_get or _default_http_get
 
