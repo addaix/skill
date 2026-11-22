@@ -42,7 +42,7 @@ class AwesomeListSource:
         self,
         *,
         http_get: Callable[..., Any] | None = None,
-    ):
+    ) -> None:
         self._http_get = http_get or _default_http_get
         self._cache: list[SkillInfo] | None = None
 

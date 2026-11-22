@@ -45,7 +45,7 @@ class GitHubSkillSource:
         *,
         token: str | None = None,
         http_get: Callable[..., Any] | None = None,
-    ):
+    ) -> None:
         self._token = token or os.environ.get("GITHUB_TOKEN")
         self._http_get = http_get or _default_http_get
 

@@ -42,7 +42,7 @@ class SkillsDirectorySource:
         *,
         token: str | None = None,
         http_get: Callable[..., Any] | None = None,
-    ):
+    ) -> None:
         self._token = token or os.environ.get("SKILLSDIRECTORY_API_KEY")
         if not self._token:
             raise ValueError(

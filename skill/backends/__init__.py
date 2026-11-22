@@ -48,7 +48,7 @@ class LocalDirSource:
     name: str = "local"
     homepage: str | None = None
 
-    def __init__(self, root: Path):
+    def __init__(self, root: Path) -> None:
         self.root = Path(root)
 
     def __getitem__(self, key: str) -> Skill:
