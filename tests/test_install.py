@@ -301,3 +301,56 @@ def test_the_rules_file_translations_stay_reachable():
     ]:
         assert AGENT_TARGETS[name].needs_translation
         assert AGENT_TARGETS[name].format == fmt
+
+
+# -- review findings on addaix/skill#24: shared folders, ownership, legacy installs --
+
+
+def test_uninstall_leaves_a_folder_it_did_not_install(tmp_path):
+    from skill.install import uninstall
+
+    store, project = _setup_store_and_project(tmp_path)
+    own = project / '.agents' / 'skills' / 'greet'
+    own.mkdir(parents=True)
+    (own / 'SKILL.md').write_text('---\nname: greet\ndescription: mine\n---\nhand-written\n')
+    with pytest.warns(UserWarning, match='not an installation'):
+        removed = uninstall(
+            'alice/greet', agent_targets=['gemini'], scope='project',
+            project_dir=project, store=store,
+        )
+    assert removed == {} and (own / 'SKILL.md').is_file()
+
+
+def test_uninstalling_a_shared_folder_names_the_other_hosts(tmp_path):
+    from skill.install import uninstall
+
+    store, project = _setup_store_and_project(tmp_path)
+    kw = dict(scope='project', project_dir=project, store=store)
+    install('alice/greet', agent_targets=['codex', 'cursor'], **kw)
+    with pytest.warns(UserWarning, match='also removes .* for .*codex'):
+        removed = uninstall('alice/greet', agent_targets=['cursor'], **kw)
+    assert not removed['cursor'].exists()
+
+
+def test_a_second_host_reuses_an_earlier_install_of_the_same_skill(tmp_path):
+    store, project = _setup_store_and_project(tmp_path)
+    kw = dict(scope='project', project_dir=project, store=store)
+    install('alice/greet', agent_targets=['codex'], copy=True, **kw)
+    result = install('alice/greet', agent_targets=['cursor'], **kw)  # no FileExistsError
+    assert (result['cursor'] / 'SKILL.md').is_file()
+
+
+def test_a_leftover_rules_file_install_is_flagged(tmp_path):
+    store, project = _setup_store_and_project(tmp_path)
+    kw = dict(scope='project', project_dir=project, store=store)
+    install('alice/greet', agent_targets=['cursor-rules'], **kw)
+    with pytest.warns(UserWarning, match="cursor-rules"):
+        install('alice/greet', agent_targets=['cursor'], **kw)
+
+
+def test_every_rules_file_target_names_its_host():
+    rules = {n: t for n, t in AGENT_TARGETS.items() if t.needs_translation}
+    assert {t.host_name for t in rules.values()} == {
+        'cursor', 'copilot', 'windsurf', 'cline', 'gemini'
+    }
+    assert all(t.host_name in AGENT_TARGETS for t in rules.values())

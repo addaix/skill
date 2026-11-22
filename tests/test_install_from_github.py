@@ -126,3 +126,9 @@ def test_pin_is_passed_through_to_gh(monkeypatch):
     install_from_github("thorwhalen/skill", "a", preview=True, pin="v1.2.0")
     assert calls[0][-2:] == ["--pin", "v1.2.0"]
     assert "--pin" not in calls[1]
+
+
+def test_pin_and_an_inline_version_are_refused_together(monkeypatch):
+    _patch_which(monkeypatch, lambda _: "/usr/bin/gh")
+    with pytest.raises(ValueError, match="inline @version"):
+        install_from_github("thorwhalen/skill", "a@v1", pin="v2")
