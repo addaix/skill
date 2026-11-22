@@ -110,3 +110,19 @@ def test_subprocess_filenotfound_raises(monkeypatch):
     with pytest.raises(RuntimeError) as exc:
         install_from_github("thorwhalen/skill", "x")
     assert "cli.github.com" in str(exc.value)
+
+
+def test_pin_is_passed_through_to_gh(monkeypatch):
+    """pin= becomes `--pin <ref>` on install, and is ignored for previews."""
+    _patch_which(monkeypatch, lambda _: "/usr/bin/gh")
+    calls = []
+
+    def fake_run(argv, **kwargs):
+        calls.append(argv)
+        return subprocess.CompletedProcess(argv, 0, stdout="", stderr="")
+
+    _patch_run(monkeypatch, fake_run)
+    install_from_github("thorwhalen/skill", "a", pin="v1.2.0")
+    install_from_github("thorwhalen/skill", "a", preview=True, pin="v1.2.0")
+    assert calls[0][-2:] == ["--pin", "v1.2.0"]
+    assert "--pin" not in calls[1]

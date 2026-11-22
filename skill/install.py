@@ -79,19 +79,45 @@ agent_targets.register(
         format="skill.md",
     ),
 )
+# Hosts that now read SKILL.md folders natively (per each host's own skills docs, as
+# tabulated by `npx skills` 1.9.0: https://github.com/vercel-labs/skills/blob/main/docs/agents.md).
+# Cursor, Copilot, Gemini CLI and Cline share the cross-host ``.agents/skills`` project
+# folder with Codex, so one install serves all of them; their user-level folders differ.
+_NATIVE_HOSTS = {
+    # name: (global_path, project_path)
+    "cursor": ("{home}/.cursor/skills/{name}", "{project}/.agents/skills/{name}"),
+    "copilot": ("{home}/.copilot/skills/{name}", "{project}/.agents/skills/{name}"),
+    "gemini": ("{home}/.gemini/skills/{name}", "{project}/.agents/skills/{name}"),
+    "cline": ("{home}/.agents/skills/{name}", "{project}/.agents/skills/{name}"),
+    "windsurf": (
+        "{home}/.codeium/windsurf/skills/{name}",
+        "{project}/.windsurf/skills/{name}",
+    ),
+}
+for _name, (_global, _project) in _NATIVE_HOSTS.items():
+    agent_targets.register(
+        _name,
+        AgentTarget(
+            name=_name, global_path=_global, project_path=_project, format="skill.md"
+        ),
+    )
+
+# The older rules-file translations, kept reachable under explicit names for anyone
+# who wants a rules file (or to uninstall one an earlier version wrote). They are lossy:
+# ``skill.translate`` warns about the fields it drops.
 agent_targets.register(
-    "cursor",
+    "cursor-rules",
     AgentTarget(
-        name="cursor",
+        name="cursor-rules",
         project_path="{project}/.cursor/rules/{name}.mdc",
         format="mdc",
         needs_translation=True,
     ),
 )
 agent_targets.register(
-    "copilot",
+    "copilot-instructions",
     AgentTarget(
-        name="copilot",
+        name="copilot-instructions",
         project_path="{project}/.github/copilot-instructions.md",
         format="copilot_md",
         needs_translation=True,
@@ -99,27 +125,27 @@ agent_targets.register(
     ),
 )
 agent_targets.register(
-    "windsurf",
+    "windsurf-rules",
     AgentTarget(
-        name="windsurf",
+        name="windsurf-rules",
         project_path="{project}/.windsurf/rules/{name}.md",
         format="windsurf_md",
         needs_translation=True,
     ),
 )
 agent_targets.register(
-    "cline",
+    "cline-rules",
     AgentTarget(
-        name="cline",
+        name="cline-rules",
         project_path="{project}/.clinerules/{name}.md",
         format="clinerules_md",
         needs_translation=True,
     ),
 )
 agent_targets.register(
-    "gemini",
+    "gemini-md",
     AgentTarget(
-        name="gemini",
+        name="gemini-md",
         project_path="{project}/GEMINI.md",
         format="gemini_md",
         needs_translation=True,
@@ -145,6 +171,7 @@ def install_from_github(
     *,
     agent: str = "claude-code",
     preview: bool = False,
+    pin: str | None = None,
 ) -> list[dict]:
     """Install (or preview) skills published on GitHub via the ``gh skill`` CLI.
 
@@ -163,6 +190,10 @@ def install_from_github(
         The agent host to install into (default ``'claude-code'``). Ignored for previews.
     preview : bool
         If True, run ``gh skill preview`` instead of ``gh skill install``.
+    pin : str | None
+        A tag or commit SHA to install, passed as ``gh skill install --pin``, so the
+        install is reproducible and ``gh skill update`` leaves it alone. ``None``
+        (default) installs the latest. Ignored for previews.
 
     Returns
     -------
@@ -196,6 +227,8 @@ def install_from_github(
         argv = ["gh", "skill", verb, repo, name]
         if not preview:
             argv += ["--agent", agent]
+            if pin is not None:
+                argv += ["--pin", pin]
         try:
             proc = subprocess.run(
                 argv,
@@ -387,6 +420,11 @@ def install(
             )
             continue
 
+        if dest in installed.values():
+            # Several hosts share one folder (``.agents/skills``): installed once
+            installed[target_name] = dest
+            continue
+
         if target.appends and dest.is_symlink():
             # Typically GEMINI.md -> AGENTS.md: appending would edit the canonical
             warnings.warn(
@@ -454,6 +492,10 @@ def uninstall(
     """Remove a skill's installation from agent target directories.
 
     Returns a dict mapping agent target names to the paths that were removed.
+
+    Hosts that share a folder (Codex, Cursor, Copilot, Gemini CLI and Cline all read
+    ``<project>/.agents/skills``) share one installation, so removing it for one of
+    them removes it for all.
     """
     if store is None:
         store = LocalSkillStore()

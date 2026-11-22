@@ -184,8 +184,15 @@ Each entry point should resolve to the object to register (an `AgentTarget` inst
 | Name | Format | Translation | Scope |
 |------|--------|-------------|-------|
 | `claude-code` | `skill.md` | No | Global + Project |
-| `cursor` | `mdc` | Yes | Project only |
-| `copilot` | `copilot_md` | Yes | Project only |
+| `codex`, `cursor`, `copilot`, `gemini`, `cline` | `skill.md` | No | Global + Project (`<project>/.agents/skills`, shared) |
+| `windsurf` | `skill.md` | No | Global + Project (`<project>/.windsurf/skills`) |
+| `cursor-rules` | `mdc` | Yes | Project only |
+| `copilot-instructions` | `copilot_md` | Yes (appends) | Project only |
+| `windsurf-rules` | `windsurf_md` | Yes | Project only |
+| `cline-rules` | `clinerules_md` | Yes | Project only |
+| `gemini-md` | `gemini_md` | Yes (appends) | Project only |
+
+Every host above now reads SKILL.md folders natively, so the translating targets are kept only for anyone who wants a rules file, or to uninstall one an earlier version of `skill` wrote (`uninstall(key, agent_targets=['cursor-rules'])`).
 
 ### Translators
 
