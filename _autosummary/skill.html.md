@@ -84,3 +84,4 @@ True
 | [`stores`](skill.stores.html.md#module-skill.stores)                                     | Storage layer: LocalSkillStore and SourcedSkillStore via dol.             |
 | [`translate`](skill.translate.html.md#module-skill.translate)                               | Format translators: SKILL.md <-> agent-specific formats.                  |
 | [`util`](skill.util.html.md#module-skill.util)                                         | Pure helpers with zero internal imports.                                  |
+| [`wheel`](skill.wheel.html.md#module-skill.wheel)                                       | The `wheel-included-skills` placement method: a tested build recipe.      |

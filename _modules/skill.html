@@ -129,6 +129,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../_autosummary/skill.stores.html">skill.stores</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../_autosummary/skill.translate.html">skill.translate</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../_autosummary/skill.util.html">skill.util</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../_autosummary/skill.wheel.html">skill.wheel</a></li>
 </ul>
 </li>
 </ul>
@@ -209,77 +210,78 @@
 </span><span id="line-31">    <span class="n">find_package_skills</span><span class="p">,</span>
 </span><span id="line-32"><span class="p">)</span>
 </span><span id="line-33"><span class="kn">from</span><span class="w"> </span><span class="nn">skill.bundled</span><span class="w"> </span><span class="kn">import</span> <span class="n">install_bundled</span><span class="p">,</span> <span class="n">claude_homes</span>
-</span><span id="line-34"><span class="kn">from</span><span class="w"> </span><span class="nn">skill.create</span><span class="w"> </span><span class="kn">import</span> <span class="n">create</span><span class="p">,</span> <span class="n">scaffold</span><span class="p">,</span> <span class="n">validate</span><span class="p">,</span> <span class="n">check_dependencies</span>
-</span><span id="line-35"><span class="kn">from</span><span class="w"> </span><span class="nn">skill.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Skill</span><span class="p">,</span> <span class="n">SkillMeta</span><span class="p">,</span> <span class="n">SkillInfo</span>
-</span><span id="line-36"><span class="kn">from</span><span class="w"> </span><span class="nn">skill.stores</span><span class="w"> </span><span class="kn">import</span> <span class="n">LocalSkillStore</span>
-</span><span id="line-37"><span class="kn">from</span><span class="w"> </span><span class="nn">skill.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Registry</span>
-</span><span id="line-38">
+</span><span id="line-34"><span class="kn">from</span><span class="w"> </span><span class="nn">skill.wheel</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_wheel_skills</span><span class="p">,</span> <span class="n">wheel_skills_snippet</span>
+</span><span id="line-35"><span class="kn">from</span><span class="w"> </span><span class="nn">skill.create</span><span class="w"> </span><span class="kn">import</span> <span class="n">create</span><span class="p">,</span> <span class="n">scaffold</span><span class="p">,</span> <span class="n">validate</span><span class="p">,</span> <span class="n">check_dependencies</span>
+</span><span id="line-36"><span class="kn">from</span><span class="w"> </span><span class="nn">skill.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Skill</span><span class="p">,</span> <span class="n">SkillMeta</span><span class="p">,</span> <span class="n">SkillInfo</span>
+</span><span id="line-37"><span class="kn">from</span><span class="w"> </span><span class="nn">skill.stores</span><span class="w"> </span><span class="kn">import</span> <span class="n">LocalSkillStore</span>
+</span><span id="line-38"><span class="kn">from</span><span class="w"> </span><span class="nn">skill.registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">Registry</span>
 </span><span id="line-39">
+</span><span id="line-40">
 <div class="viewcode-block" id="list_skills">
 <a class="viewcode-back" href="../_autosummary/skill.html#skill.list_skills">[docs]</a>
-</span><span id="line-40"><span class="k">def</span><span class="w"> </span><span class="nf">list_skills</span><span class="p">(</span>
-</span><span id="line-41">    <span class="o">*</span><span class="p">,</span>
-</span><span id="line-42">    <span class="n">agent_target</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="line-43">    <span class="n">scope</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"all"</span><span class="p">,</span>
-</span><span id="line-44"><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">SkillInfo</span><span class="p">]:</span>
-</span><span id="line-45"><span class="w">    </span><span class="sd">"""List locally installed skills, optionally filtered by agent target.</span>
-</span><span id="line-46">
-</span><span id="line-47"><span class="sd">    &gt;&gt;&gt; isinstance(list_skills(), list)</span>
-</span><span id="line-48"><span class="sd">    True</span>
-</span><span id="line-49"><span class="sd">    """</span>
-</span><span id="line-50">    <span class="n">store</span> <span class="o">=</span> <span class="n">LocalSkillStore</span><span class="p">()</span>
-</span><span id="line-51">    <span class="n">infos</span> <span class="o">=</span> <span class="n">store</span><span class="o">.</span><span class="n">list_info</span><span class="p">()</span>
-</span><span id="line-52">    <span class="c1"># Filtering by agent_target is a future enhancement — for now, return all</span>
-</span><span id="line-53">    <span class="k">return</span> <span class="n">infos</span></div>
+</span><span id="line-41"><span class="k">def</span><span class="w"> </span><span class="nf">list_skills</span><span class="p">(</span>
+</span><span id="line-42">    <span class="o">*</span><span class="p">,</span>
+</span><span id="line-43">    <span class="n">agent_target</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-44">    <span class="n">scope</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"all"</span><span class="p">,</span>
+</span><span id="line-45"><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">SkillInfo</span><span class="p">]:</span>
+</span><span id="line-46"><span class="w">    </span><span class="sd">"""List locally installed skills, optionally filtered by agent target.</span>
+</span><span id="line-47">
+</span><span id="line-48"><span class="sd">    &gt;&gt;&gt; isinstance(list_skills(), list)</span>
+</span><span id="line-49"><span class="sd">    True</span>
+</span><span id="line-50"><span class="sd">    """</span>
+</span><span id="line-51">    <span class="n">store</span> <span class="o">=</span> <span class="n">LocalSkillStore</span><span class="p">()</span>
+</span><span id="line-52">    <span class="n">infos</span> <span class="o">=</span> <span class="n">store</span><span class="o">.</span><span class="n">list_info</span><span class="p">()</span>
+</span><span id="line-53">    <span class="c1"># Filtering by agent_target is a future enhancement — for now, return all</span>
+</span><span id="line-54">    <span class="k">return</span> <span class="n">infos</span></div>
 
-</span><span id="line-54">
 </span><span id="line-55">
+</span><span id="line-56">
 <div class="viewcode-block" id="show">
 <a class="viewcode-back" href="../_autosummary/skill.html#skill.show">[docs]</a>
-</span><span id="line-56"><span class="k">def</span><span class="w"> </span><span class="nf">show</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Skill</span><span class="p">:</span>
-</span><span id="line-57"><span class="w">    </span><span class="sd">"""Read and return a skill by its canonical key.</span>
-</span><span id="line-58">
-</span><span id="line-59"><span class="sd">    Raises KeyError if the skill is not found locally.</span>
-</span><span id="line-60"><span class="sd">    """</span>
-</span><span id="line-61">    <span class="n">store</span> <span class="o">=</span> <span class="n">LocalSkillStore</span><span class="p">()</span>
-</span><span id="line-62">    <span class="k">return</span> <span class="n">store</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
+</span><span id="line-57"><span class="k">def</span><span class="w"> </span><span class="nf">show</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Skill</span><span class="p">:</span>
+</span><span id="line-58"><span class="w">    </span><span class="sd">"""Read and return a skill by its canonical key.</span>
+</span><span id="line-59">
+</span><span id="line-60"><span class="sd">    Raises KeyError if the skill is not found locally.</span>
+</span><span id="line-61"><span class="sd">    """</span>
+</span><span id="line-62">    <span class="n">store</span> <span class="o">=</span> <span class="n">LocalSkillStore</span><span class="p">()</span>
+</span><span id="line-63">    <span class="k">return</span> <span class="n">store</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
 
-</span><span id="line-63">
 </span><span id="line-64">
+</span><span id="line-65">
 <div class="viewcode-block" id="sources">
 <a class="viewcode-back" href="../_autosummary/skill.html#skill.sources">[docs]</a>
-</span><span id="line-65"><span class="k">def</span><span class="w"> </span><span class="nf">sources</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
-</span><span id="line-66"><span class="w">    </span><span class="sd">"""List registered search backends with their name, homepage, and status.</span>
-</span><span id="line-67">
-</span><span id="line-68"><span class="sd">    &gt;&gt;&gt; isinstance(sources(), list)</span>
-</span><span id="line-69"><span class="sd">    True</span>
-</span><span id="line-70"><span class="sd">    """</span>
-</span><span id="line-71">    <span class="kn">from</span><span class="w"> </span><span class="nn">skill.search</span><span class="w"> </span><span class="kn">import</span> <span class="n">backends</span><span class="p">,</span> <span class="n">_ensure_default_backends</span>
-</span><span id="line-72">    <span class="kn">from</span><span class="w"> </span><span class="nn">skill.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_config</span>
-</span><span id="line-73">
-</span><span id="line-74">    <span class="n">_ensure_default_backends</span><span class="p">()</span>
-</span><span id="line-75">    <span class="n">config</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">()</span>
-</span><span id="line-76">
-</span><span id="line-77">    <span class="n">_enable_flags</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="line-78">        <span class="s2">"github"</span><span class="p">:</span> <span class="s2">"github_enabled"</span><span class="p">,</span>
-</span><span id="line-79">        <span class="s2">"smithery"</span><span class="p">:</span> <span class="s2">"smithery_enabled"</span><span class="p">,</span>
-</span><span id="line-80">        <span class="s2">"composio"</span><span class="p">:</span> <span class="s2">"composio_enabled"</span><span class="p">,</span>
-</span><span id="line-81">        <span class="s2">"awesome-list"</span><span class="p">:</span> <span class="s2">"awesome_list_enabled"</span><span class="p">,</span>
-</span><span id="line-82">        <span class="s2">"skillsdirectory"</span><span class="p">:</span> <span class="s2">"skillsdirectory_enabled"</span><span class="p">,</span>
-</span><span id="line-83">    <span class="p">}</span>
-</span><span id="line-84">
-</span><span id="line-85">    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="line-86">    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">backends</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-</span><span id="line-87">        <span class="n">flag</span> <span class="o">=</span> <span class="n">_enable_flags</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-</span><span id="line-88">        <span class="n">enabled</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">flag</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="n">flag</span> <span class="k">else</span> <span class="kc">True</span>
-</span><span id="line-89">        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-</span><span id="line-90">            <span class="p">{</span>
-</span><span id="line-91">                <span class="s2">"name"</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
-</span><span id="line-92">                <span class="s2">"homepage"</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s2">"homepage"</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-</span><span id="line-93">                <span class="s2">"enabled"</span><span class="p">:</span> <span class="n">enabled</span><span class="p">,</span>
-</span><span id="line-94">            <span class="p">}</span>
-</span><span id="line-95">        <span class="p">)</span>
-</span><span id="line-96">    <span class="k">return</span> <span class="n">result</span></div>
+</span><span id="line-66"><span class="k">def</span><span class="w"> </span><span class="nf">sources</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+</span><span id="line-67"><span class="w">    </span><span class="sd">"""List registered search backends with their name, homepage, and status.</span>
+</span><span id="line-68">
+</span><span id="line-69"><span class="sd">    &gt;&gt;&gt; isinstance(sources(), list)</span>
+</span><span id="line-70"><span class="sd">    True</span>
+</span><span id="line-71"><span class="sd">    """</span>
+</span><span id="line-72">    <span class="kn">from</span><span class="w"> </span><span class="nn">skill.search</span><span class="w"> </span><span class="kn">import</span> <span class="n">backends</span><span class="p">,</span> <span class="n">_ensure_default_backends</span>
+</span><span id="line-73">    <span class="kn">from</span><span class="w"> </span><span class="nn">skill.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_config</span>
+</span><span id="line-74">
+</span><span id="line-75">    <span class="n">_ensure_default_backends</span><span class="p">()</span>
+</span><span id="line-76">    <span class="n">config</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">()</span>
+</span><span id="line-77">
+</span><span id="line-78">    <span class="n">_enable_flags</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="line-79">        <span class="s2">"github"</span><span class="p">:</span> <span class="s2">"github_enabled"</span><span class="p">,</span>
+</span><span id="line-80">        <span class="s2">"smithery"</span><span class="p">:</span> <span class="s2">"smithery_enabled"</span><span class="p">,</span>
+</span><span id="line-81">        <span class="s2">"composio"</span><span class="p">:</span> <span class="s2">"composio_enabled"</span><span class="p">,</span>
+</span><span id="line-82">        <span class="s2">"awesome-list"</span><span class="p">:</span> <span class="s2">"awesome_list_enabled"</span><span class="p">,</span>
+</span><span id="line-83">        <span class="s2">"skillsdirectory"</span><span class="p">:</span> <span class="s2">"skillsdirectory_enabled"</span><span class="p">,</span>
+</span><span id="line-84">    <span class="p">}</span>
+</span><span id="line-85">
+</span><span id="line-86">    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="line-87">    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">source</span> <span class="ow">in</span> <span class="n">backends</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+</span><span id="line-88">        <span class="n">flag</span> <span class="o">=</span> <span class="n">_enable_flags</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+</span><span id="line-89">        <span class="n">enabled</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">flag</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="n">flag</span> <span class="k">else</span> <span class="kc">True</span>
+</span><span id="line-90">        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+</span><span id="line-91">            <span class="p">{</span>
+</span><span id="line-92">                <span class="s2">"name"</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+</span><span id="line-93">                <span class="s2">"homepage"</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s2">"homepage"</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+</span><span id="line-94">                <span class="s2">"enabled"</span><span class="p">:</span> <span class="n">enabled</span><span class="p">,</span>
+</span><span id="line-95">            <span class="p">}</span>
+</span><span id="line-96">        <span class="p">)</span>
+</span><span id="line-97">    <span class="k">return</span> <span class="n">result</span></div>
 
 </span></code></pre></div>
     </div></div>
@@ -294,7 +296,7 @@
 </footer>
     </div>
     
-    <script src="../_static/documentation_options.js?v=20522496"></script>
+    <script src="../_static/documentation_options.js?v=ebdbb45b"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>

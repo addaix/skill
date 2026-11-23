@@ -5,7 +5,7 @@ orphan: true
 
 # About this build
 
-This documentation was built on **2026-11-23 02:51 UTC** from commit <a href="https://github.com/addaix/skill/commit/8f7d1567a75b1fedda6dbc76e57a4b41a9a220c4"><code>8f7d156</code></a> on branch <code>master</code>, for **skill 0.1.23** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-23 03:36 UTC** from commit <a href="https://github.com/addaix/skill/commit/001e6345dd352f6b7ce4162e27e18f6ef263df7b"><code>001e634</code></a> on branch <code>master</code>, for **skill 0.1.24** (from <code>pyproject.toml</code>).
 
 :::{note}
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -15,7 +15,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 | | |
 |---|---|
-| Commit | <a href="https://github.com/addaix/skill/commit/8f7d1567a75b1fedda6dbc76e57a4b41a9a220c4"><code>8f7d1567a75b1fedda6dbc76e57a4b41a9a220c4</code></a> |
+| Commit | <a href="https://github.com/addaix/skill/commit/001e6345dd352f6b7ce4162e27e18f6ef263df7b"><code>001e6345dd352f6b7ce4162e27e18f6ef263df7b</code></a> |
 | Branch | <code>master</code> |
 | Tags at this commit | none |
 | Working tree | clean |
@@ -26,9 +26,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 | | |
 |---|---|
 | Repository | <code>addaix/skill</code> |
-| Run | <a href="https://github.com/addaix/skill/actions/runs/45102447150">45102447150</a> |
+| Run | <a href="https://github.com/addaix/skill/actions/runs/45106778059">45106778059</a> |
 | Ref | <code>refs/heads/master</code> |
-| Event commit | <code>8f7d1567a75b1fedda6dbc76e57a4b41a9a220c4</code> (in the history of the built commit) |
+| Event commit | <code>001e6345dd352f6b7ce4162e27e18f6ef263df7b</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -53,13 +53,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/skill/0.1.23/">0.1.23</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/skill/0.1.24/">0.1.24</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/addaix/skill && cd skill
-git checkout 8f7d1567a75b1fedda6dbc76e57a4b41a9a220c4
+git checkout 001e6345dd352f6b7ce4162e27e18f6ef263df7b
 pip install "epythet==0.2.23"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

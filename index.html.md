@@ -70,7 +70,10 @@ skill install-from-package some-distribution --scope global   # the skills an in
 skill gh-install owner/repo skill-name --scope user            # a GitHub-published skill, via `gh skill`
 skill link-skills /path/to/project
 skill link-skills /path/to/project --target ~/.claude/skills --force
+skill check-wheel-skills dist/my_pkg-0.1.0-py3-none-any.whl     # skills/ shipped once, as my_pkg/_skills
 ```
+
+To ship a package’s top-level `skills/` inside its wheel too (the `wheel-included-skills` method), add `[tool.hatch.build.targets.wheel.force-include]` with `"skills" = "my_pkg/_skills"` to `pyproject.toml` and check each build with `skill check-wheel-skills`. Users then run `skill install-from-package my-pkg`.
 
 ### Shell completion
 

@@ -26,6 +26,7 @@
 - [skill.stores](skill.stores.html.md): Storage layer: LocalSkillStore and SourcedSkillStore via dol.
 - [skill.translate](skill.translate.html.md): Format translators: SKILL.md &lt;-&gt; agent-specific formats.
 - [skill.util](skill.util.html.md): Pure helpers with zero internal imports.
+- [skill.wheel](skill.wheel.html.md): The &#96;wheel-included-skills&#96; placement method: a tested build recipe.
 
 ## Optional
 

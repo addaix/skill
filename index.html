@@ -98,6 +98,7 @@
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/skill.stores.html">skill.stores</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/skill.translate.html">skill.translate</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/skill.util.html">skill.util</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/skill.wheel.html">skill.wheel</a></li>
 </ul>
 </li>
 </ul>
@@ -181,8 +182,10 @@ skills directory.</p>
 </span><span id="line-7"><span class="n">skill</span> <span class="n">gh</span><span class="o">-</span><span class="n">install</span> <span class="n">owner</span><span class="o">/</span><span class="n">repo</span> <span class="n">skill</span><span class="o">-</span><span class="n">name</span> <span class="o">--</span><span class="n">scope</span> <span class="n">user</span>            <span class="c1"># a GitHub-published skill, via `gh skill`</span>
 </span><span id="line-8"><span class="n">skill</span> <span class="n">link</span><span class="o">-</span><span class="n">skills</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">project</span>
 </span><span id="line-9"><span class="n">skill</span> <span class="n">link</span><span class="o">-</span><span class="n">skills</span> <span class="o">/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">project</span> <span class="o">--</span><span class="n">target</span> <span class="o">~/.</span><span class="n">claude</span><span class="o">/</span><span class="n">skills</span> <span class="o">--</span><span class="n">force</span>
+</span><span id="line-10"><span class="n">skill</span> <span class="n">check</span><span class="o">-</span><span class="n">wheel</span><span class="o">-</span><span class="n">skills</span> <span class="n">dist</span><span class="o">/</span><span class="n">my_pkg</span><span class="o">-</span><span class="mf">0.1.0</span><span class="o">-</span><span class="n">py3</span><span class="o">-</span><span class="n">none</span><span class="o">-</span><span class="nb">any</span><span class="o">.</span><span class="n">whl</span>     <span class="c1"># skills/ shipped once, as my_pkg/_skills</span>
 </span></code></pre></div>
 </div>
+<p>To ship a package’s top-level <code class="docutils literal notranslate"><span class="pre">skills/</span></code> inside its wheel too (the <code class="docutils literal notranslate"><span class="pre">wheel-included-skills</span></code> method), add <code class="docutils literal notranslate"><span class="pre">[tool.hatch.build.targets.wheel.force-include]</span></code> with <code class="docutils literal notranslate"><span class="pre">"skills"</span> <span class="pre">=</span> <span class="pre">"my_pkg/_skills"</span></code> to <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> and check each build with <code class="docutils literal notranslate"><span class="pre">skill</span> <span class="pre">check-wheel-skills</span></code>. Users then run <code class="docutils literal notranslate"><span class="pre">skill</span> <span class="pre">install-from-package</span> <span class="pre">my-pkg</span></code>.</p>
 </section>
 <section id="shell-completion">
 <h3>Shell completion<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#shell-completion" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#shell-completion'">¶</a></h3>
@@ -303,7 +306,7 @@ a thin wrapper over the <code class="docutils literal notranslate"><span class="
 
 </section>
 </section>
-<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-11-23 02:51 UTC from <a href="https://github.com/addaix/skill/commit/8f7d1567a75b1fedda6dbc76e57a4b41a9a220c4">8f7d156</a> (master) · skill 0.1.23 · <a href="about-this-build.html">about this build</a></p>
+<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-11-23 03:36 UTC from <a href="https://github.com/addaix/skill/commit/001e6345dd352f6b7ce4162e27e18f6ef263df7b">001e634</a> (master) · skill 0.1.24 · <a href="about-this-build.html">about this build</a></p>
 </div></div><aside class="hidden text-sm xl:block" id="right-sidebar">
 <div class="sticky top-16 -mt-10 max-h-[calc(100vh-5rem)] h-full overflow-y-auto pt-6 space-y-2"><p class="font-medium">On this page</p>
 <ul>
@@ -329,7 +332,7 @@ a thin wrapper over the <code class="docutils literal notranslate"><span class="
 </div>
 </footer>
 </div>
-<script src="_static/documentation_options.js?v=20522496"></script>
+<script src="_static/documentation_options.js?v=ebdbb45b"></script>
 <script src="_static/doctools.js?v=fd6eb6e6"></script>
 <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="_static/clipboard.min.js?v=a7894cd8"></script>
