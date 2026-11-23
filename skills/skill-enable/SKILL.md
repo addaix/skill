@@ -138,6 +138,43 @@ Verify the wheel actually contains them:
 python -m build --wheel >/dev/null && unzip -l dist/*.whl | grep -i skills
 ```
 
+**`wheel-included-skills`** (real files in top-level `skills/`, copied into the wheel at
+build time; decision record addaix/skill#8, recipe #31). hatchling:
+
+```toml
+[tool.hatch.build.targets.wheel.force-include]
+"skills" = "your_pkg/_skills"
+```
+
+setuptools (the skills folder declared as a subpackage whose directory is `skills/`):
+
+```toml
+[tool.setuptools]
+packages = ["your_pkg", "your_pkg._skills"]
+package-dir = { "your_pkg._skills" = "skills" }
+package-data = { "your_pkg._skills" = ["**/*"] }
+```
+
+`skill.wheel_skills_snippet('your_pkg', backend=...)` prints these, and
+`skill.wheel_skills_config(...)` gives them as a dict to merge into a `pyproject.toml` that
+already has those tables. The copy exists only in the wheel: never commit
+`your_pkg/_skills/`, and never make it a symlink (whether `gh skill` follows one is
+unverified). Everything tracked in `skills/` ships, developer skills included, so keep
+`<pkg>-dev-…` skills out of this method's repos or accept that users see them. The sdist
+must contain `skills/` too (an sdist `only-include` that leaves it out fails the build with
+"Forced include not found"). Build the way a release does, through the sdist, and check the
+newest wheel:
+
+```bash
+rm -rf dist && python -m build && skill check-wheel-skills dist/*.whl
+```
+
+It fails unless every tracked `skills/<name>/` file is in the wheel under
+`your_pkg/_skills/<name>/` byte for byte, each `SKILL.md` is in the wheel once, and the
+repository holds each skill in one `skills/` folder; it warns about a developer skill that
+ships. After `pip install your-package`, `skill install-from-package your-package --agent
+claude-code` finds `your_pkg/_skills`.
+
 ## Step 4: document install (README)
 
 `gh skill` is the primary, cross-agent path; pip is the bundled/offline path:
