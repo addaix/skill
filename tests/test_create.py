@@ -133,3 +133,20 @@ class TestValidateProfiles:
 
         d = self._write(tmp_path, "name: s\ndescription: Use when: asked # now")
         assert any("quote it" in i for i in validate(d))
+
+
+def test_a_value_holding_dashes_does_not_end_the_frontmatter(tmp_path):
+    """Keys after `description: a --- b` are still YAML-safety checked (addaix/skill#35)."""
+    from skill.base import parse_frontmatter
+    from skill.create import validate
+
+    text = (
+        "---\nname: s\ndescription: Reports --- fast\nlicense: MIT # see LICENSE\n---\n# Body\n"
+    )
+    meta, body = parse_frontmatter(text)
+    assert meta["license"] == "MIT" and body.startswith("# Body")
+    d = tmp_path / "s"
+    d.mkdir()
+    (d / "SKILL.md").write_text(text)
+    problems = validate(d)
+    assert any("license" in p or "#" in p for p in problems), problems

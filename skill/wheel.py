@@ -263,13 +263,13 @@ def _audience(skill_md: bytes) -> str | None:
     import yaml
 
     text = skill_md.decode("utf-8", errors="replace")
-    if not text.startswith("---"):
-        return None
-    parts = text.split("---", 2)
-    if len(parts) < 3:
+    from skill.base import split_frontmatter
+
+    parts = split_frontmatter(text)
+    if parts is None:
         return None
     try:
-        front = yaml.safe_load(parts[1]) or {}
+        front = yaml.safe_load(parts[0]) or {}
     except yaml.YAMLError:
         return None
     if not isinstance(front, dict):

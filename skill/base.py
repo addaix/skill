@@ -4,12 +4,33 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+import re
+
 import yaml
 
 
 # ---------------------------------------------------------------------------
 # Parsing helpers (pure functions)
 # ---------------------------------------------------------------------------
+
+
+_FRONTMATTER = re.compile(r"\A---[ \t]*\r?\n(.*?)^---[ \t]*(?:\r?\n|\Z)", re.S | re.M)
+
+
+def split_frontmatter(content: str) -> tuple[str, str] | None:
+    """``(yaml_text, body)`` of markdown that opens with a ``---`` frontmatter block,
+    else ``None``. The closing ``---`` must be a line of its own, so a value holding
+    ``---`` does not end the block (addaix/skill#35).
+
+    >>> split_frontmatter("---\\ndescription: a --- b\\nname: x\\n---\\nbody")
+    ('description: a --- b\\nname: x\\n', 'body')
+    >>> split_frontmatter("no frontmatter") is None
+    True
+    """
+    match = _FRONTMATTER.match(content)
+    if match is None:
+        return None
+    return match.group(1), content[match.end() :]
 
 
 def parse_frontmatter(content: str) -> tuple[dict, str]:
@@ -24,16 +45,10 @@ def parse_frontmatter(content: str) -> tuple[dict, str]:
     ({}, 'no frontmatter here')
     """
     content = content.lstrip()
-    if not content.startswith("---"):
+    parts = split_frontmatter(content)
+    if parts is None:
         return {}, content
-    # Find the closing ---
-    end = content.find("---", 3)
-    if end == -1:
-        return {}, content
-    yaml_str = content[3:end].strip()
-    body = content[end + 3 :]
-    if body.startswith("\n"):
-        body = body[1:]
+    yaml_str, body = parts
     meta = yaml.safe_load(yaml_str) or {}
     return meta, body
 

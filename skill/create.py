@@ -8,6 +8,7 @@ import yaml
 from skill.base import Skill, SkillMeta, parse_frontmatter
 from skill.stores import LocalSkillStore
 from skill.util import ParsedKey
+from skill.base import split_frontmatter
 from skill.profiles import check_profile, check_yaml_safety
 from skill.registry import Registry
 
@@ -217,7 +218,8 @@ def validate(path_or_key: str, *, profile: str = "spec") -> list[str]:
         if not skill_md.exists():
             return [f"Missing SKILL.md in {path}"]
         raw = skill_md.read_text().lstrip()
-        fm = raw[3:].split("---", 1)[0] if raw.startswith("---") else ""
+        parts = split_frontmatter(raw)
+        fm = parts[0] if parts else ""
         unsafe = check_yaml_safety(fm)
         try:
             skill = Skill.from_path(path)
