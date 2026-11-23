@@ -66,6 +66,8 @@ skill search "react best practices" --local-only
 skill validate ./my-skill/
 skill list-skills
 skill install _local/my-skill --agent-targets claude-code
+skill install-from-package some-distribution --scope global   # the skills an installed package ships
+skill gh-install owner/repo skill-name --scope user            # a GitHub-published skill, via `gh skill`
 skill link-skills /path/to/project
 skill link-skills /path/to/project --target ~/.claude/skills --force
 ```

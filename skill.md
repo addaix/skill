@@ -1,4 +1,4 @@
-> built 2026-11-23 00:27 UTC from bf60a04 (master) · skill 0.1.23. Details: build_info.json
+> built 2026-11-23 02:51 UTC from 8f7d156 (master) · skill 0.1.23. Details: build_info.json
 
 # index.html.md
 
@@ -70,6 +70,8 @@ skill search "react best practices" --local-only
 skill validate ./my-skill/
 skill list-skills
 skill install _local/my-skill --agent-targets claude-code
+skill install-from-package some-distribution --scope global   # the skills an installed package ships
+skill gh-install owner/repo skill-name --scope user            # a GitHub-published skill, via `gh skill`
 skill link-skills /path/to/project
 skill link-skills /path/to/project --target ~/.claude/skills --force
 ```
@@ -1671,7 +1673,7 @@ Resolve `$VAR` and `${VAR}` references from environment variables.
 
 # About this build
 
-This documentation was built on **2026-11-23 00:27 UTC** from commit <a href="https://github.com/addaix/skill/commit/bf60a04900997e4ce867e655e5b4fafff4e21245"><code>bf60a04</code></a> on branch <code>master</code>, for **skill 0.1.23** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-23 02:51 UTC** from commit <a href="https://github.com/addaix/skill/commit/8f7d1567a75b1fedda6dbc76e57a4b41a9a220c4"><code>8f7d156</code></a> on branch <code>master</code>, for **skill 0.1.23** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -1680,7 +1682,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                     |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/addaix/skill/commit/bf60a04900997e4ce867e655e5b4fafff4e21245"><code>bf60a04900997e4ce867e655e5b4fafff4e21245</code></a> |
+| Commit              | <a href="https://github.com/addaix/skill/commit/8f7d1567a75b1fedda6dbc76e57a4b41a9a220c4"><code>8f7d1567a75b1fedda6dbc76e57a4b41a9a220c4</code></a> |
 | Branch              | <code>master</code>                                                                                                                                 |
 | Tags at this commit | none                                                                                                                                                |
 | Working tree        | clean                                                                                                                                               |
@@ -1691,9 +1693,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>addaix/skill</code>                                                                  |
-| Run          | <a href="https://github.com/addaix/skill/actions/runs/45088686296">45088686296</a>         |
+| Run          | <a href="https://github.com/addaix/skill/actions/runs/45102447150">45102447150</a>         |
 | Ref          | <code>refs/heads/master</code>                                                             |
-| Event commit | <code>bf60a04900997e4ce867e655e5b4fafff4e21245</code> (in the history of the built commit) |
+| Event commit | <code>8f7d1567a75b1fedda6dbc76e57a4b41a9a220c4</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -1724,7 +1726,7 @@ Latest release: <a href="https://pypi.org/project/skill/0.1.23/">0.1.23</a>, the
 
 ```bash
 git clone https://github.com/addaix/skill && cd skill
-git checkout bf60a04900997e4ce867e655e5b4fafff4e21245
+git checkout 8f7d1567a75b1fedda6dbc76e57a4b41a9a220c4
 pip install "epythet==0.2.23"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
