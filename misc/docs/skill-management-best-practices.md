@@ -1,5 +1,7 @@
 # Skills Management — Decision Record (2026-06)
 
+> **Amended 2026-11-23** by `skill-placement-methods.md` ([addaix/skill#8](https://github.com/addaix/skill/issues/8)): placement methods now have names, and the default for every repository, pip packages included, is `repo-skills` (top-level `skills/`). The `{pkg}/data/skills/` row below is the `package-data-skills` method, still supported but no longer the default for pip packages. Everything else here stands.
+
 How AI agent skills are organized and distributed across the package ecosystem,
 now that `gh skill` (GitHub CLI ≥ v2.90.0, shipped 2026-04-16) is the cross-agent
 standard. This is the capstone decision; the option analysis is in

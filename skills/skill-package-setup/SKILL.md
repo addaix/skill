@@ -46,12 +46,19 @@ everyone, though: Claude Code reads only `.claude/skills/`. Hence the rule.
 ## The rule (memorize this)
 
 **Real skill files live in exactly ONE non-hidden location, with relative
-per-skill symlinks in `.claude/skills/`.** Pick the location:
+per-skill symlinks in `.claude/skills/`.** Pick a named placement method
+(decision record: `misc/docs/skill-placement-methods.md`, addaix/skill#8):
 
-| Repo kind | Canonical real-files location |
-|---|---|
-| Pip-installable package whose skills should ship with `pip install` | **`{pkg}/data/skills/<name>/`** — ships via pip AND `gh skill`-discoverable. One location serves both channels. |
-| Everything else (apps, skill-only repos, dev/maintainer-only skills) | **`skills/<name>/`** at the repo root — the ecosystem convention. |
+| Method | Real-files location | In the wheel? |
+|---|---|---|
+| **`repo-skills`** — the default, for every repo, pip packages included | **`skills/<name>/`** at the repo root — the ecosystem convention | no: users run `gh skill install` |
+| **`package-data-skills`** — only when the maintainer wants skills inside the wheel | `{pkg}/data/skills/<name>/` — ships via pip AND `gh skill`-discoverable | yes |
+| **`wheel-included-skills`** — repo layout, plus a build-time copy into the wheel | `skills/<name>/` at the root; hatch `force-include` copies it to `{pkg}/_skills` | yes |
+
+pip has no post-install hook, so no method puts skills into an agent host by
+itself: the README's `gh skill install … --agent <host>` line is the install
+story for every host. Don't move an existing `{pkg}/data/skills/` repo unless
+its maintainer asks: `package-data-skills` is a supported method.
 
 - **Never both.** Real files in both `skills/` and `{pkg}/data/skills/` means
   `gh skill` reports duplicate skills. The Step-0 `find` in the runbook is your
@@ -71,8 +78,8 @@ per-skill symlinks in `.claude/skills/`.** Pick the location:
 
 ## Flow A — new package
 
-1. Pick the canonical location per the rule (pip-shipped → `{pkg}/data/skills/`,
-   else `skills/`).
+1. Pick the placement method per the rule (default `repo-skills`: `skills/`;
+   `{pkg}/data/skills/` only if the maintainer asks for `package-data-skills`).
 2. Scaffold `…/<pkg>-quickstart/SKILL.md` with spec-valid frontmatter
    (`name` == folder name, lowercase `[a-z0-9-]`; `description` ≤ 1024 chars,
    packed with trigger keywords). Use **skill-build**/**skill-creator** for content.
@@ -80,7 +87,8 @@ per-skill symlinks in `.claude/skills/`.** Pick the location:
 4. Classify audience (consumer vs developer) — reuse **skill-enable**'s signal
    lists. Prefix maintainer skills `<pkg>-dev-…`; put `metadata.audience` in
    frontmatter.
-5. If pip-shipping, wire package-data (**skill-enable** owns the mechanics).
+5. Only for `package-data-skills` / `wheel-included-skills`: wire the wheel
+   (package-data, or hatch `force-include`; **skill-enable** owns the mechanics).
 6. README "Skills" section with `gh skill install <owner>/<repo> <name>` lines
    (**skill-docs** can generate it).
 7. Validate (`gh skill publish --dry-run`, or `skill validate`/`skills-ref

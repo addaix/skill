@@ -52,7 +52,7 @@ holds one relative symlink per skill.**
 |---|---|---|
 | Audience | Users of the package (esp. their agents) | People working *on* the package |
 | Examples | `vd-ingest`, `pdfdol-read` | `vd-add-backend`, "release this pkg" |
-| Real-files location | `{pkg}/data/skills/` if pip-shipping, else `skills/` | `skills/` (no reason to bundle in the wheel) |
+| Real-files location | `skills/` (`repo-skills`, the default); `{pkg}/data/skills/` only under `package-data-skills` | `skills/` (no reason to bundle in the wheel) |
 | Naming | `<pkg>-<verb/domain>` | `<pkg>-dev-<verb>` + `metadata.audience: developers` |
 
 Use **skill-enable**'s signal lists to classify ambiguous cases. A package can
