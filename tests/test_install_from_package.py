@@ -118,5 +118,6 @@ def test_a_fresh_claude_home_without_skills_is_still_a_home(tmp_path, monkeypatc
     (home / ".claude").mkdir(parents=True)
     (home / ".claude-backup").mkdir()  # no skills/: not a home
     monkeypatch.setenv("HOME", str(home))
+    monkeypatch.setenv("USERPROFILE", str(home))  # Windows reads this, not HOME
     monkeypatch.delenv("CLAUDE_CONFIG_DIR", raising=False)
     assert claude_homes() == [home / ".claude"]
