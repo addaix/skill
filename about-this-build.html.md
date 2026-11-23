@@ -2,7 +2,7 @@
 
 # About this build
 
-This documentation was built on **2026-11-22 22:08 UTC** from commit <a href="https://github.com/addaix/skill/commit/9d88c1c985f9412e4306da6fe9f165e71f35a165"><code>9d88c1c</code></a> on branch <code>master</code>, for **skill 0.1.23** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-23 00:27 UTC** from commit <a href="https://github.com/addaix/skill/commit/bf60a04900997e4ce867e655e5b4fafff4e21245"><code>bf60a04</code></a> on branch <code>master</code>, for **skill 0.1.23** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -11,7 +11,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                     |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/addaix/skill/commit/9d88c1c985f9412e4306da6fe9f165e71f35a165"><code>9d88c1c985f9412e4306da6fe9f165e71f35a165</code></a> |
+| Commit              | <a href="https://github.com/addaix/skill/commit/bf60a04900997e4ce867e655e5b4fafff4e21245"><code>bf60a04900997e4ce867e655e5b4fafff4e21245</code></a> |
 | Branch              | <code>master</code>                                                                                                                                 |
 | Tags at this commit | none                                                                                                                                                |
 | Working tree        | clean                                                                                                                                               |
@@ -22,9 +22,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>addaix/skill</code>                                                                  |
-| Run          | <a href="https://github.com/addaix/skill/actions/runs/45075873798">45075873798</a>         |
+| Run          | <a href="https://github.com/addaix/skill/actions/runs/45088686296">45088686296</a>         |
 | Ref          | <code>refs/heads/master</code>                                                             |
-| Event commit | <code>9d88c1c985f9412e4306da6fe9f165e71f35a165</code> (in the history of the built commit) |
+| Event commit | <code>bf60a04900997e4ce867e655e5b4fafff4e21245</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -55,7 +55,7 @@ Latest release: <a href="https://pypi.org/project/skill/0.1.23/">0.1.23</a>, the
 
 ```bash
 git clone https://github.com/addaix/skill && cd skill
-git checkout 9d88c1c985f9412e4306da6fe9f165e71f35a165
+git checkout bf60a04900997e4ce867e655e5b4fafff4e21245
 pip install "epythet==0.2.23"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

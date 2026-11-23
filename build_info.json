@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "built_at": "2026-11-22T22:08:25Z",
+  "built_at": "2026-11-23T00:27:04Z",
   "package": {
     "name": "skill",
     "version": "0.1.23",
@@ -9,24 +9,24 @@
   },
   "git": {
     "available": true,
-    "commit": "9d88c1c985f9412e4306da6fe9f165e71f35a165",
-    "short_commit": "9d88c1c",
+    "commit": "bf60a04900997e4ce867e655e5b4fafff4e21245",
+    "short_commit": "bf60a04",
     "branch": "master",
     "tags": [],
     "dirty": false,
     "remote_url": "https://github.com/addaix/skill",
-    "commit_url": "https://github.com/addaix/skill/commit/9d88c1c985f9412e4306da6fe9f165e71f35a165",
+    "commit_url": "https://github.com/addaix/skill/commit/bf60a04900997e4ce867e655e5b4fafff4e21245",
     "error": null
   },
   "ci": {
     "provider": "github",
     "repository": "addaix/skill",
-    "sha": "9d88c1c985f9412e4306da6fe9f165e71f35a165",
+    "sha": "bf60a04900997e4ce867e655e5b4fafff4e21245",
     "sha_in_history": true,
     "ref": "refs/heads/master",
     "ref_name": "master",
-    "run_id": "45075873798",
-    "run_url": "https://github.com/addaix/skill/actions/runs/45075873798",
+    "run_id": "45088686296",
+    "run_url": "https://github.com/addaix/skill/actions/runs/45088686296",
     "server_url": "https://github.com"
   },
   "tools": {
@@ -64,7 +64,7 @@
     "relation": "same",
     "error": null
   },
-  "reproduce": "git clone https://github.com/addaix/skill && cd skill\ngit checkout 9d88c1c985f9412e4306da6fe9f165e71f35a165\npip install \"epythet==0.2.23\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
+  "reproduce": "git clone https://github.com/addaix/skill && cd skill\ngit checkout bf60a04900997e4ce867e655e5b4fafff4e21245\npip install \"epythet==0.2.23\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
   "warnings": [],
   "alignment": {
     "aligned": true,
