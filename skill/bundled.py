@@ -36,14 +36,18 @@ AGENTS_SUBDIR = "agents"
 def claude_homes() -> list[Path]:
     """Every Claude Code home on this machine: ``~/.claude`` and ``~/.claude-*``.
 
-    A home counts when it has a ``skills`` folder. ``CLAUDE_CONFIG_DIR``, when set, is
-    included even if it has none yet.
+    ``~/.claude`` counts whenever it exists (a fresh home has no ``skills`` folder yet,
+    addaix/skill#37); another ``~/.claude-*`` folder counts when it has a ``skills``
+    folder. ``CLAUDE_CONFIG_DIR``, when set, is included even if it has none yet.
 
     >>> all(isinstance(h, Path) for h in claude_homes())
     True
     """
-    found = [Path("~/.claude").expanduser(), *sorted(Path.home().glob(".claude-*"))]
-    homes = [h for h in found if (h / SKILLS_SUBDIR).is_dir()]
+    main = Path("~/.claude").expanduser()
+    homes = [main] if main.is_dir() else []
+    homes += [
+        h for h in sorted(Path.home().glob(".claude-*")) if (h / SKILLS_SUBDIR).is_dir()
+    ]
     configured = os.environ.get("CLAUDE_CONFIG_DIR")
     if configured and Path(configured).expanduser() not in homes:
         homes.append(Path(configured).expanduser())
