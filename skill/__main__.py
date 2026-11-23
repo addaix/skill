@@ -120,7 +120,12 @@ def check_wheel_skills(
     package: str | None = None,
 ) -> str:
     """Check a built wheel holds the repository's skills/ once, as <pkg>/_skills (wheel-included-skills)."""
-    report = _check_wheel_skills(wheel, repo_root, package=package)
+    import zipfile
+
+    try:
+        report = _check_wheel_skills(wheel, repo_root, package=package)
+    except (FileNotFoundError, zipfile.BadZipFile) as e:
+        raise SystemExit(f"Cannot read the wheel {wheel!r}: {e}") from None
     if not report.ok:
         raise SystemExit(str(report))
     return str(report)

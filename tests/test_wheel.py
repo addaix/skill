@@ -16,7 +16,12 @@ import pytest
 hatchling_build = pytest.importorskip("hatchling.build")
 
 from skill import find_package_skills
-from skill.wheel import WHEEL_SKILLS_DIR, check_wheel_skills, wheel_skills_snippet
+from skill.wheel import (
+    WHEEL_SKILLS_DIR,
+    check_wheel_skills,
+    wheel_skills_config,
+    wheel_skills_snippet,
+)
 
 SKILL_MD = (
     "---\nname: {name}\ndescription: Use {name} for things.\n{extra}---\n\nBody.\n"
@@ -149,3 +154,68 @@ def test_a_developer_skill_shipped_to_users_is_a_warning(tmp_path):
     assert report.warnings == [
         "demo-dev-release: a developer skill (audience: developer) ships to users"
     ]
+
+
+def _git(repo: Path, *args: str) -> None:
+    import subprocess
+
+    subprocess.run(
+        [
+            "git",
+            "-c",
+            "user.name=t",
+            "-c",
+            "user.email=t@example.org",
+            "-C",
+            str(repo),
+            *args,
+        ],
+        check=True,
+        capture_output=True,
+    )
+
+
+def test_untracked_and_os_litter_are_not_expected_in_the_wheel(tmp_path):
+    """Review findings: a Finder .DS_Store (which hatchling never ships) and a git-ignored
+    file (which a build through the sdist drops) are not expected in the wheel."""
+    repo = _fixture_repo(tmp_path / "repo")
+    (repo / ".gitignore").write_text("*.env\n")
+    _git(repo, "init", "-q")
+    _git(repo, "add", "-A")
+    _git(repo, "commit", "-qm", "fixture")
+    (repo / "skills" / "demo-quickstart" / ".DS_Store").write_bytes(b"x")
+    (repo / "skills" / "demo-quickstart" / "secret.env").write_text("TOKEN=x\n")
+    wheel = _build(repo, tmp_path / "dist")
+    report = check_wheel_skills(wheel, repo)
+    assert report.ok, str(report)
+
+
+def test_only_skills_folders_count_as_duplicates(tmp_path):
+    """A fixture folder named like a skill, and a symlinked skills/ copy in a non-hidden
+    folder, are not places gh skill discovers a second real copy."""
+    repo = _fixture_repo(tmp_path / "repo")
+    fixture = repo / "tests" / "fixtures" / "demo-quickstart"
+    fixture.mkdir(parents=True)
+    (fixture / "SKILL.md").write_text("---\nname: demo-quickstart\n---\n")
+    (repo / "docs" / "skills").mkdir(parents=True)
+    (repo / "docs" / "skills" / "demo-advanced").symlink_to(
+        Path("..", "..", "skills", "demo-advanced")
+    )
+    wheel = _build(repo, tmp_path / "dist")
+    assert check_wheel_skills(wheel, repo).ok
+
+
+def test_setuptools_variant_and_config_dict():
+    assert wheel_skills_config("p", backend="setuptools")["tool"]["setuptools"][
+        "package-dir"
+    ] == {"p._skills": "skills"}
+    assert "force-include" in wheel_skills_snippet("p")
+    with pytest.raises(ValueError):
+        wheel_skills_config("p", backend="flit")
+
+
+def test_cli_reports_a_missing_wheel_cleanly(tmp_path):
+    from skill.__main__ import check_wheel_skills as cli
+
+    with pytest.raises(SystemExit, match="Cannot read the wheel"):
+        cli(str(tmp_path / "nope.whl"), repo_root=str(_fixture_repo(tmp_path / "repo")))
