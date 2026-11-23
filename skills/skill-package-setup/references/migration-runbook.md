@@ -29,8 +29,8 @@ must be consolidated to one.
 
 | Repo kind | Location |
 |---|---|
-| Pip package whose skills should ship with `pip install` | `<pkg>/data/skills/` |
-| Everything else / dev-only skills | `skills/` (repo root) |
+| Default (`repo-skills`), pip packages included | `skills/` (repo root) |
+| `package-data-skills`: only when the maintainer wants skills inside the wheel | `<pkg>/data/skills/` |
 
 `gh skill` discovers both; only `<pkg>/data/skills/` also ships in the wheel.
 

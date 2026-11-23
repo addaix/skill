@@ -24,6 +24,8 @@ how to decide which skills qualify. Layout and spec compliance are owned by the
 
 ## Where pip-shipped skills go (and why it just works)
 
+> Shipping skills in the wheel is opt-in: the default placement method is `repo-skills` (top-level `skills/`, installed with `gh skill install`). This section is the `package-data-skills` method, for when the maintainer wants skills in the wheel (`misc/docs/skill-placement-methods.md`, addaix/skill#8).
+
 To ride along with `pip install`, skill files must live **inside the importable
 package**: `{pkg}/data/skills/<name>/`. That's the only place a wheel reliably
 ships non-code data.
