@@ -165,8 +165,9 @@ runtime dependencies can copy this file instead of depending on <code class="doc
 <dt class="sig sig-object py" id="skill.bundled.claude_homes">
 <span class="sig-prename descclassname"><span class="pre">skill.bundled.</span></span><span class="sig-name descname"><span class="pre">claude_homes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skill/bundled.html#claude_homes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#skill.bundled.claude_homes" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#skill.bundled.claude_homes'">¶</a></dt>
 <dd><p>Every Claude Code home on this machine: <code class="docutils literal notranslate"><span class="pre">~/.claude</span></code> and <code class="docutils literal notranslate"><span class="pre">~/.claude-*</span></code>.</p>
-<p>A home counts when it has a <code class="docutils literal notranslate"><span class="pre">skills</span></code> folder. <code class="docutils literal notranslate"><span class="pre">CLAUDE_CONFIG_DIR</span></code>, when set, is
-included even if it has none yet.</p>
+<p><code class="docutils literal notranslate"><span class="pre">~/.claude</span></code> counts whenever it exists (a fresh home has no <code class="docutils literal notranslate"><span class="pre">skills</span></code> folder yet,
+addaix/skill#37); another <code class="docutils literal notranslate"><span class="pre">~/.claude-*</span></code> folder counts when it has a <code class="docutils literal notranslate"><span class="pre">skills</span></code>
+folder. <code class="docutils literal notranslate"><span class="pre">CLAUDE_CONFIG_DIR</span></code>, when set, is included even if it has none yet.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="gp">&gt;&gt;&gt; </span><span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">Path</span><span class="p">)</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">claude_homes</span><span class="p">())</span>
 </span><span id="line-2"><span class="go">True</span>
 </span></code></pre></div>
@@ -219,7 +220,7 @@ says <code class="docutils literal notranslate"><span class="pre">symlink</span>
 </div>
 </footer>
 </div>
-<script src="../_static/documentation_options.js?v=4fa33042"></script>
+<script src="../_static/documentation_options.js?v=785bba28"></script>
 <script src="../_static/doctools.js?v=fd6eb6e6"></script>
 <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="../_static/clipboard.min.js?v=a7894cd8"></script>

@@ -220,123 +220,127 @@
 </span><span id="line-36"><span class="k">def</span><span class="w"> </span><span class="nf">claude_homes</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">]:</span>
 </span><span id="line-37"><span class="w">    </span><span class="sd">"""Every Claude Code home on this machine: ``~/.claude`` and ``~/.claude-*``.</span>
 </span><span id="line-38">
-</span><span id="line-39"><span class="sd">    A home counts when it has a ``skills`` folder. ``CLAUDE_CONFIG_DIR``, when set, is</span>
-</span><span id="line-40"><span class="sd">    included even if it has none yet.</span>
-</span><span id="line-41">
-</span><span id="line-42"><span class="sd">    &gt;&gt;&gt; all(isinstance(h, Path) for h in claude_homes())</span>
-</span><span id="line-43"><span class="sd">    True</span>
-</span><span id="line-44"><span class="sd">    """</span>
-</span><span id="line-45">    <span class="n">found</span> <span class="o">=</span> <span class="p">[</span><span class="n">Path</span><span class="p">(</span><span class="s2">"~/.claude"</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(),</span> <span class="o">*</span><span class="nb">sorted</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">".claude-*"</span><span class="p">))]</span>
-</span><span id="line-46">    <span class="n">homes</span> <span class="o">=</span> <span class="p">[</span><span class="n">h</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">found</span> <span class="k">if</span> <span class="p">(</span><span class="n">h</span> <span class="o">/</span> <span class="n">SKILLS_SUBDIR</span><span class="p">)</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()]</span>
-</span><span id="line-47">    <span class="n">configured</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"CLAUDE_CONFIG_DIR"</span><span class="p">)</span>
-</span><span id="line-48">    <span class="k">if</span> <span class="n">configured</span> <span class="ow">and</span> <span class="n">Path</span><span class="p">(</span><span class="n">configured</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">homes</span><span class="p">:</span>
-</span><span id="line-49">        <span class="n">homes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">configured</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">())</span>
-</span><span id="line-50">    <span class="k">return</span> <span class="n">homes</span></div>
+</span><span id="line-39"><span class="sd">    ``~/.claude`` counts whenever it exists (a fresh home has no ``skills`` folder yet,</span>
+</span><span id="line-40"><span class="sd">    addaix/skill#37); another ``~/.claude-*`` folder counts when it has a ``skills``</span>
+</span><span id="line-41"><span class="sd">    folder. ``CLAUDE_CONFIG_DIR``, when set, is included even if it has none yet.</span>
+</span><span id="line-42">
+</span><span id="line-43"><span class="sd">    &gt;&gt;&gt; all(isinstance(h, Path) for h in claude_homes())</span>
+</span><span id="line-44"><span class="sd">    True</span>
+</span><span id="line-45"><span class="sd">    """</span>
+</span><span id="line-46">    <span class="n">main</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"~/.claude"</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
+</span><span id="line-47">    <span class="n">homes</span> <span class="o">=</span> <span class="p">[</span><span class="n">main</span><span class="p">]</span> <span class="k">if</span> <span class="n">main</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="k">else</span> <span class="p">[]</span>
+</span><span id="line-48">    <span class="n">homes</span> <span class="o">+=</span> <span class="p">[</span>
+</span><span id="line-49">        <span class="n">h</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">".claude-*"</span><span class="p">))</span> <span class="k">if</span> <span class="p">(</span><span class="n">h</span> <span class="o">/</span> <span class="n">SKILLS_SUBDIR</span><span class="p">)</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span>
+</span><span id="line-50">    <span class="p">]</span>
+</span><span id="line-51">    <span class="n">configured</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"CLAUDE_CONFIG_DIR"</span><span class="p">)</span>
+</span><span id="line-52">    <span class="k">if</span> <span class="n">configured</span> <span class="ow">and</span> <span class="n">Path</span><span class="p">(</span><span class="n">configured</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">homes</span><span class="p">:</span>
+</span><span id="line-53">        <span class="n">homes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">configured</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">())</span>
+</span><span id="line-54">    <span class="k">return</span> <span class="n">homes</span></div>
 
-</span><span id="line-51">
-</span><span id="line-52">
-</span><span id="line-53"><span class="k">def</span><span class="w"> </span><span class="nf">_assets</span><span class="p">(</span><span class="n">source_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
-</span><span id="line-54"><span class="w">    </span><span class="sd">"""``(source, path relative to a home)`` for every bundled skill dir and agent file."""</span>
-</span><span id="line-55">    <span class="n">skills</span><span class="p">,</span> <span class="n">agents</span> <span class="o">=</span> <span class="n">source_dir</span> <span class="o">/</span> <span class="n">SKILLS_SUBDIR</span><span class="p">,</span> <span class="n">source_dir</span> <span class="o">/</span> <span class="n">AGENTS_SUBDIR</span>
-</span><span id="line-56">    <span class="n">found</span> <span class="o">=</span> <span class="p">[</span>
-</span><span id="line-57">        <span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">SKILLS_SUBDIR</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</span><span id="line-58">        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">skills</span><span class="o">.</span><span class="n">iterdir</span><span class="p">()</span> <span class="k">if</span> <span class="n">skills</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="k">else</span> <span class="p">())</span>
-</span><span id="line-59">        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span>
-</span><span id="line-60">    <span class="p">]</span>
-</span><span id="line-61">    <span class="n">found</span> <span class="o">+=</span> <span class="p">[(</span><span class="n">p</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">AGENTS_SUBDIR</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">agents</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">"*.md"</span><span class="p">))]</span>
-</span><span id="line-62">    <span class="k">return</span> <span class="n">found</span>
-</span><span id="line-63">
-</span><span id="line-64">
-</span><span id="line-65"><span class="k">def</span><span class="w"> </span><span class="nf">_is_ours</span><span class="p">(</span><span class="n">dest</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span id="line-66"><span class="w">    </span><span class="sd">"""``dest`` already is a link to ``src`` (or a faithful copy of it)."""</span>
-</span><span id="line-67">    <span class="k">if</span> <span class="n">dest</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">():</span>
-</span><span id="line-68">        <span class="k">return</span> <span class="p">(</span>
-</span><span id="line-69">            <span class="n">dest</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span> <span class="o">==</span> <span class="n">src</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
-</span><span id="line-70">        <span class="p">)</span>  <span class="c1"># (os.readlink can carry a \\?\ prefix on Windows)</span>
-</span><span id="line-71">    <span class="k">if</span> <span class="n">dest</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="ow">and</span> <span class="n">src</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
-</span><span id="line-72">        <span class="k">return</span> <span class="n">dest</span><span class="o">.</span><span class="n">read_bytes</span><span class="p">()</span> <span class="o">==</span> <span class="n">src</span><span class="o">.</span><span class="n">read_bytes</span><span class="p">()</span>
-</span><span id="line-73">    <span class="k">if</span> <span class="n">dest</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="ow">and</span> <span class="n">src</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">dest</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">():</span>
-</span><span id="line-74">        <span class="k">return</span> <span class="n">_tree</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span> <span class="o">==</span> <span class="n">_tree</span><span class="p">(</span><span class="n">src</span><span class="p">)</span>
-</span><span id="line-75">    <span class="k">return</span> <span class="kc">False</span>
-</span><span id="line-76">
-</span><span id="line-77">
-</span><span id="line-78"><span class="k">def</span><span class="w"> </span><span class="nf">_tree</span><span class="p">(</span><span class="n">root</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]:</span>
-</span><span id="line-79"><span class="w">    </span><span class="sd">"""``{relative path: bytes}`` of every file under ``root``."""</span>
-</span><span id="line-80">    <span class="k">return</span> <span class="p">{</span>
-</span><span id="line-81">        <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">root</span><span class="p">)):</span> <span class="n">p</span><span class="o">.</span><span class="n">read_bytes</span><span class="p">()</span>
-</span><span id="line-82">        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">"*"</span><span class="p">))</span>
-</span><span id="line-83">        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span>
-</span><span id="line-84">    <span class="p">}</span>
-</span><span id="line-85">
-</span><span id="line-86">
-</span><span id="line-87"><span class="k">def</span><span class="w"> </span><span class="nf">_remove</span><span class="p">(</span><span class="n">dest</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-88">    <span class="k">if</span> <span class="n">dest</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">()</span> <span class="ow">or</span> <span class="n">dest</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
-</span><span id="line-89">        <span class="n">dest</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
-</span><span id="line-90">    <span class="k">else</span><span class="p">:</span>
-</span><span id="line-91">        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span>
-</span><span id="line-92">
-</span><span id="line-93">
-</span><span id="line-94"><span class="k">def</span><span class="w"> </span><span class="nf">_place</span><span class="p">(</span><span class="n">src</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">dest</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="line-95"><span class="w">    </span><span class="sd">"""Link ``src`` at ``dest``; copy where symlinks are unavailable. Returns the method."""</span>
-</span><span id="line-96">    <span class="n">dest</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="line-97">    <span class="k">try</span><span class="p">:</span>
-</span><span id="line-98">        <span class="n">os</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dest</span><span class="p">,</span> <span class="n">target_is_directory</span><span class="o">=</span><span class="n">src</span><span class="o">.</span><span class="n">is_dir</span><span class="p">())</span>
-</span><span id="line-99">        <span class="k">return</span> <span class="s2">"symlink"</span>
-</span><span id="line-100">    <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">NotImplementedError</span><span class="p">):</span>
-</span><span id="line-101">        <span class="k">if</span> <span class="n">src</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
-</span><span id="line-102">            <span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dest</span><span class="p">)</span>
-</span><span id="line-103">        <span class="k">else</span><span class="p">:</span>
-</span><span id="line-104">            <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dest</span><span class="p">)</span>
-</span><span id="line-105">        <span class="k">return</span> <span class="s2">"copy"</span>
-</span><span id="line-106">
-</span><span id="line-107">
+</span><span id="line-55">
+</span><span id="line-56">
+</span><span id="line-57"><span class="k">def</span><span class="w"> </span><span class="nf">_assets</span><span class="p">(</span><span class="n">source_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
+</span><span id="line-58"><span class="w">    </span><span class="sd">"""``(source, path relative to a home)`` for every bundled skill dir and agent file."""</span>
+</span><span id="line-59">    <span class="n">skills</span><span class="p">,</span> <span class="n">agents</span> <span class="o">=</span> <span class="n">source_dir</span> <span class="o">/</span> <span class="n">SKILLS_SUBDIR</span><span class="p">,</span> <span class="n">source_dir</span> <span class="o">/</span> <span class="n">AGENTS_SUBDIR</span>
+</span><span id="line-60">    <span class="n">found</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="line-61">        <span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">SKILLS_SUBDIR</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="line-62">        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">skills</span><span class="o">.</span><span class="n">iterdir</span><span class="p">()</span> <span class="k">if</span> <span class="n">skills</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="k">else</span> <span class="p">())</span>
+</span><span id="line-63">        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span>
+</span><span id="line-64">    <span class="p">]</span>
+</span><span id="line-65">    <span class="n">found</span> <span class="o">+=</span> <span class="p">[(</span><span class="n">p</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">AGENTS_SUBDIR</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">agents</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">"*.md"</span><span class="p">))]</span>
+</span><span id="line-66">    <span class="k">return</span> <span class="n">found</span>
+</span><span id="line-67">
+</span><span id="line-68">
+</span><span id="line-69"><span class="k">def</span><span class="w"> </span><span class="nf">_is_ours</span><span class="p">(</span><span class="n">dest</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="line-70"><span class="w">    </span><span class="sd">"""``dest`` already is a link to ``src`` (or a faithful copy of it)."""</span>
+</span><span id="line-71">    <span class="k">if</span> <span class="n">dest</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">():</span>
+</span><span id="line-72">        <span class="k">return</span> <span class="p">(</span>
+</span><span id="line-73">            <span class="n">dest</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span> <span class="o">==</span> <span class="n">src</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+</span><span id="line-74">        <span class="p">)</span>  <span class="c1"># (os.readlink can carry a \\?\ prefix on Windows)</span>
+</span><span id="line-75">    <span class="k">if</span> <span class="n">dest</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="ow">and</span> <span class="n">src</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+</span><span id="line-76">        <span class="k">return</span> <span class="n">dest</span><span class="o">.</span><span class="n">read_bytes</span><span class="p">()</span> <span class="o">==</span> <span class="n">src</span><span class="o">.</span><span class="n">read_bytes</span><span class="p">()</span>
+</span><span id="line-77">    <span class="k">if</span> <span class="n">dest</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="ow">and</span> <span class="n">src</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">dest</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">():</span>
+</span><span id="line-78">        <span class="k">return</span> <span class="n">_tree</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span> <span class="o">==</span> <span class="n">_tree</span><span class="p">(</span><span class="n">src</span><span class="p">)</span>
+</span><span id="line-79">    <span class="k">return</span> <span class="kc">False</span>
+</span><span id="line-80">
+</span><span id="line-81">
+</span><span id="line-82"><span class="k">def</span><span class="w"> </span><span class="nf">_tree</span><span class="p">(</span><span class="n">root</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]:</span>
+</span><span id="line-83"><span class="w">    </span><span class="sd">"""``{relative path: bytes}`` of every file under ``root``."""</span>
+</span><span id="line-84">    <span class="k">return</span> <span class="p">{</span>
+</span><span id="line-85">        <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">root</span><span class="p">)):</span> <span class="n">p</span><span class="o">.</span><span class="n">read_bytes</span><span class="p">()</span>
+</span><span id="line-86">        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">"*"</span><span class="p">))</span>
+</span><span id="line-87">        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span>
+</span><span id="line-88">    <span class="p">}</span>
+</span><span id="line-89">
+</span><span id="line-90">
+</span><span id="line-91"><span class="k">def</span><span class="w"> </span><span class="nf">_remove</span><span class="p">(</span><span class="n">dest</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-92">    <span class="k">if</span> <span class="n">dest</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">()</span> <span class="ow">or</span> <span class="n">dest</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+</span><span id="line-93">        <span class="n">dest</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+</span><span id="line-94">    <span class="k">else</span><span class="p">:</span>
+</span><span id="line-95">        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span>
+</span><span id="line-96">
+</span><span id="line-97">
+</span><span id="line-98"><span class="k">def</span><span class="w"> </span><span class="nf">_place</span><span class="p">(</span><span class="n">src</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">dest</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="line-99"><span class="w">    </span><span class="sd">"""Link ``src`` at ``dest``; copy where symlinks are unavailable. Returns the method."""</span>
+</span><span id="line-100">    <span class="n">dest</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="line-101">    <span class="k">try</span><span class="p">:</span>
+</span><span id="line-102">        <span class="n">os</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dest</span><span class="p">,</span> <span class="n">target_is_directory</span><span class="o">=</span><span class="n">src</span><span class="o">.</span><span class="n">is_dir</span><span class="p">())</span>
+</span><span id="line-103">        <span class="k">return</span> <span class="s2">"symlink"</span>
+</span><span id="line-104">    <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">NotImplementedError</span><span class="p">):</span>
+</span><span id="line-105">        <span class="k">if</span> <span class="n">src</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+</span><span id="line-106">            <span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dest</span><span class="p">)</span>
+</span><span id="line-107">        <span class="k">else</span><span class="p">:</span>
+</span><span id="line-108">            <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dest</span><span class="p">)</span>
+</span><span id="line-109">        <span class="k">return</span> <span class="s2">"copy"</span>
+</span><span id="line-110">
+</span><span id="line-111">
 <div class="viewcode-block" id="install_bundled">
 <a class="viewcode-back" href="../../_autosummary/skill.bundled.html#skill.bundled.install_bundled">[docs]</a>
-</span><span id="line-108"><span class="k">def</span><span class="w"> </span><span class="nf">install_bundled</span><span class="p">(</span>
-</span><span id="line-109">    <span class="n">source_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
-</span><span id="line-110">    <span class="o">*</span><span class="p">,</span>
-</span><span id="line-111">    <span class="n">homes</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="line-112">    <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-</span><span id="line-113">    <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-</span><span id="line-114"><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
-</span><span id="line-115"><span class="w">    </span><span class="sd">"""Install a package's bundled skills and agents into each Claude home.</span>
-</span><span id="line-116">
-</span><span id="line-117"><span class="sd">    ``source_dir`` holds ``skills/&lt;name&gt;/`` directories and/or ``agents/&lt;name&gt;.md`` files</span>
-</span><span id="line-118"><span class="sd">    (a package's ``data`` folder). ``homes`` defaults to :func:`claude_homes`. Returns one</span>
-</span><span id="line-119"><span class="sd">    row per (home, asset): ``{"home", "name", "action"}`` with ``action`` one of</span>
+</span><span id="line-112"><span class="k">def</span><span class="w"> </span><span class="nf">install_bundled</span><span class="p">(</span>
+</span><span id="line-113">    <span class="n">source_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
+</span><span id="line-114">    <span class="o">*</span><span class="p">,</span>
+</span><span id="line-115">    <span class="n">homes</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-116">    <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+</span><span id="line-117">    <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+</span><span id="line-118"><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+</span><span id="line-119"><span class="w">    </span><span class="sd">"""Install a package's bundled skills and agents into each Claude home.</span>
 </span><span id="line-120">
-</span><span id="line-121"><span class="sd">    - ``"ok"``: already installed (a link to the source, or an identical copy);</span>
-</span><span id="line-122"><span class="sd">    - ``"install"``: installed now (or would be, under ``dry_run``); a ``"method"`` key</span>
-</span><span id="line-123"><span class="sd">      says ``symlink`` or ``copy``;</span>
-</span><span id="line-124"><span class="sd">    - ``"conflict"``: something else is at that name; left alone unless ``force``.</span>
-</span><span id="line-125">
-</span><span id="line-126"><span class="sd">    &gt;&gt;&gt; install_bundled("/no/such/folder", homes=["/tmp/never-used"])</span>
-</span><span id="line-127"><span class="sd">    []</span>
-</span><span id="line-128"><span class="sd">    """</span>
-</span><span id="line-129">    <span class="n">source_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">source_dir</span><span class="p">)</span>
-</span><span id="line-130">    <span class="n">homes</span> <span class="o">=</span> <span class="p">[</span>
-</span><span id="line-131">        <span class="n">Path</span><span class="p">(</span><span class="n">h</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="p">(</span><span class="n">homes</span> <span class="k">if</span> <span class="n">homes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">claude_homes</span><span class="p">())</span>
-</span><span id="line-132">    <span class="p">]</span>
-</span><span id="line-133">    <span class="n">rows</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="line-134">    <span class="k">for</span> <span class="n">home</span> <span class="ow">in</span> <span class="n">homes</span><span class="p">:</span>
-</span><span id="line-135">        <span class="k">for</span> <span class="n">src</span><span class="p">,</span> <span class="n">rel</span> <span class="ow">in</span> <span class="n">_assets</span><span class="p">(</span><span class="n">source_dir</span><span class="p">):</span>
-</span><span id="line-136">            <span class="n">dest</span> <span class="o">=</span> <span class="n">home</span> <span class="o">/</span> <span class="n">rel</span>
-</span><span id="line-137">            <span class="n">exists</span> <span class="o">=</span> <span class="n">dest</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">or</span> <span class="n">dest</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">()</span>
-</span><span id="line-138">            <span class="k">if</span> <span class="n">_is_ours</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="n">src</span><span class="p">):</span>
-</span><span id="line-139">                <span class="n">action</span> <span class="o">=</span> <span class="s2">"ok"</span>
-</span><span id="line-140">            <span class="k">else</span><span class="p">:</span>
-</span><span id="line-141">                <span class="n">action</span> <span class="o">=</span> <span class="s2">"conflict"</span> <span class="k">if</span> <span class="n">exists</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">force</span> <span class="k">else</span> <span class="s2">"install"</span>
-</span><span id="line-142">            <span class="n">row</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="line-143">                <span class="s2">"home"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">home</span><span class="p">),</span>
-</span><span id="line-144">                <span class="s2">"name"</span><span class="p">:</span> <span class="n">src</span><span class="o">.</span><span class="n">stem</span> <span class="k">if</span> <span class="n">src</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="k">else</span> <span class="n">src</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-</span><span id="line-145">                <span class="s2">"action"</span><span class="p">:</span> <span class="n">action</span><span class="p">,</span>
-</span><span id="line-146">            <span class="p">}</span>
-</span><span id="line-147">            <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">"install"</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">dry_run</span><span class="p">:</span>
-</span><span id="line-148">                <span class="k">if</span> <span class="n">exists</span><span class="p">:</span>
-</span><span id="line-149">                    <span class="n">_remove</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span>
-</span><span id="line-150">                <span class="n">row</span><span class="p">[</span><span class="s2">"method"</span><span class="p">]</span> <span class="o">=</span> <span class="n">_place</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dest</span><span class="p">)</span>
-</span><span id="line-151">            <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
-</span><span id="line-152">    <span class="k">return</span> <span class="n">rows</span></div>
+</span><span id="line-121"><span class="sd">    ``source_dir`` holds ``skills/&lt;name&gt;/`` directories and/or ``agents/&lt;name&gt;.md`` files</span>
+</span><span id="line-122"><span class="sd">    (a package's ``data`` folder). ``homes`` defaults to :func:`claude_homes`. Returns one</span>
+</span><span id="line-123"><span class="sd">    row per (home, asset): ``{"home", "name", "action"}`` with ``action`` one of</span>
+</span><span id="line-124">
+</span><span id="line-125"><span class="sd">    - ``"ok"``: already installed (a link to the source, or an identical copy);</span>
+</span><span id="line-126"><span class="sd">    - ``"install"``: installed now (or would be, under ``dry_run``); a ``"method"`` key</span>
+</span><span id="line-127"><span class="sd">      says ``symlink`` or ``copy``;</span>
+</span><span id="line-128"><span class="sd">    - ``"conflict"``: something else is at that name; left alone unless ``force``.</span>
+</span><span id="line-129">
+</span><span id="line-130"><span class="sd">    &gt;&gt;&gt; install_bundled("/no/such/folder", homes=["/tmp/never-used"])</span>
+</span><span id="line-131"><span class="sd">    []</span>
+</span><span id="line-132"><span class="sd">    """</span>
+</span><span id="line-133">    <span class="n">source_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">source_dir</span><span class="p">)</span>
+</span><span id="line-134">    <span class="n">homes</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="line-135">        <span class="n">Path</span><span class="p">(</span><span class="n">h</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="p">(</span><span class="n">homes</span> <span class="k">if</span> <span class="n">homes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">claude_homes</span><span class="p">())</span>
+</span><span id="line-136">    <span class="p">]</span>
+</span><span id="line-137">    <span class="n">rows</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="line-138">    <span class="k">for</span> <span class="n">home</span> <span class="ow">in</span> <span class="n">homes</span><span class="p">:</span>
+</span><span id="line-139">        <span class="k">for</span> <span class="n">src</span><span class="p">,</span> <span class="n">rel</span> <span class="ow">in</span> <span class="n">_assets</span><span class="p">(</span><span class="n">source_dir</span><span class="p">):</span>
+</span><span id="line-140">            <span class="n">dest</span> <span class="o">=</span> <span class="n">home</span> <span class="o">/</span> <span class="n">rel</span>
+</span><span id="line-141">            <span class="n">exists</span> <span class="o">=</span> <span class="n">dest</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">or</span> <span class="n">dest</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">()</span>
+</span><span id="line-142">            <span class="k">if</span> <span class="n">_is_ours</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="n">src</span><span class="p">):</span>
+</span><span id="line-143">                <span class="n">action</span> <span class="o">=</span> <span class="s2">"ok"</span>
+</span><span id="line-144">            <span class="k">else</span><span class="p">:</span>
+</span><span id="line-145">                <span class="n">action</span> <span class="o">=</span> <span class="s2">"conflict"</span> <span class="k">if</span> <span class="n">exists</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">force</span> <span class="k">else</span> <span class="s2">"install"</span>
+</span><span id="line-146">            <span class="n">row</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="line-147">                <span class="s2">"home"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">home</span><span class="p">),</span>
+</span><span id="line-148">                <span class="s2">"name"</span><span class="p">:</span> <span class="n">src</span><span class="o">.</span><span class="n">stem</span> <span class="k">if</span> <span class="n">src</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="k">else</span> <span class="n">src</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+</span><span id="line-149">                <span class="s2">"action"</span><span class="p">:</span> <span class="n">action</span><span class="p">,</span>
+</span><span id="line-150">            <span class="p">}</span>
+</span><span id="line-151">            <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">"install"</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">dry_run</span><span class="p">:</span>
+</span><span id="line-152">                <span class="k">if</span> <span class="n">exists</span><span class="p">:</span>
+</span><span id="line-153">                    <span class="n">_remove</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span>
+</span><span id="line-154">                <span class="n">row</span><span class="p">[</span><span class="s2">"method"</span><span class="p">]</span> <span class="o">=</span> <span class="n">_place</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dest</span><span class="p">)</span>
+</span><span id="line-155">            <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+</span><span id="line-156">    <span class="k">return</span> <span class="n">rows</span></div>
 
 </span></code></pre></div>
     </div></div>
@@ -351,7 +355,7 @@
 </footer>
     </div>
     
-    <script src="../../_static/documentation_options.js?v=4fa33042"></script>
+    <script src="../../_static/documentation_options.js?v=785bba28"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>

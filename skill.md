@@ -1,4 +1,4 @@
-> built 2026-11-23 22:36 UTC from 8147d9f (master) · skill 0.1.25. Details: build_info.json
+> built 2026-11-23 22:59 UTC from 025496c (master) · skill 0.1.26. Details: build_info.json
 
 # index.html.md
 
@@ -734,8 +734,9 @@ runtime dependencies can copy this file instead of depending on `skill`.
 
 Every Claude Code home on this machine: `~/.claude` and `~/.claude-*`.
 
-A home counts when it has a `skills` folder. `CLAUDE_CONFIG_DIR`, when set, is
-included even if it has none yet.
+`~/.claude` counts whenever it exists (a fresh home has no `skills` folder yet,
+addaix/skill#37); another `~/.claude-*` folder counts when it has a `skills`
+folder. `CLAUDE_CONFIG_DIR`, when set, is included even if it has none yet.
 
 ```pycon
 >>> all(isinstance(h, Path) for h in claude_homes())
@@ -1812,18 +1813,16 @@ package-data = { "p._skills" = ["**/*"] }
 
 # About this build
 
-This documentation was built on **2026-11-23 22:36 UTC** from commit <a href="https://github.com/addaix/skill/commit/8147d9fec8c554865aab426e107992ca6b2a1b36"><code>8147d9f</code></a> on branch <code>master</code>, for **skill 0.1.25** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-23 22:59 UTC** from commit <a href="https://github.com/addaix/skill/commit/025496ccb176c049eef53c3af7508c376d908764"><code>025496c</code></a> on branch <code>master</code>, for **skill 0.1.26** (from <code>pyproject.toml</code>).
 
-#### WARNING
-The documentation and the package may be misaligned:
-
-- The documented version (0.1.25) is behind the latest release on PyPI (0.1.26): `pip install skill` gives newer code than these docs describe.
+#### NOTE
+Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
 
 ## Source
 
 |                     |                                                                                                                                                     |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/addaix/skill/commit/8147d9fec8c554865aab426e107992ca6b2a1b36"><code>8147d9fec8c554865aab426e107992ca6b2a1b36</code></a> |
+| Commit              | <a href="https://github.com/addaix/skill/commit/025496ccb176c049eef53c3af7508c376d908764"><code>025496ccb176c049eef53c3af7508c376d908764</code></a> |
 | Branch              | <code>master</code>                                                                                                                                 |
 | Tags at this commit | none                                                                                                                                                |
 | Working tree        | clean                                                                                                                                               |
@@ -1834,9 +1833,9 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>addaix/skill</code>                                                                  |
-| Run          | <a href="https://github.com/addaix/skill/actions/runs/45281133945">45281133945</a>         |
+| Run          | <a href="https://github.com/addaix/skill/actions/runs/45284606163">45284606163</a>         |
 | Ref          | <code>refs/heads/master</code>                                                             |
-| Event commit | <code>8147d9fec8c554865aab426e107992ca6b2a1b36</code> (in the history of the built commit) |
+| Event commit | <code>025496ccb176c049eef53c3af7508c376d908764</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -1861,13 +1860,13 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/skill/0.1.26/">0.1.26</a>, newer than the documented version (0.1.25).
+Latest release: <a href="https://pypi.org/project/skill/0.1.26/">0.1.26</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/addaix/skill && cd skill
-git checkout 8147d9fec8c554865aab426e107992ca6b2a1b36
+git checkout 025496ccb176c049eef53c3af7508c376d908764
 pip install "epythet==0.2.25"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

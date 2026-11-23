@@ -33,8 +33,9 @@ runtime dependencies can copy this file instead of depending on `skill`.
 
 Every Claude Code home on this machine: `~/.claude` and `~/.claude-*`.
 
-A home counts when it has a `skills` folder. `CLAUDE_CONFIG_DIR`, when set, is
-included even if it has none yet.
+`~/.claude` counts whenever it exists (a fresh home has no `skills` folder yet,
+addaix/skill#37); another `~/.claude-*` folder counts when it has a `skills`
+folder. `CLAUDE_CONFIG_DIR`, when set, is included even if it has none yet.
 
 ```pycon
 >>> all(isinstance(h, Path) for h in claude_homes())
