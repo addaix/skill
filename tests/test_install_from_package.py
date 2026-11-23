@@ -29,6 +29,7 @@ def _make_dist(
         f"Metadata-Version: 2.1\nName: {dist}\nVersion: 1.0\n"
     )
     (info / "top_level.txt").write_text(pkg + "\n")
+    importlib.invalidate_caches()
     return package
 
 
