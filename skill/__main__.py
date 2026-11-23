@@ -16,6 +16,8 @@ import cw
 
 from skill import search as _search
 from skill import install as _install
+from skill import install_from_package as _install_from_package
+from skill import install_from_github as _install_from_github
 from skill import uninstall as _uninstall
 from skill import create as _create
 from skill import list_skills as _list_skills
@@ -82,6 +84,33 @@ def sources() -> str:
     return format_sources(_sources())
 
 
+def install_from_package(
+    distribution: str,
+    *,
+    agent_targets: list[str] | None = None,
+    scope: str = "project",
+    copy: bool = False,
+    force: bool = False,
+    project_dir: str | None = None,
+) -> str:
+    """Install the skills an installed distribution ships (data/skills or _skills) into agent hosts."""
+    installed = _install_from_package(
+        distribution,
+        agent_targets=agent_targets,
+        scope=scope,
+        copy=copy,
+        force=force,
+        project_dir=project_dir,
+    )
+    return (
+        "\n".join(
+            f"{name}:\n{format_path_dict(paths, verb='Installed')}"
+            for name, paths in installed.items()
+        )
+        or f"No valid skills installed from {distribution}."
+    )
+
+
 def install(
     key: str,
     *,
@@ -101,6 +130,19 @@ def install(
         project_dir=project_dir,
     )
     return format_path_dict(result, verb="Installed")
+
+
+def gh_install(
+    repo: str,
+    names: list[str],
+    *,
+    agent: str = "claude-code",
+    pin: str | None = None,
+    scope: str | None = None,
+) -> str:
+    """Install skills published on GitHub (owner/repo) with ``gh skill``."""
+    results = _install_from_github(repo, names, agent=agent, pin=pin, scope=scope)
+    return "\n".join(f"Installed {r['name']} from {r['repo']}" for r in results)
 
 
 def uninstall(
@@ -153,6 +195,8 @@ def link_skills(
 COMMANDS = [
     search,
     install,
+    install_from_package,
+    gh_install,
     uninstall,
     create,
     list_skills,
