@@ -160,8 +160,11 @@ def _pop_mdc_globs(content: str) -> tuple[str, str | None]:
     >>> _pop_mdc_globs("no frontmatter\\nglobs: *.py")
     ('no frontmatter\\nglobs: *.py', None)
     """
+    from skill.base import split_frontmatter
+
     stripped = content.lstrip()
-    end = stripped.find("---", 3) if stripped.startswith("---") else -1
+    parts = split_frontmatter(stripped)
+    end = len(stripped) - len(parts[1]) if parts else -1
     match = _MDC_GLOBS_LINE.search(stripped, 3, end) if end != -1 else None
     if match is None:
         return content, None
