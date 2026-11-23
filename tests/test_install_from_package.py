@@ -108,3 +108,16 @@ def test_cli_commands_exist():
         timeout=30,
     ).stdout
     assert "install-from-package" in out and "gh-install" in out
+
+
+def test_a_fresh_claude_home_without_skills_is_still_a_home(tmp_path, monkeypatch):
+    """A fresh ~/.claude has no skills/ folder yet (addaix/skill#37)."""
+    from skill.bundled import claude_homes
+
+    home = tmp_path / "home"
+    (home / ".claude").mkdir(parents=True)
+    (home / ".claude-backup").mkdir()  # no skills/: not a home
+    monkeypatch.setenv("HOME", str(home))
+    monkeypatch.setenv("USERPROFILE", str(home))  # Windows reads this, not HOME
+    monkeypatch.delenv("CLAUDE_CONFIG_DIR", raising=False)
+    assert claude_homes() == [home / ".claude"]
