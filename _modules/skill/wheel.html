@@ -454,13 +454,13 @@
 </span><span id="line-263">    <span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
 </span><span id="line-264">
 </span><span id="line-265">    <span class="n">text</span> <span class="o">=</span> <span class="n">skill_md</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">"replace"</span><span class="p">)</span>
-</span><span id="line-266">    <span class="k">if</span> <span class="ow">not</span> <span class="n">text</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"---"</span><span class="p">):</span>
-</span><span id="line-267">        <span class="k">return</span> <span class="kc">None</span>
-</span><span id="line-268">    <span class="n">parts</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"---"</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-</span><span id="line-269">    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+</span><span id="line-266">    <span class="kn">from</span><span class="w"> </span><span class="nn">skill.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">split_frontmatter</span>
+</span><span id="line-267">
+</span><span id="line-268">    <span class="n">parts</span> <span class="o">=</span> <span class="n">split_frontmatter</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+</span><span id="line-269">    <span class="k">if</span> <span class="n">parts</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="line-270">        <span class="k">return</span> <span class="kc">None</span>
 </span><span id="line-271">    <span class="k">try</span><span class="p">:</span>
-</span><span id="line-272">        <span class="n">front</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="ow">or</span> <span class="p">{}</span>
+</span><span id="line-272">        <span class="n">front</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">or</span> <span class="p">{}</span>
 </span><span id="line-273">    <span class="k">except</span> <span class="n">yaml</span><span class="o">.</span><span class="n">YAMLError</span><span class="p">:</span>
 </span><span id="line-274">        <span class="k">return</span> <span class="kc">None</span>
 </span><span id="line-275">    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">front</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
@@ -582,7 +582,7 @@
 </footer>
     </div>
     
-    <script src="../../_static/documentation_options.js?v=ebdbb45b"></script>
+    <script src="../../_static/documentation_options.js?v=4fa33042"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>

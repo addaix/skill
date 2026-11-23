@@ -19,6 +19,7 @@ skill.base
       parse_skill_md
       render_frontmatter
       render_skill_md
+      split_frontmatter
    
    .. rubric:: Classes
 

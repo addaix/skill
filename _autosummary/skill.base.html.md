@@ -9,12 +9,13 @@ Core data model and SKILL.md parsing.
 
 ### Functions
 
-| [`discover_resources`](#skill.base.discover_resources)(path)    | Scan a skill directory for bundled resource subdirectories.      |
-|------------------------------------------------------------------------------|------------------------------------------------------------------|
-| [`parse_frontmatter`](#skill.base.parse_frontmatter)(content)  | Parse YAML frontmatter delimited by `---` from markdown content. |
-| [`parse_skill_md`](#skill.base.parse_skill_md)(content)     | Parse a SKILL.md string into (SkillMeta, body).                  |
-| [`render_frontmatter`](#skill.base.render_frontmatter)(meta)    | Render a dict as YAML frontmatter block.                         |
-| [`render_skill_md`](#skill.base.render_skill_md)(meta, body) | Render a SKILL.md string from meta and body.                     |
+| [`discover_resources`](#skill.base.discover_resources)(path)    | Scan a skill directory for bundled resource subdirectories.                             |
+|------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
+| [`parse_frontmatter`](#skill.base.parse_frontmatter)(content)  | Parse YAML frontmatter delimited by `---` from markdown content.                        |
+| [`parse_skill_md`](#skill.base.parse_skill_md)(content)     | Parse a SKILL.md string into (SkillMeta, body).                                         |
+| [`render_frontmatter`](#skill.base.render_frontmatter)(meta)    | Render a dict as YAML frontmatter block.                                                |
+| [`render_skill_md`](#skill.base.render_skill_md)(meta, body) | Render a SKILL.md string from meta and body.                                            |
+| [`split_frontmatter`](#skill.base.split_frontmatter)(content)  | `(yaml_text, body)` of markdown that opens with a `---` frontmatter block, else `None`. |
 
 ### Classes
 
@@ -201,3 +202,19 @@ True
 
 * **Return type:**
   [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
+### skill.base.split_frontmatter(content)
+
+`(yaml_text, body)` of markdown that opens with a `---` frontmatter block,
+else `None`. The closing `---` must be a line of its own, so a value holding
+`---` does not end the block (addaix/skill#35).
+
+```pycon
+>>> split_frontmatter("---\ndescription: a --- b\nname: x\n---\nbody")
+('description: a --- b\nname: x\n', 'body')
+>>> split_frontmatter("no frontmatter") is None
+True
+```
+
+* **Return type:**
+  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)] | [`None`](https://docs.python.org/3/builtins/constants.html#None)

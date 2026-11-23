@@ -1,4 +1,4 @@
-> built 2026-11-23 03:36 UTC from 001e634 (master) · skill 0.1.24. Details: build_info.json
+> built 2026-11-23 22:36 UTC from 8147d9f (master) · skill 0.1.25. Details: build_info.json
 
 # index.html.md
 
@@ -486,12 +486,13 @@ Core data model and SKILL.md parsing.
 
 ### Functions
 
-| [`discover_resources`](_autosummary/skill.base.html.md#skill.base.discover_resources)(path)    | Scan a skill directory for bundled resource subdirectories.      |
-|------------------------------------------------------------------------------|------------------------------------------------------------------|
-| [`parse_frontmatter`](_autosummary/skill.base.html.md#skill.base.parse_frontmatter)(content)  | Parse YAML frontmatter delimited by `---` from markdown content. |
-| [`parse_skill_md`](_autosummary/skill.base.html.md#skill.base.parse_skill_md)(content)     | Parse a SKILL.md string into (SkillMeta, body).                  |
-| [`render_frontmatter`](_autosummary/skill.base.html.md#skill.base.render_frontmatter)(meta)    | Render a dict as YAML frontmatter block.                         |
-| [`render_skill_md`](_autosummary/skill.base.html.md#skill.base.render_skill_md)(meta, body) | Render a SKILL.md string from meta and body.                     |
+| [`discover_resources`](_autosummary/skill.base.html.md#skill.base.discover_resources)(path)    | Scan a skill directory for bundled resource subdirectories.                             |
+|------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
+| [`parse_frontmatter`](_autosummary/skill.base.html.md#skill.base.parse_frontmatter)(content)  | Parse YAML frontmatter delimited by `---` from markdown content.                        |
+| [`parse_skill_md`](_autosummary/skill.base.html.md#skill.base.parse_skill_md)(content)     | Parse a SKILL.md string into (SkillMeta, body).                                         |
+| [`render_frontmatter`](_autosummary/skill.base.html.md#skill.base.render_frontmatter)(meta)    | Render a dict as YAML frontmatter block.                                                |
+| [`render_skill_md`](_autosummary/skill.base.html.md#skill.base.render_skill_md)(meta, body) | Render a SKILL.md string from meta and body.                                            |
+| [`split_frontmatter`](_autosummary/skill.base.html.md#skill.base.split_frontmatter)(content)  | `(yaml_text, body)` of markdown that opens with a `---` frontmatter block, else `None`. |
 
 ### Classes
 
@@ -678,6 +679,22 @@ True
 
 * **Return type:**
   [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
+### skill.base.split_frontmatter(content)
+
+`(yaml_text, body)` of markdown that opens with a `---` frontmatter block,
+else `None`. The closing `---` must be a line of its own, so a value holding
+`---` does not end the block (addaix/skill#35).
+
+```pycon
+>>> split_frontmatter("---\ndescription: a --- b\nname: x\n---\nbody")
+('description: a --- b\nname: x\n', 'body')
+>>> split_frontmatter("no frontmatter") is None
+True
+```
+
+* **Return type:**
+  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)] | [`None`](https://docs.python.org/3/builtins/constants.html#None)
 
 
 # _autosummary/skill.bundled.html.md
@@ -1795,16 +1812,18 @@ package-data = { "p._skills" = ["**/*"] }
 
 # About this build
 
-This documentation was built on **2026-11-23 03:36 UTC** from commit <a href="https://github.com/addaix/skill/commit/001e6345dd352f6b7ce4162e27e18f6ef263df7b"><code>001e634</code></a> on branch <code>master</code>, for **skill 0.1.24** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-23 22:36 UTC** from commit <a href="https://github.com/addaix/skill/commit/8147d9fec8c554865aab426e107992ca6b2a1b36"><code>8147d9f</code></a> on branch <code>master</code>, for **skill 0.1.25** (from <code>pyproject.toml</code>).
 
-#### NOTE
-Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
+#### WARNING
+The documentation and the package may be misaligned:
+
+- The documented version (0.1.25) is behind the latest release on PyPI (0.1.26): `pip install skill` gives newer code than these docs describe.
 
 ## Source
 
 |                     |                                                                                                                                                     |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/addaix/skill/commit/001e6345dd352f6b7ce4162e27e18f6ef263df7b"><code>001e6345dd352f6b7ce4162e27e18f6ef263df7b</code></a> |
+| Commit              | <a href="https://github.com/addaix/skill/commit/8147d9fec8c554865aab426e107992ca6b2a1b36"><code>8147d9fec8c554865aab426e107992ca6b2a1b36</code></a> |
 | Branch              | <code>master</code>                                                                                                                                 |
 | Tags at this commit | none                                                                                                                                                |
 | Working tree        | clean                                                                                                                                               |
@@ -1815,15 +1834,15 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>addaix/skill</code>                                                                  |
-| Run          | <a href="https://github.com/addaix/skill/actions/runs/45106778059">45106778059</a>         |
+| Run          | <a href="https://github.com/addaix/skill/actions/runs/45281133945">45281133945</a>         |
 | Ref          | <code>refs/heads/master</code>                                                             |
-| Event commit | <code>001e6345dd352f6b7ce4162e27e18f6ef263df7b</code> (in the history of the built commit) |
+| Event commit | <code>8147d9fec8c554865aab426e107992ca6b2a1b36</code> (in the history of the built commit) |
 
 ## Tools
 
 |          |         |
 |----------|---------|
-| epythet  | 0.2.23  |
+| epythet  | 0.2.25  |
 | Sphinx   | 9.1.1   |
 | docutils | 0.22.4  |
 | Python   | 3.12.16 |
@@ -1842,14 +1861,14 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/skill/0.1.24/">0.1.24</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/skill/0.1.26/">0.1.26</a>, newer than the documented version (0.1.25).
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/addaix/skill && cd skill
-git checkout 001e6345dd352f6b7ce4162e27e18f6ef263df7b
-pip install "epythet==0.2.23"
+git checkout 8147d9fec8c554865aab426e107992ca6b2a1b36
+pip install "epythet==0.2.25"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
 

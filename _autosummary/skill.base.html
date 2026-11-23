@@ -158,6 +158,9 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#skill.base.render_skill_md" title="skill.base.render_skill_md"><code class="xref py py-obj docutils literal notranslate"><span class="pre">render_skill_md</span></code></a>(meta, body)</p></td>
 <td><p>Render a SKILL.md string from meta and body.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skill.base.split_frontmatter" title="skill.base.split_frontmatter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">split_frontmatter</span></code></a>(content)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">(yaml_text,</span> <span class="pre">body)</span></code> of markdown that opens with a <code class="docutils literal notranslate"><span class="pre">---</span></code> frontmatter block, else <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></td>
+</tr>
 </tbody>
 </table>
 <p class="rubric">Classes</p>
@@ -378,6 +381,24 @@ follow, so namespaced blocks survive <code class="docutils literal notranslate">
 </dd>
 </dl>
 </dd></dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="skill.base.split_frontmatter">
+<span class="sig-prename descclassname"><span class="pre">skill.base.</span></span><span class="sig-name descname"><span class="pre">split_frontmatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skill/base.html#split_frontmatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#skill.base.split_frontmatter" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#skill.base.split_frontmatter'">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">(yaml_text,</span> <span class="pre">body)</span></code> of markdown that opens with a <code class="docutils literal notranslate"><span class="pre">---</span></code> frontmatter block,
+else <code class="docutils literal notranslate"><span class="pre">None</span></code>. The closing <code class="docutils literal notranslate"><span class="pre">---</span></code> must be a line of its own, so a value holding
+<code class="docutils literal notranslate"><span class="pre">---</span></code> does not end the block (addaix/skill#35).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="gp">&gt;&gt;&gt; </span><span class="n">split_frontmatter</span><span class="p">(</span><span class="s2">"---</span><span class="se">\n</span><span class="s2">description: a --- b</span><span class="se">\n</span><span class="s2">name: x</span><span class="se">\n</span><span class="s2">---</span><span class="se">\n</span><span class="s2">body"</span><span class="p">)</span>
+</span><span id="line-2"><span class="go">('description: a --- b\nname: x\n', 'body')</span>
+</span><span id="line-3"><span class="gp">&gt;&gt;&gt; </span><span class="n">split_frontmatter</span><span class="p">(</span><span class="s2">"no frontmatter"</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span>
+</span><span id="line-4"><span class="go">True</span>
+</span></code></pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" rel="nofollow noopener" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" rel="nofollow noopener" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" rel="nofollow noopener" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" rel="nofollow noopener" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a></span></span></p>
+</dd>
+</dl>
+</dd></dl>
 </section>
 </div></div><aside class="hidden text-sm xl:block" id="right-sidebar">
 <div class="sticky top-16 -mt-10 max-h-[calc(100vh-5rem)] h-full overflow-y-auto pt-6 space-y-2"><p class="font-medium">On this page</p>
@@ -401,6 +422,7 @@ follow, so namespaced blocks survive <code class="docutils literal notranslate">
 <li><a :data-current="activeSection === '#skill.base.parse_skill_md'" class="reference internal" href="#skill.base.parse_skill_md"><code class="docutils literal notranslate"><span class="pre">parse_skill_md()</span></code></a></li>
 <li><a :data-current="activeSection === '#skill.base.render_frontmatter'" class="reference internal" href="#skill.base.render_frontmatter"><code class="docutils literal notranslate"><span class="pre">render_frontmatter()</span></code></a></li>
 <li><a :data-current="activeSection === '#skill.base.render_skill_md'" class="reference internal" href="#skill.base.render_skill_md"><code class="docutils literal notranslate"><span class="pre">render_skill_md()</span></code></a></li>
+<li><a :data-current="activeSection === '#skill.base.split_frontmatter'" class="reference internal" href="#skill.base.split_frontmatter"><code class="docutils literal notranslate"><span class="pre">split_frontmatter()</span></code></a></li>
 </ul>
 </div>
 </aside>
@@ -414,7 +436,7 @@ follow, so namespaced blocks survive <code class="docutils literal notranslate">
 </div>
 </footer>
 </div>
-<script src="../_static/documentation_options.js?v=ebdbb45b"></script>
+<script src="../_static/documentation_options.js?v=4fa33042"></script>
 <script src="../_static/doctools.js?v=fd6eb6e6"></script>
 <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="../_static/clipboard.min.js?v=a7894cd8"></script>

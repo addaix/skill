@@ -249,7 +249,7 @@ see a one-time hint reminding you to run <code class="docutils literal notransla
 them with <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">skill</span></code> as above. See <code class="docutils literal notranslate"><span class="pre">skill-package-setup</span></code> for the layout policy
 this repo follows (real files in <code class="docutils literal notranslate"><span class="pre">skills/</span></code>, relative symlinks in <code class="docutils literal notranslate"><span class="pre">.claude/skills/</span></code>).</p>
 <p>Packages can also install their own GitHub-published skills programmatically via
-<a class="reference internal" href="#skill/install.py"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">skill.install_from_github(repo,</span> <span class="pre">names,</span> <span class="pre">agent='claude-code',</span> <span class="pre">pin=None)</span></code></span></a>,
+<a class="reference external" href="https://github.com/addaix/skill/blob/HEAD/skill/install.py" rel="nofollow noopener"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">skill.install_from_github(repo,</span> <span class="pre">names,</span> <span class="pre">agent='claude-code',</span> <span class="pre">pin=None)</span></code></span><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>,
 a thin wrapper over the <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">skill</span></code> CLI (GitHub CLI 2.90 or later). Pass <code class="docutils literal notranslate"><span class="pre">pin='v1.2.0'</span></code> (a tag or a commit SHA) for a reproducible install that <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">skill</span> <span class="pre">update</span></code> leaves alone.</p>
 <p><code class="docutils literal notranslate"><span class="pre">skill</span></code> does not try to be an installer for every host: <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">skill</span></code> and <a class="reference external" href="https://github.com/vercel-labs/skills" rel="nofollow noopener"><code class="docutils literal notranslate"><span class="pre">npx</span> <span class="pre">skills</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a> cover dozens of hosts, with pinning and lockfiles. What they do not do is check a skill: <code class="docutils literal notranslate"><span class="pre">npx</span> <span class="pre">skills</span> <span class="pre">add</span></code> installs a skill whose <code class="docutils literal notranslate"><span class="pre">name</span></code> is invalid. Run <code class="docutils literal notranslate"><span class="pre">skill</span> <span class="pre">validate</span></code> before either.</p>
 </section>
@@ -301,12 +301,12 @@ a thin wrapper over the <code class="docutils literal notranslate"><span class="
 </span><span id="line-2"><span class="n">my-host</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"my_package:my_host_target"</span>
 </span></code></pre></div>
 </div>
-<p>See <a class="reference internal" href="#misc/docs/plugin_system.md"><span class="xref myst">Plugin System Documentation</span></a> for full details on contracts, interfaces, and built-in registrations.</p>
+<p>See <a class="reference external" href="https://github.com/addaix/skill/blob/HEAD/misc/docs/plugin_system.md" rel="nofollow noopener"><span class="xref myst">Plugin System Documentation</span><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a> for full details on contracts, interfaces, and built-in registrations.</p>
 <p class="epythet-aggregates">This documentation as a single file: <a href="skill.md">skill.md</a> (Markdown, for agents).</p>
 
 </section>
 </section>
-<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-11-23 03:36 UTC from <a href="https://github.com/addaix/skill/commit/001e6345dd352f6b7ce4162e27e18f6ef263df7b">001e634</a> (master) · skill 0.1.24 · <a href="about-this-build.html">about this build</a></p>
+<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-11-23 22:36 UTC from <a href="https://github.com/addaix/skill/commit/8147d9fec8c554865aab426e107992ca6b2a1b36">8147d9f</a> (master) · skill 0.1.25 · <a href="about-this-build.html">about this build</a></p>
 </div></div><aside class="hidden text-sm xl:block" id="right-sidebar">
 <div class="sticky top-16 -mt-10 max-h-[calc(100vh-5rem)] h-full overflow-y-auto pt-6 space-y-2"><p class="font-medium">On this page</p>
 <ul>
@@ -332,7 +332,7 @@ a thin wrapper over the <code class="docutils literal notranslate"><span class="
 </div>
 </footer>
 </div>
-<script src="_static/documentation_options.js?v=ebdbb45b"></script>
+<script src="_static/documentation_options.js?v=4fa33042"></script>
 <script src="_static/doctools.js?v=fd6eb6e6"></script>
 <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="_static/clipboard.min.js?v=a7894cd8"></script>

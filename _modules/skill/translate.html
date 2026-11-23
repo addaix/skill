@@ -348,234 +348,237 @@
 </span><span id="line-160"><span class="sd">    &gt;&gt;&gt; _pop_mdc_globs("no frontmatter\\nglobs: *.py")</span>
 </span><span id="line-161"><span class="sd">    ('no frontmatter\\nglobs: *.py', None)</span>
 </span><span id="line-162"><span class="sd">    """</span>
-</span><span id="line-163">    <span class="n">stripped</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span>
-</span><span id="line-164">    <span class="n">end</span> <span class="o">=</span> <span class="n">stripped</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">"---"</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="k">if</span> <span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"---"</span><span class="p">)</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span>
-</span><span id="line-165">    <span class="n">match</span> <span class="o">=</span> <span class="n">_MDC_GLOBS_LINE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">stripped</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span> <span class="k">if</span> <span class="n">end</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="kc">None</span>
-</span><span id="line-166">    <span class="k">if</span> <span class="n">match</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-167">        <span class="k">return</span> <span class="n">content</span><span class="p">,</span> <span class="kc">None</span>
-</span><span id="line-168">    <span class="n">raw</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-</span><span id="line-169">    <span class="k">try</span><span class="p">:</span>
-</span><span id="line-170">        <span class="n">parsed</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
-</span><span id="line-171">    <span class="k">except</span> <span class="n">yaml</span><span class="o">.</span><span class="n">YAMLError</span><span class="p">:</span>
-</span><span id="line-172">        <span class="n">parsed</span> <span class="o">=</span> <span class="n">raw</span>
-</span><span id="line-173">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parsed</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-</span><span id="line-174">        <span class="n">globs</span> <span class="o">=</span> <span class="n">_mdc_globs</span><span class="p">(</span><span class="n">parsed</span><span class="p">)</span>
-</span><span id="line-175">    <span class="k">else</span><span class="p">:</span>
-</span><span id="line-176">        <span class="n">globs</span> <span class="o">=</span> <span class="n">parsed</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parsed</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">raw</span>
-</span><span id="line-177">    <span class="k">return</span> <span class="n">stripped</span><span class="p">[:</span> <span class="n">match</span><span class="o">.</span><span class="n">start</span><span class="p">()]</span> <span class="o">+</span> <span class="n">stripped</span><span class="p">[</span><span class="n">match</span><span class="o">.</span><span class="n">end</span><span class="p">()</span> <span class="p">:],</span> <span class="n">globs</span>
-</span><span id="line-178">
-</span><span id="line-179">
+</span><span id="line-163">    <span class="kn">from</span><span class="w"> </span><span class="nn">skill.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">split_frontmatter</span>
+</span><span id="line-164">
+</span><span id="line-165">    <span class="n">stripped</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span>
+</span><span id="line-166">    <span class="n">parts</span> <span class="o">=</span> <span class="n">split_frontmatter</span><span class="p">(</span><span class="n">stripped</span><span class="p">)</span>
+</span><span id="line-167">    <span class="n">end</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">stripped</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">if</span> <span class="n">parts</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span>
+</span><span id="line-168">    <span class="n">match</span> <span class="o">=</span> <span class="n">_MDC_GLOBS_LINE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">stripped</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span> <span class="k">if</span> <span class="n">end</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="kc">None</span>
+</span><span id="line-169">    <span class="k">if</span> <span class="n">match</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-170">        <span class="k">return</span> <span class="n">content</span><span class="p">,</span> <span class="kc">None</span>
+</span><span id="line-171">    <span class="n">raw</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="line-172">    <span class="k">try</span><span class="p">:</span>
+</span><span id="line-173">        <span class="n">parsed</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
+</span><span id="line-174">    <span class="k">except</span> <span class="n">yaml</span><span class="o">.</span><span class="n">YAMLError</span><span class="p">:</span>
+</span><span id="line-175">        <span class="n">parsed</span> <span class="o">=</span> <span class="n">raw</span>
+</span><span id="line-176">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parsed</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+</span><span id="line-177">        <span class="n">globs</span> <span class="o">=</span> <span class="n">_mdc_globs</span><span class="p">(</span><span class="n">parsed</span><span class="p">)</span>
+</span><span id="line-178">    <span class="k">else</span><span class="p">:</span>
+</span><span id="line-179">        <span class="n">globs</span> <span class="o">=</span> <span class="n">parsed</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parsed</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">raw</span>
+</span><span id="line-180">    <span class="k">return</span> <span class="n">stripped</span><span class="p">[:</span> <span class="n">match</span><span class="o">.</span><span class="n">start</span><span class="p">()]</span> <span class="o">+</span> <span class="n">stripped</span><span class="p">[</span><span class="n">match</span><span class="o">.</span><span class="n">end</span><span class="p">()</span> <span class="p">:],</span> <span class="n">globs</span>
+</span><span id="line-181">
+</span><span id="line-182">
 <div class="viewcode-block" id="from_mdc">
 <a class="viewcode-back" href="../../_autosummary/skill.translate.html#skill.translate.from_mdc">[docs]</a>
-</span><span id="line-180"><span class="k">def</span><span class="w"> </span><span class="nf">from_mdc</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Skill</span><span class="p">:</span>
-</span><span id="line-181"><span class="w">    </span><span class="sd">"""Import a Cursor ``.mdc`` file as a Skill.</span>
-</span><span id="line-182">
-</span><span id="line-183"><span class="sd">    &gt;&gt;&gt; content = "---\\ndescription: Do things\\nglobs: '*.py'\\nalwaysApply: false\\n---\\n# Rules"</span>
-</span><span id="line-184"><span class="sd">    &gt;&gt;&gt; s = from_mdc(content)</span>
-</span><span id="line-185"><span class="sd">    &gt;&gt;&gt; s.meta.description</span>
-</span><span id="line-186"><span class="sd">    'Do things'</span>
-</span><span id="line-187"><span class="sd">    &gt;&gt;&gt; s.meta.metadata.get('cursor.globs')</span>
-</span><span id="line-188"><span class="sd">    '*.py'</span>
-</span><span id="line-189">
-</span><span id="line-190"><span class="sd">    Globs as Cursor itself writes them (unquoted, not valid YAML) are kept verbatim:</span>
-</span><span id="line-191">
-</span><span id="line-192"><span class="sd">    &gt;&gt;&gt; from_mdc("---\\nglobs: **/*.py, **/*.ts\\n---\\nx").meta.metadata['cursor.globs']</span>
-</span><span id="line-193"><span class="sd">    '**/*.py, **/*.ts'</span>
-</span><span id="line-194"><span class="sd">    """</span>
-</span><span id="line-195">    <span class="n">content</span><span class="p">,</span> <span class="n">globs</span> <span class="o">=</span> <span class="n">_pop_mdc_globs</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
-</span><span id="line-196">    <span class="n">raw_meta</span><span class="p">,</span> <span class="n">body</span> <span class="o">=</span> <span class="n">parse_frontmatter</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
-</span><span id="line-197">    <span class="k">if</span> <span class="n">globs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s2">"globs"</span> <span class="ow">in</span> <span class="n">raw_meta</span><span class="p">:</span>
-</span><span id="line-198">        <span class="n">globs</span> <span class="o">=</span> <span class="n">raw_meta</span><span class="p">[</span><span class="s2">"globs"</span><span class="p">]</span>
-</span><span id="line-199">        <span class="n">globs</span> <span class="o">=</span> <span class="n">_mdc_globs</span><span class="p">(</span><span class="n">globs</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">globs</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">globs</span><span class="p">)</span>
-</span><span id="line-200">    <span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="line-201">    <span class="k">if</span> <span class="n">globs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-202">        <span class="n">metadata</span><span class="p">[</span><span class="s2">"cursor.globs"</span><span class="p">]</span> <span class="o">=</span> <span class="n">globs</span>
-</span><span id="line-203">    <span class="k">if</span> <span class="s2">"alwaysApply"</span> <span class="ow">in</span> <span class="n">raw_meta</span><span class="p">:</span>
-</span><span id="line-204">        <span class="n">metadata</span><span class="p">[</span><span class="s2">"cursor.alwaysApply"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw_meta</span><span class="p">[</span><span class="s2">"alwaysApply"</span><span class="p">])</span>
-</span><span id="line-205">
-</span><span id="line-206">    <span class="c1"># Derive name from description (first few words, slugified)</span>
-</span><span id="line-207">    <span class="n">desc</span> <span class="o">=</span> <span class="n">raw_meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"description"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
-</span><span id="line-208">    <span class="n">name</span> <span class="o">=</span> <span class="s2">"-"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">desc</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()[:</span><span class="mi">3</span><span class="p">])</span> <span class="ow">or</span> <span class="s2">"imported-rule"</span>
-</span><span id="line-209">    <span class="c1"># Clean name to valid chars</span>
-</span><span id="line-210">    <span class="n">name</span> <span class="o">=</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">c</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">isalnum</span><span class="p">()</span> <span class="ow">or</span> <span class="n">c</span> <span class="o">==</span> <span class="s2">"-"</span> <span class="k">else</span> <span class="s2">"-"</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">"-"</span><span class="p">)</span>
-</span><span id="line-211">
-</span><span id="line-212">    <span class="n">meta</span> <span class="o">=</span> <span class="n">SkillMeta</span><span class="p">(</span>
-</span><span id="line-213">        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-</span><span id="line-214">        <span class="n">description</span><span class="o">=</span><span class="n">desc</span><span class="p">,</span>
-</span><span id="line-215">        <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span>
-</span><span id="line-216">    <span class="p">)</span>
-</span><span id="line-217">    <span class="k">return</span> <span class="n">Skill</span><span class="p">(</span><span class="n">meta</span><span class="o">=</span><span class="n">meta</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span></div>
+</span><span id="line-183"><span class="k">def</span><span class="w"> </span><span class="nf">from_mdc</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Skill</span><span class="p">:</span>
+</span><span id="line-184"><span class="w">    </span><span class="sd">"""Import a Cursor ``.mdc`` file as a Skill.</span>
+</span><span id="line-185">
+</span><span id="line-186"><span class="sd">    &gt;&gt;&gt; content = "---\\ndescription: Do things\\nglobs: '*.py'\\nalwaysApply: false\\n---\\n# Rules"</span>
+</span><span id="line-187"><span class="sd">    &gt;&gt;&gt; s = from_mdc(content)</span>
+</span><span id="line-188"><span class="sd">    &gt;&gt;&gt; s.meta.description</span>
+</span><span id="line-189"><span class="sd">    'Do things'</span>
+</span><span id="line-190"><span class="sd">    &gt;&gt;&gt; s.meta.metadata.get('cursor.globs')</span>
+</span><span id="line-191"><span class="sd">    '*.py'</span>
+</span><span id="line-192">
+</span><span id="line-193"><span class="sd">    Globs as Cursor itself writes them (unquoted, not valid YAML) are kept verbatim:</span>
+</span><span id="line-194">
+</span><span id="line-195"><span class="sd">    &gt;&gt;&gt; from_mdc("---\\nglobs: **/*.py, **/*.ts\\n---\\nx").meta.metadata['cursor.globs']</span>
+</span><span id="line-196"><span class="sd">    '**/*.py, **/*.ts'</span>
+</span><span id="line-197"><span class="sd">    """</span>
+</span><span id="line-198">    <span class="n">content</span><span class="p">,</span> <span class="n">globs</span> <span class="o">=</span> <span class="n">_pop_mdc_globs</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+</span><span id="line-199">    <span class="n">raw_meta</span><span class="p">,</span> <span class="n">body</span> <span class="o">=</span> <span class="n">parse_frontmatter</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+</span><span id="line-200">    <span class="k">if</span> <span class="n">globs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s2">"globs"</span> <span class="ow">in</span> <span class="n">raw_meta</span><span class="p">:</span>
+</span><span id="line-201">        <span class="n">globs</span> <span class="o">=</span> <span class="n">raw_meta</span><span class="p">[</span><span class="s2">"globs"</span><span class="p">]</span>
+</span><span id="line-202">        <span class="n">globs</span> <span class="o">=</span> <span class="n">_mdc_globs</span><span class="p">(</span><span class="n">globs</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">globs</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">globs</span><span class="p">)</span>
+</span><span id="line-203">    <span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="line-204">    <span class="k">if</span> <span class="n">globs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-205">        <span class="n">metadata</span><span class="p">[</span><span class="s2">"cursor.globs"</span><span class="p">]</span> <span class="o">=</span> <span class="n">globs</span>
+</span><span id="line-206">    <span class="k">if</span> <span class="s2">"alwaysApply"</span> <span class="ow">in</span> <span class="n">raw_meta</span><span class="p">:</span>
+</span><span id="line-207">        <span class="n">metadata</span><span class="p">[</span><span class="s2">"cursor.alwaysApply"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw_meta</span><span class="p">[</span><span class="s2">"alwaysApply"</span><span class="p">])</span>
+</span><span id="line-208">
+</span><span id="line-209">    <span class="c1"># Derive name from description (first few words, slugified)</span>
+</span><span id="line-210">    <span class="n">desc</span> <span class="o">=</span> <span class="n">raw_meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"description"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
+</span><span id="line-211">    <span class="n">name</span> <span class="o">=</span> <span class="s2">"-"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">desc</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()[:</span><span class="mi">3</span><span class="p">])</span> <span class="ow">or</span> <span class="s2">"imported-rule"</span>
+</span><span id="line-212">    <span class="c1"># Clean name to valid chars</span>
+</span><span id="line-213">    <span class="n">name</span> <span class="o">=</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">c</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">isalnum</span><span class="p">()</span> <span class="ow">or</span> <span class="n">c</span> <span class="o">==</span> <span class="s2">"-"</span> <span class="k">else</span> <span class="s2">"-"</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">"-"</span><span class="p">)</span>
+</span><span id="line-214">
+</span><span id="line-215">    <span class="n">meta</span> <span class="o">=</span> <span class="n">SkillMeta</span><span class="p">(</span>
+</span><span id="line-216">        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+</span><span id="line-217">        <span class="n">description</span><span class="o">=</span><span class="n">desc</span><span class="p">,</span>
+</span><span id="line-218">        <span class="n">metadata</span><span class="o">=</span><span class="n">metadata</span><span class="p">,</span>
+</span><span id="line-219">    <span class="p">)</span>
+</span><span id="line-220">    <span class="k">return</span> <span class="n">Skill</span><span class="p">(</span><span class="n">meta</span><span class="o">=</span><span class="n">meta</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">body</span><span class="p">)</span></div>
 
-</span><span id="line-218">
-</span><span id="line-219">
-</span><span id="line-220"><span class="c1"># ---------------------------------------------------------------------------</span>
-</span><span id="line-221"><span class="c1"># SKILL.md -&gt; Copilot instructions</span>
-</span><span id="line-222"><span class="c1"># ---------------------------------------------------------------------------</span>
-</span><span id="line-223">
-</span><span id="line-224">
+</span><span id="line-221">
+</span><span id="line-222">
+</span><span id="line-223"><span class="c1"># ---------------------------------------------------------------------------</span>
+</span><span id="line-224"><span class="c1"># SKILL.md -&gt; Copilot instructions</span>
+</span><span id="line-225"><span class="c1"># ---------------------------------------------------------------------------</span>
+</span><span id="line-226">
+</span><span id="line-227">
 <div class="viewcode-block" id="to_copilot_instructions">
 <a class="viewcode-back" href="../../_autosummary/skill.translate.html#skill.translate.to_copilot_instructions">[docs]</a>
-</span><span id="line-225"><span class="k">def</span><span class="w"> </span><span class="nf">to_copilot_instructions</span><span class="p">(</span><span class="n">skill</span><span class="p">:</span> <span class="n">Skill</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="line-226"><span class="w">    </span><span class="sd">"""Translate a Skill to GitHub Copilot instructions format.</span>
-</span><span id="line-227">
-</span><span id="line-228"><span class="sd">    Produces a Markdown section suitable for appending to</span>
-</span><span id="line-229"><span class="sd">    ``.github/copilot-instructions.md``. Lossy: no frontmatter support</span>
-</span><span id="line-230"><span class="sd">    beyond ``applyTo``, no progressive disclosure, no resources.</span>
-</span><span id="line-231">
-</span><span id="line-232"><span class="sd">    &gt;&gt;&gt; from skill.base import SkillMeta</span>
-</span><span id="line-233"><span class="sd">    &gt;&gt;&gt; s = Skill(meta=SkillMeta(name='lint', description='Lint rules'), body='Use ruff.')</span>
-</span><span id="line-234"><span class="sd">    &gt;&gt;&gt; md = to_copilot_instructions(s)</span>
-</span><span id="line-235"><span class="sd">    &gt;&gt;&gt; '## lint' in md</span>
-</span><span id="line-236"><span class="sd">    True</span>
-</span><span id="line-237"><span class="sd">    &gt;&gt;&gt; 'Use ruff.' in md</span>
-</span><span id="line-238"><span class="sd">    True</span>
-</span><span id="line-239"><span class="sd">    """</span>
-</span><span id="line-240">    <span class="n">_warn_lossy</span><span class="p">(</span><span class="n">skill</span><span class="p">,</span> <span class="n">target_format</span><span class="o">=</span><span class="s2">"copilot_md"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"copilot-instructions"</span><span class="p">)</span>
-</span><span id="line-241">    <span class="k">return</span> <span class="n">_md_section</span><span class="p">(</span><span class="n">skill</span><span class="p">)</span></div>
+</span><span id="line-228"><span class="k">def</span><span class="w"> </span><span class="nf">to_copilot_instructions</span><span class="p">(</span><span class="n">skill</span><span class="p">:</span> <span class="n">Skill</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="line-229"><span class="w">    </span><span class="sd">"""Translate a Skill to GitHub Copilot instructions format.</span>
+</span><span id="line-230">
+</span><span id="line-231"><span class="sd">    Produces a Markdown section suitable for appending to</span>
+</span><span id="line-232"><span class="sd">    ``.github/copilot-instructions.md``. Lossy: no frontmatter support</span>
+</span><span id="line-233"><span class="sd">    beyond ``applyTo``, no progressive disclosure, no resources.</span>
+</span><span id="line-234">
+</span><span id="line-235"><span class="sd">    &gt;&gt;&gt; from skill.base import SkillMeta</span>
+</span><span id="line-236"><span class="sd">    &gt;&gt;&gt; s = Skill(meta=SkillMeta(name='lint', description='Lint rules'), body='Use ruff.')</span>
+</span><span id="line-237"><span class="sd">    &gt;&gt;&gt; md = to_copilot_instructions(s)</span>
+</span><span id="line-238"><span class="sd">    &gt;&gt;&gt; '## lint' in md</span>
+</span><span id="line-239"><span class="sd">    True</span>
+</span><span id="line-240"><span class="sd">    &gt;&gt;&gt; 'Use ruff.' in md</span>
+</span><span id="line-241"><span class="sd">    True</span>
+</span><span id="line-242"><span class="sd">    """</span>
+</span><span id="line-243">    <span class="n">_warn_lossy</span><span class="p">(</span><span class="n">skill</span><span class="p">,</span> <span class="n">target_format</span><span class="o">=</span><span class="s2">"copilot_md"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"copilot-instructions"</span><span class="p">)</span>
+</span><span id="line-244">    <span class="k">return</span> <span class="n">_md_section</span><span class="p">(</span><span class="n">skill</span><span class="p">)</span></div>
 
-</span><span id="line-242">
-</span><span id="line-243">
-</span><span id="line-244"><span class="k">def</span><span class="w"> </span><span class="nf">_md_section</span><span class="p">(</span><span class="n">skill</span><span class="p">:</span> <span class="n">Skill</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="line-245"><span class="w">    </span><span class="sd">"""A skill as one ``## name`` section of a shared instructions file."""</span>
-</span><span id="line-246">    <span class="n">quoted</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"&gt; </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">skill</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">description</span><span class="o">.</span><span class="n">splitlines</span><span class="p">())</span>
-</span><span id="line-247">    <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">"## </span><span class="si">{</span><span class="n">skill</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="n">quoted</span> <span class="ow">or</span> <span class="s2">"&gt;"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="n">skill</span><span class="o">.</span><span class="n">body</span><span class="p">])</span>
-</span><span id="line-248">
-</span><span id="line-249">
-</span><span id="line-250"><span class="n">translators</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">"copilot_md"</span><span class="p">,</span> <span class="n">to_copilot_instructions</span><span class="p">)</span>
-</span><span id="line-251"><span class="n">translation_losses</span><span class="o">.</span><span class="n">register</span><span class="p">(</span>
-</span><span id="line-252">    <span class="s2">"copilot_md"</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">_dropped</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s2">"allowed-tools"</span><span class="p">,</span> <span class="s2">"resources"</span><span class="p">))</span>
-</span><span id="line-253"><span class="p">)</span>
-</span><span id="line-254">
-</span><span id="line-255">
-</span><span id="line-256"><span class="c1"># ---------------------------------------------------------------------------</span>
-</span><span id="line-257"><span class="c1"># SKILL.md -&gt; Gemini CLI (a section of GEMINI.md)</span>
-</span><span id="line-258"><span class="c1"># ---------------------------------------------------------------------------</span>
-</span><span id="line-259">
-</span><span id="line-260">
+</span><span id="line-245">
+</span><span id="line-246">
+</span><span id="line-247"><span class="k">def</span><span class="w"> </span><span class="nf">_md_section</span><span class="p">(</span><span class="n">skill</span><span class="p">:</span> <span class="n">Skill</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="line-248"><span class="w">    </span><span class="sd">"""A skill as one ``## name`` section of a shared instructions file."""</span>
+</span><span id="line-249">    <span class="n">quoted</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"&gt; </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">skill</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">description</span><span class="o">.</span><span class="n">splitlines</span><span class="p">())</span>
+</span><span id="line-250">    <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">"## </span><span class="si">{</span><span class="n">skill</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="n">quoted</span> <span class="ow">or</span> <span class="s2">"&gt;"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="n">skill</span><span class="o">.</span><span class="n">body</span><span class="p">])</span>
+</span><span id="line-251">
+</span><span id="line-252">
+</span><span id="line-253"><span class="n">translators</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">"copilot_md"</span><span class="p">,</span> <span class="n">to_copilot_instructions</span><span class="p">)</span>
+</span><span id="line-254"><span class="n">translation_losses</span><span class="o">.</span><span class="n">register</span><span class="p">(</span>
+</span><span id="line-255">    <span class="s2">"copilot_md"</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">_dropped</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s2">"allowed-tools"</span><span class="p">,</span> <span class="s2">"resources"</span><span class="p">))</span>
+</span><span id="line-256"><span class="p">)</span>
+</span><span id="line-257">
+</span><span id="line-258">
+</span><span id="line-259"><span class="c1"># ---------------------------------------------------------------------------</span>
+</span><span id="line-260"><span class="c1"># SKILL.md -&gt; Gemini CLI (a section of GEMINI.md)</span>
+</span><span id="line-261"><span class="c1"># ---------------------------------------------------------------------------</span>
+</span><span id="line-262">
+</span><span id="line-263">
 <div class="viewcode-block" id="to_gemini_md">
 <a class="viewcode-back" href="../../_autosummary/skill.translate.html#skill.translate.to_gemini_md">[docs]</a>
-</span><span id="line-261"><span class="k">def</span><span class="w"> </span><span class="nf">to_gemini_md</span><span class="p">(</span><span class="n">skill</span><span class="p">:</span> <span class="n">Skill</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="line-262"><span class="w">    </span><span class="sd">"""Translate a Skill to a section of Gemini CLI's ``GEMINI.md``.</span>
-</span><span id="line-263">
-</span><span id="line-264"><span class="sd">    Lossy: the file is always loaded (no progressive disclosure), and</span>
-</span><span id="line-265"><span class="sd">    ``allowed-tools``, ``license`` and bundled resources are dropped.</span>
+</span><span id="line-264"><span class="k">def</span><span class="w"> </span><span class="nf">to_gemini_md</span><span class="p">(</span><span class="n">skill</span><span class="p">:</span> <span class="n">Skill</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="line-265"><span class="w">    </span><span class="sd">"""Translate a Skill to a section of Gemini CLI's ``GEMINI.md``.</span>
 </span><span id="line-266">
-</span><span id="line-267"><span class="sd">    &gt;&gt;&gt; from skill.base import SkillMeta</span>
-</span><span id="line-268"><span class="sd">    &gt;&gt;&gt; s = Skill(meta=SkillMeta(name='lint', description='Lint rules'), body='Use ruff.')</span>
-</span><span id="line-269"><span class="sd">    &gt;&gt;&gt; to_gemini_md(s).splitlines()[0]</span>
-</span><span id="line-270"><span class="sd">    '## lint'</span>
-</span><span id="line-271"><span class="sd">    """</span>
-</span><span id="line-272">    <span class="n">_warn_lossy</span><span class="p">(</span><span class="n">skill</span><span class="p">,</span> <span class="n">target_format</span><span class="o">=</span><span class="s2">"gemini_md"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"GEMINI.md"</span><span class="p">)</span>
-</span><span id="line-273">    <span class="k">return</span> <span class="n">_md_section</span><span class="p">(</span><span class="n">skill</span><span class="p">)</span></div>
+</span><span id="line-267"><span class="sd">    Lossy: the file is always loaded (no progressive disclosure), and</span>
+</span><span id="line-268"><span class="sd">    ``allowed-tools``, ``license`` and bundled resources are dropped.</span>
+</span><span id="line-269">
+</span><span id="line-270"><span class="sd">    &gt;&gt;&gt; from skill.base import SkillMeta</span>
+</span><span id="line-271"><span class="sd">    &gt;&gt;&gt; s = Skill(meta=SkillMeta(name='lint', description='Lint rules'), body='Use ruff.')</span>
+</span><span id="line-272"><span class="sd">    &gt;&gt;&gt; to_gemini_md(s).splitlines()[0]</span>
+</span><span id="line-273"><span class="sd">    '## lint'</span>
+</span><span id="line-274"><span class="sd">    """</span>
+</span><span id="line-275">    <span class="n">_warn_lossy</span><span class="p">(</span><span class="n">skill</span><span class="p">,</span> <span class="n">target_format</span><span class="o">=</span><span class="s2">"gemini_md"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"GEMINI.md"</span><span class="p">)</span>
+</span><span id="line-276">    <span class="k">return</span> <span class="n">_md_section</span><span class="p">(</span><span class="n">skill</span><span class="p">)</span></div>
 
-</span><span id="line-274">
-</span><span id="line-275">
-</span><span id="line-276"><span class="n">translators</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">"gemini_md"</span><span class="p">,</span> <span class="n">to_gemini_md</span><span class="p">)</span>
-</span><span id="line-277"><span class="n">translation_losses</span><span class="o">.</span><span class="n">register</span><span class="p">(</span>
-</span><span id="line-278">    <span class="s2">"gemini_md"</span><span class="p">,</span>
-</span><span id="line-279">    <span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">_dropped</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s2">"allowed-tools"</span><span class="p">,</span> <span class="s2">"license"</span><span class="p">,</span> <span class="s2">"resources"</span><span class="p">)),</span>
-</span><span id="line-280"><span class="p">)</span>
-</span><span id="line-281">
-</span><span id="line-282">
-</span><span id="line-283"><span class="c1"># ---------------------------------------------------------------------------</span>
-</span><span id="line-284"><span class="c1"># SKILL.md -&gt; Windsurf rule (.windsurf/rules/&lt;name&gt;.md)</span>
-</span><span id="line-285"><span class="c1"># ---------------------------------------------------------------------------</span>
-</span><span id="line-286">
-</span><span id="line-287">
+</span><span id="line-277">
+</span><span id="line-278">
+</span><span id="line-279"><span class="n">translators</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">"gemini_md"</span><span class="p">,</span> <span class="n">to_gemini_md</span><span class="p">)</span>
+</span><span id="line-280"><span class="n">translation_losses</span><span class="o">.</span><span class="n">register</span><span class="p">(</span>
+</span><span id="line-281">    <span class="s2">"gemini_md"</span><span class="p">,</span>
+</span><span id="line-282">    <span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">_dropped</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s2">"allowed-tools"</span><span class="p">,</span> <span class="s2">"license"</span><span class="p">,</span> <span class="s2">"resources"</span><span class="p">)),</span>
+</span><span id="line-283"><span class="p">)</span>
+</span><span id="line-284">
+</span><span id="line-285">
+</span><span id="line-286"><span class="c1"># ---------------------------------------------------------------------------</span>
+</span><span id="line-287"><span class="c1"># SKILL.md -&gt; Windsurf rule (.windsurf/rules/&lt;name&gt;.md)</span>
+</span><span id="line-288"><span class="c1"># ---------------------------------------------------------------------------</span>
+</span><span id="line-289">
+</span><span id="line-290">
 <div class="viewcode-block" id="to_windsurf_rule">
 <a class="viewcode-back" href="../../_autosummary/skill.translate.html#skill.translate.to_windsurf_rule">[docs]</a>
-</span><span id="line-288"><span class="k">def</span><span class="w"> </span><span class="nf">to_windsurf_rule</span><span class="p">(</span><span class="n">skill</span><span class="p">:</span> <span class="n">Skill</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="line-289"><span class="w">    </span><span class="sd">"""Translate a Skill to a Windsurf rule, applied when the model judges it relevant.</span>
-</span><span id="line-290">
-</span><span id="line-291"><span class="sd">    ``metadata`` keys ``windsurf.trigger`` (default ``model_decision``) and</span>
-</span><span id="line-292"><span class="sd">    ``windsurf.globs`` pass through. Lossy: ``allowed-tools``, ``license`` and</span>
-</span><span id="line-293"><span class="sd">    bundled resources are dropped.</span>
-</span><span id="line-294">
-</span><span id="line-295"><span class="sd">    &gt;&gt;&gt; from skill.base import SkillMeta</span>
-</span><span id="line-296"><span class="sd">    &gt;&gt;&gt; s = Skill(meta=SkillMeta(name='lint', description='Lint rules'), body='Use ruff.')</span>
-</span><span id="line-297"><span class="sd">    &gt;&gt;&gt; print(to_windsurf_rule(s))</span>
-</span><span id="line-298"><span class="sd">    ---</span>
-</span><span id="line-299"><span class="sd">    trigger: model_decision</span>
-</span><span id="line-300"><span class="sd">    description: Lint rules</span>
+</span><span id="line-291"><span class="k">def</span><span class="w"> </span><span class="nf">to_windsurf_rule</span><span class="p">(</span><span class="n">skill</span><span class="p">:</span> <span class="n">Skill</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="line-292"><span class="w">    </span><span class="sd">"""Translate a Skill to a Windsurf rule, applied when the model judges it relevant.</span>
+</span><span id="line-293">
+</span><span id="line-294"><span class="sd">    ``metadata`` keys ``windsurf.trigger`` (default ``model_decision``) and</span>
+</span><span id="line-295"><span class="sd">    ``windsurf.globs`` pass through. Lossy: ``allowed-tools``, ``license`` and</span>
+</span><span id="line-296"><span class="sd">    bundled resources are dropped.</span>
+</span><span id="line-297">
+</span><span id="line-298"><span class="sd">    &gt;&gt;&gt; from skill.base import SkillMeta</span>
+</span><span id="line-299"><span class="sd">    &gt;&gt;&gt; s = Skill(meta=SkillMeta(name='lint', description='Lint rules'), body='Use ruff.')</span>
+</span><span id="line-300"><span class="sd">    &gt;&gt;&gt; print(to_windsurf_rule(s))</span>
 </span><span id="line-301"><span class="sd">    ---</span>
-</span><span id="line-302"><span class="sd">    &lt;BLANKLINE&gt;</span>
-</span><span id="line-303"><span class="sd">    Use ruff.</span>
-</span><span id="line-304"><span class="sd">    """</span>
-</span><span id="line-305">    <span class="n">_warn_lossy</span><span class="p">(</span><span class="n">skill</span><span class="p">,</span> <span class="n">target_format</span><span class="o">=</span><span class="s2">"windsurf_md"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"a Windsurf rule"</span><span class="p">)</span>
-</span><span id="line-306">    <span class="n">meta</span> <span class="o">=</span> <span class="n">skill</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">metadata</span>
-</span><span id="line-307">    <span class="n">trigger</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"windsurf.trigger"</span><span class="p">,</span> <span class="s2">"model_decision"</span><span class="p">)</span>
-</span><span id="line-308">    <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"---"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"trigger: </span><span class="si">{</span><span class="n">_yaml_scalar</span><span class="p">(</span><span class="n">trigger</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span>
-</span><span id="line-309">    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"description: </span><span class="si">{</span><span class="n">_yaml_scalar</span><span class="p">(</span><span class="n">skill</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">description</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</span><span id="line-310">    <span class="k">if</span> <span class="n">globs</span> <span class="o">:=</span> <span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"windsurf.globs"</span><span class="p">):</span>
-</span><span id="line-311">        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"globs: </span><span class="si">{</span><span class="n">_yaml_scalar</span><span class="p">(</span><span class="n">globs</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</span><span id="line-312">    <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span><span class="s2">"---"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="n">skill</span><span class="o">.</span><span class="n">body</span><span class="p">]</span>
-</span><span id="line-313">    <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
+</span><span id="line-302"><span class="sd">    trigger: model_decision</span>
+</span><span id="line-303"><span class="sd">    description: Lint rules</span>
+</span><span id="line-304"><span class="sd">    ---</span>
+</span><span id="line-305"><span class="sd">    &lt;BLANKLINE&gt;</span>
+</span><span id="line-306"><span class="sd">    Use ruff.</span>
+</span><span id="line-307"><span class="sd">    """</span>
+</span><span id="line-308">    <span class="n">_warn_lossy</span><span class="p">(</span><span class="n">skill</span><span class="p">,</span> <span class="n">target_format</span><span class="o">=</span><span class="s2">"windsurf_md"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"a Windsurf rule"</span><span class="p">)</span>
+</span><span id="line-309">    <span class="n">meta</span> <span class="o">=</span> <span class="n">skill</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">metadata</span>
+</span><span id="line-310">    <span class="n">trigger</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"windsurf.trigger"</span><span class="p">,</span> <span class="s2">"model_decision"</span><span class="p">)</span>
+</span><span id="line-311">    <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"---"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"trigger: </span><span class="si">{</span><span class="n">_yaml_scalar</span><span class="p">(</span><span class="n">trigger</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span>
+</span><span id="line-312">    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"description: </span><span class="si">{</span><span class="n">_yaml_scalar</span><span class="p">(</span><span class="n">skill</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">description</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="line-313">    <span class="k">if</span> <span class="n">globs</span> <span class="o">:=</span> <span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"windsurf.globs"</span><span class="p">):</span>
+</span><span id="line-314">        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"globs: </span><span class="si">{</span><span class="n">_yaml_scalar</span><span class="p">(</span><span class="n">globs</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="line-315">    <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span><span class="s2">"---"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="n">skill</span><span class="o">.</span><span class="n">body</span><span class="p">]</span>
+</span><span id="line-316">    <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
 
-</span><span id="line-314">
-</span><span id="line-315">
-</span><span id="line-316"><span class="n">translators</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">"windsurf_md"</span><span class="p">,</span> <span class="n">to_windsurf_rule</span><span class="p">)</span>
-</span><span id="line-317"><span class="n">translation_losses</span><span class="o">.</span><span class="n">register</span><span class="p">(</span>
-</span><span id="line-318">    <span class="s2">"windsurf_md"</span><span class="p">,</span>
-</span><span id="line-319">    <span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">_dropped</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s2">"allowed-tools"</span><span class="p">,</span> <span class="s2">"license"</span><span class="p">,</span> <span class="s2">"resources"</span><span class="p">)),</span>
-</span><span id="line-320"><span class="p">)</span>
-</span><span id="line-321">
-</span><span id="line-322">
-</span><span id="line-323"><span class="c1"># ---------------------------------------------------------------------------</span>
-</span><span id="line-324"><span class="c1"># SKILL.md -&gt; Cline rule (.clinerules/&lt;name&gt;.md)</span>
-</span><span id="line-325"><span class="c1"># ---------------------------------------------------------------------------</span>
-</span><span id="line-326">
-</span><span id="line-327">
+</span><span id="line-317">
+</span><span id="line-318">
+</span><span id="line-319"><span class="n">translators</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">"windsurf_md"</span><span class="p">,</span> <span class="n">to_windsurf_rule</span><span class="p">)</span>
+</span><span id="line-320"><span class="n">translation_losses</span><span class="o">.</span><span class="n">register</span><span class="p">(</span>
+</span><span id="line-321">    <span class="s2">"windsurf_md"</span><span class="p">,</span>
+</span><span id="line-322">    <span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">_dropped</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s2">"allowed-tools"</span><span class="p">,</span> <span class="s2">"license"</span><span class="p">,</span> <span class="s2">"resources"</span><span class="p">)),</span>
+</span><span id="line-323"><span class="p">)</span>
+</span><span id="line-324">
+</span><span id="line-325">
+</span><span id="line-326"><span class="c1"># ---------------------------------------------------------------------------</span>
+</span><span id="line-327"><span class="c1"># SKILL.md -&gt; Cline rule (.clinerules/&lt;name&gt;.md)</span>
+</span><span id="line-328"><span class="c1"># ---------------------------------------------------------------------------</span>
+</span><span id="line-329">
+</span><span id="line-330">
 <div class="viewcode-block" id="to_cline_rule">
 <a class="viewcode-back" href="../../_autosummary/skill.translate.html#skill.translate.to_cline_rule">[docs]</a>
-</span><span id="line-328"><span class="k">def</span><span class="w"> </span><span class="nf">to_cline_rule</span><span class="p">(</span><span class="n">skill</span><span class="p">:</span> <span class="n">Skill</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="line-329"><span class="w">    </span><span class="sd">"""Translate a Skill to a Cline rule file (Markdown; always active).</span>
-</span><span id="line-330">
-</span><span id="line-331"><span class="sd">    ``metadata`` key ``cline.paths`` becomes the ``paths`` frontmatter that makes the</span>
-</span><span id="line-332"><span class="sd">    rule conditional. Lossy: no progressive disclosure, and ``allowed-tools``,</span>
-</span><span id="line-333"><span class="sd">    ``license`` and bundled resources are dropped.</span>
-</span><span id="line-334">
-</span><span id="line-335"><span class="sd">    &gt;&gt;&gt; from skill.base import SkillMeta</span>
-</span><span id="line-336"><span class="sd">    &gt;&gt;&gt; s = Skill(meta=SkillMeta(name='lint', description='Lint rules'), body='Use ruff.')</span>
-</span><span id="line-337"><span class="sd">    &gt;&gt;&gt; to_cline_rule(s).splitlines()[:3]</span>
-</span><span id="line-338"><span class="sd">    ['# lint', '', '&gt; Lint rules']</span>
-</span><span id="line-339"><span class="sd">    """</span>
-</span><span id="line-340">    <span class="n">_warn_lossy</span><span class="p">(</span><span class="n">skill</span><span class="p">,</span> <span class="n">target_format</span><span class="o">=</span><span class="s2">"clinerules_md"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"a Cline rule"</span><span class="p">)</span>
-</span><span id="line-341">    <span class="n">body</span> <span class="o">=</span> <span class="n">_md_section</span><span class="p">(</span><span class="n">skill</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"## "</span><span class="p">,</span> <span class="s2">"# "</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-</span><span id="line-342">    <span class="k">if</span> <span class="n">paths</span> <span class="o">:=</span> <span class="n">skill</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"cline.paths"</span><span class="p">):</span>
-</span><span id="line-343">        <span class="k">return</span> <span class="sa">f</span><span class="s2">"---</span><span class="se">\n</span><span class="s2">paths: </span><span class="si">{</span><span class="n">_yaml_scalar</span><span class="p">(</span><span class="n">paths</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">---</span><span class="se">\n\n</span><span class="si">{</span><span class="n">body</span><span class="si">}</span><span class="s2">"</span>
-</span><span id="line-344">    <span class="k">return</span> <span class="n">body</span></div>
+</span><span id="line-331"><span class="k">def</span><span class="w"> </span><span class="nf">to_cline_rule</span><span class="p">(</span><span class="n">skill</span><span class="p">:</span> <span class="n">Skill</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="line-332"><span class="w">    </span><span class="sd">"""Translate a Skill to a Cline rule file (Markdown; always active).</span>
+</span><span id="line-333">
+</span><span id="line-334"><span class="sd">    ``metadata`` key ``cline.paths`` becomes the ``paths`` frontmatter that makes the</span>
+</span><span id="line-335"><span class="sd">    rule conditional. Lossy: no progressive disclosure, and ``allowed-tools``,</span>
+</span><span id="line-336"><span class="sd">    ``license`` and bundled resources are dropped.</span>
+</span><span id="line-337">
+</span><span id="line-338"><span class="sd">    &gt;&gt;&gt; from skill.base import SkillMeta</span>
+</span><span id="line-339"><span class="sd">    &gt;&gt;&gt; s = Skill(meta=SkillMeta(name='lint', description='Lint rules'), body='Use ruff.')</span>
+</span><span id="line-340"><span class="sd">    &gt;&gt;&gt; to_cline_rule(s).splitlines()[:3]</span>
+</span><span id="line-341"><span class="sd">    ['# lint', '', '&gt; Lint rules']</span>
+</span><span id="line-342"><span class="sd">    """</span>
+</span><span id="line-343">    <span class="n">_warn_lossy</span><span class="p">(</span><span class="n">skill</span><span class="p">,</span> <span class="n">target_format</span><span class="o">=</span><span class="s2">"clinerules_md"</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"a Cline rule"</span><span class="p">)</span>
+</span><span id="line-344">    <span class="n">body</span> <span class="o">=</span> <span class="n">_md_section</span><span class="p">(</span><span class="n">skill</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"## "</span><span class="p">,</span> <span class="s2">"# "</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</span><span id="line-345">    <span class="k">if</span> <span class="n">paths</span> <span class="o">:=</span> <span class="n">skill</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"cline.paths"</span><span class="p">):</span>
+</span><span id="line-346">        <span class="k">return</span> <span class="sa">f</span><span class="s2">"---</span><span class="se">\n</span><span class="s2">paths: </span><span class="si">{</span><span class="n">_yaml_scalar</span><span class="p">(</span><span class="n">paths</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">---</span><span class="se">\n\n</span><span class="si">{</span><span class="n">body</span><span class="si">}</span><span class="s2">"</span>
+</span><span id="line-347">    <span class="k">return</span> <span class="n">body</span></div>
 
-</span><span id="line-345">
-</span><span id="line-346">
-</span><span id="line-347"><span class="n">translators</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">"clinerules_md"</span><span class="p">,</span> <span class="n">to_cline_rule</span><span class="p">)</span>
-</span><span id="line-348"><span class="n">translation_losses</span><span class="o">.</span><span class="n">register</span><span class="p">(</span>
-</span><span id="line-349">    <span class="s2">"clinerules_md"</span><span class="p">,</span>
-</span><span id="line-350">    <span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">_dropped</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s2">"allowed-tools"</span><span class="p">,</span> <span class="s2">"license"</span><span class="p">,</span> <span class="s2">"resources"</span><span class="p">)),</span>
-</span><span id="line-351"><span class="p">)</span>
-</span><span id="line-352">
-</span><span id="line-353">
-</span><span id="line-354"><span class="c1"># ---------------------------------------------------------------------------</span>
-</span><span id="line-355"><span class="c1"># Dispatcher</span>
-</span><span id="line-356"><span class="c1"># ---------------------------------------------------------------------------</span>
-</span><span id="line-357">
-</span><span id="line-358">
+</span><span id="line-348">
+</span><span id="line-349">
+</span><span id="line-350"><span class="n">translators</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">"clinerules_md"</span><span class="p">,</span> <span class="n">to_cline_rule</span><span class="p">)</span>
+</span><span id="line-351"><span class="n">translation_losses</span><span class="o">.</span><span class="n">register</span><span class="p">(</span>
+</span><span id="line-352">    <span class="s2">"clinerules_md"</span><span class="p">,</span>
+</span><span id="line-353">    <span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">_dropped</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">(</span><span class="s2">"allowed-tools"</span><span class="p">,</span> <span class="s2">"license"</span><span class="p">,</span> <span class="s2">"resources"</span><span class="p">)),</span>
+</span><span id="line-354"><span class="p">)</span>
+</span><span id="line-355">
+</span><span id="line-356">
+</span><span id="line-357"><span class="c1"># ---------------------------------------------------------------------------</span>
+</span><span id="line-358"><span class="c1"># Dispatcher</span>
+</span><span id="line-359"><span class="c1"># ---------------------------------------------------------------------------</span>
+</span><span id="line-360">
+</span><span id="line-361">
 <div class="viewcode-block" id="translate">
 <a class="viewcode-back" href="../../_autosummary/skill.translate.html#skill.translate.translate">[docs]</a>
-</span><span id="line-359"><span class="k">def</span><span class="w"> </span><span class="nf">translate</span><span class="p">(</span><span class="n">skill</span><span class="p">:</span> <span class="n">Skill</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">target_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="line-360"><span class="w">    </span><span class="sd">"""Translate a Skill to the specified target format.</span>
-</span><span id="line-361">
-</span><span id="line-362"><span class="sd">    &gt;&gt;&gt; from skill.base import SkillMeta</span>
-</span><span id="line-363"><span class="sd">    &gt;&gt;&gt; s = Skill(meta=SkillMeta(name='x', description='y'), body='z')</span>
-</span><span id="line-364"><span class="sd">    &gt;&gt;&gt; 'alwaysApply' in translate(s, target_format='mdc')</span>
-</span><span id="line-365"><span class="sd">    True</span>
-</span><span id="line-366"><span class="sd">    """</span>
-</span><span id="line-367">    <span class="n">translator</span> <span class="o">=</span> <span class="n">translators</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">target_format</span><span class="p">)</span>
-</span><span id="line-368">    <span class="k">if</span> <span class="n">translator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-369">        <span class="n">available</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">translators</span><span class="p">))</span>
-</span><span id="line-370">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-</span><span id="line-371">            <span class="sa">f</span><span class="s2">"Unknown target format: </span><span class="si">{</span><span class="n">target_format</span><span class="si">!r}</span><span class="s2">. Available: </span><span class="si">{</span><span class="n">available</span><span class="si">}</span><span class="s2">"</span>
-</span><span id="line-372">        <span class="p">)</span>
-</span><span id="line-373">    <span class="k">return</span> <span class="n">translator</span><span class="p">(</span><span class="n">skill</span><span class="p">)</span></div>
+</span><span id="line-362"><span class="k">def</span><span class="w"> </span><span class="nf">translate</span><span class="p">(</span><span class="n">skill</span><span class="p">:</span> <span class="n">Skill</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">target_format</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="line-363"><span class="w">    </span><span class="sd">"""Translate a Skill to the specified target format.</span>
+</span><span id="line-364">
+</span><span id="line-365"><span class="sd">    &gt;&gt;&gt; from skill.base import SkillMeta</span>
+</span><span id="line-366"><span class="sd">    &gt;&gt;&gt; s = Skill(meta=SkillMeta(name='x', description='y'), body='z')</span>
+</span><span id="line-367"><span class="sd">    &gt;&gt;&gt; 'alwaysApply' in translate(s, target_format='mdc')</span>
+</span><span id="line-368"><span class="sd">    True</span>
+</span><span id="line-369"><span class="sd">    """</span>
+</span><span id="line-370">    <span class="n">translator</span> <span class="o">=</span> <span class="n">translators</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">target_format</span><span class="p">)</span>
+</span><span id="line-371">    <span class="k">if</span> <span class="n">translator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-372">        <span class="n">available</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">translators</span><span class="p">))</span>
+</span><span id="line-373">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+</span><span id="line-374">            <span class="sa">f</span><span class="s2">"Unknown target format: </span><span class="si">{</span><span class="n">target_format</span><span class="si">!r}</span><span class="s2">. Available: </span><span class="si">{</span><span class="n">available</span><span class="si">}</span><span class="s2">"</span>
+</span><span id="line-375">        <span class="p">)</span>
+</span><span id="line-376">    <span class="k">return</span> <span class="n">translator</span><span class="p">(</span><span class="n">skill</span><span class="p">)</span></div>
 
 </span></code></pre></div>
     </div></div>
@@ -590,7 +593,7 @@
 </footer>
     </div>
     
-    <script src="../../_static/documentation_options.js?v=ebdbb45b"></script>
+    <script src="../../_static/documentation_options.js?v=4fa33042"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
