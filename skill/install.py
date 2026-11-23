@@ -192,6 +192,7 @@ def install_from_github(
     agent: str = "claude-code",
     preview: bool = False,
     pin: str | None = None,
+    scope: str | None = None,
 ) -> list[dict]:
     """Install (or preview) skills published on GitHub via the ``gh skill`` CLI.
 
@@ -214,6 +215,10 @@ def install_from_github(
         A tag or commit SHA to install, passed as ``gh skill install --pin``, so the
         install is reproducible and ``gh skill update`` leaves it alone. ``None``
         (default) installs the latest. Ignored for previews.
+    scope : str | None
+        ``'project'`` or ``'user'`` (``'global'`` is accepted as ``'user'``), passed as
+        ``gh skill install --scope``. ``None`` (default) leaves it to ``gh``. Ignored
+        for previews.
 
     Returns
     -------
@@ -234,6 +239,10 @@ def install_from_github(
     """
     if isinstance(names, str):
         names = [names]
+    if scope == "global":
+        scope = "user"
+    if scope not in (None, "project", "user"):
+        raise ValueError(f"scope must be 'project' or 'user', got {scope!r}")
     if pin is not None and (inline := [n for n in names if "@" in n]):
         raise ValueError(
             f"pin={pin!r} cannot be combined with an inline @version in {inline}: "
@@ -254,6 +263,8 @@ def install_from_github(
             argv += ["--agent", agent]
             if pin is not None:
                 argv += ["--pin", pin]
+            if scope is not None:
+                argv += ["--scope", scope]
         try:
             proc = subprocess.run(
                 argv,
@@ -468,6 +479,34 @@ def install(
             )
         project_dir = Path(project_dir)
 
+    return _install_to_targets(
+        skill,
+        skill.source_path or store._key_to_path(key),
+        targets=targets,
+        scope=scope,
+        project_dir=project_dir,
+        copy=copy,
+        force=force,
+        key=key,
+    )
+
+
+def _install_to_targets(
+    skill: Skill,
+    source_path: Path,
+    *,
+    targets: list[str],
+    scope: str,
+    project_dir: Path | None,
+    copy: bool,
+    force: bool,
+    key: str | None = None,
+) -> dict[str, Path]:
+    """Install one skill (whose folder is ``source_path``) into each agent target.
+
+    The shared core of :func:`install` (a skill in the local store) and
+    :func:`install_from_package` (a skill shipped inside an installed package).
+    """
     installed = {}
     for target_name in targets:
         target = AGENT_TARGETS.get(target_name)
@@ -521,7 +560,7 @@ def install(
             installed[target_name] = dest
         else:
             # Symlink/copy the skill directory
-            source = skill.source_path or store._key_to_path(key)
+            source = source_path
             _create_link(source, dest, copy=copy, force=force)
             installed[target_name] = dest
             if scope == "project":
@@ -529,11 +568,111 @@ def install(
                     warnings.warn(
                         f"{old} is an older rules-file install of {skill_name!r} for "
                         f"{target.host_name}; the host may now load the skill twice. "
-                        f"Remove it with uninstall({key!r}, agent_targets="
+                        f"Remove it with uninstall({key or skill_name!r}, agent_targets="
                         f"[{_legacy_target_name(target.host_name)!r}])",
                         stacklevel=2,
                     )
 
+    return installed
+
+
+#: Where a distribution keeps the skills it ships, relative to its import package:
+#: ``package-data-skills`` and ``wheel-included-skills`` (the latter copies the
+#: repository's top-level ``skills/`` into the wheel at build time).
+PACKAGE_SKILLS_SUBPATHS: tuple[tuple[str, ...], ...] = (
+    ("data", "skills"),
+    ("_skills",),
+)
+
+
+def find_package_skills(distribution: str) -> Path:
+    """The folder holding the skills shipped by an installed ``distribution``.
+
+    The import packages come from the distribution's metadata (``top_level.txt``,
+    its file list, and its normalised name), never from a folder name, and each
+    is located with ``importlib`` so editable installs work too.
+
+    Raises ``LookupError`` if the distribution is not installed or ships no skills.
+    """
+    import importlib.util
+    from importlib import metadata
+
+    try:
+        dist = metadata.distribution(distribution)
+    except metadata.PackageNotFoundError:
+        raise LookupError(f"Distribution {distribution!r} is not installed") from None
+    names: list[str] = []
+    top_level = dist.read_text("top_level.txt") or ""
+    names += top_level.split()
+    for f in dist.files or ():
+        top = f.parts[0] if len(f.parts) > 1 else ""
+        if (
+            top
+            and not top.endswith((".dist-info", ".egg-info"))
+            and top != "__pycache__"
+        ):
+            names.append(top)
+    names.append(distribution.replace("-", "_").lower())
+    for name in dict.fromkeys(names):
+        try:
+            spec = importlib.util.find_spec(name)
+        except (ImportError, ValueError):
+            continue
+        for location in (spec.submodule_search_locations or ()) if spec else ():
+            for subpath in PACKAGE_SKILLS_SUBPATHS:
+                candidate = Path(location, *subpath)
+                if _has_skills(candidate):
+                    return candidate
+    raise LookupError(
+        f"Distribution {distribution!r} ships no skills (looked for "
+        + ", ".join("<pkg>/" + "/".join(p) for p in PACKAGE_SKILLS_SUBPATHS)
+        + ")"
+    )
+
+
+def install_from_package(
+    distribution: str,
+    *,
+    agent_targets: list[str] | None = None,
+    scope: str = "project",
+    copy: bool = False,
+    force: bool = False,
+    project_dir: Path | str | None = None,
+) -> dict[str, dict[str, Path]]:
+    """Install the skills shipped by an installed distribution into agent hosts.
+
+    Finds them with :func:`find_package_skills`, validates each (an invalid skill is
+    skipped with a warning), and links or copies it to every agent target. Returns
+    ``{skill_name: {agent_target: path}}``.
+    """
+    source = find_package_skills(distribution)
+    targets = agent_targets or load_config().default_agent_targets
+    if scope == "project":
+        project_dir = Path(project_dir) if project_dir else find_project_root()
+        if project_dir is None:
+            raise RuntimeError(
+                "Could not detect project root. Pass project_dir explicitly "
+                "or run from within a project directory."
+            )
+    installed: dict[str, dict[str, Path]] = {}
+    for name, skill_dir in _iter_skill_dirs(source):
+        skill = Skill.from_path(skill_dir)
+        issues = _validate_skill(skill)
+        if issues:
+            warnings.warn(
+                f"Skipping invalid skill {name!r} at {skill_dir}: " + "; ".join(issues),
+                stacklevel=2,
+            )
+            continue
+        installed[name] = _install_to_targets(
+            skill,
+            skill_dir,
+            targets=targets,
+            scope=scope,
+            project_dir=project_dir,
+            copy=copy,
+            force=force,
+        )
     return installed
 
 
