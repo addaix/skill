@@ -138,6 +138,31 @@ Verify the wheel actually contains them:
 python -m build --wheel >/dev/null && unzip -l dist/*.whl | grep -i skills
 ```
 
+**`wheel-included-skills`** (real files in top-level `skills/`, copied into the wheel at
+build time; decision record addaix/skill#8, recipe #31). hatchling only:
+
+```toml
+[tool.hatch.build.targets.wheel.force-include]
+"skills" = "your_pkg/_skills"
+```
+
+`python -c "from skill import wheel_skills_snippet; print(wheel_skills_snippet('your_pkg'))"`
+prints it. The copy exists only in the wheel: never commit `your_pkg/_skills/`, and never
+make it a symlink (whether `gh skill` follows one is unverified). Everything in `skills/`
+ships, developer skills included, so keep `<pkg>-dev-…` skills out of this method's repos
+or accept that users see them. Check a build:
+
+```bash
+python -m build --wheel && skill check-wheel-skills dist/your_pkg-*.whl
+```
+
+It fails unless every `skills/<name>/` file is in the wheel under `your_pkg/_skills/<name>/`
+byte for byte, each `SKILL.md` is in the wheel once, and the repository holds each skill in
+one place; it warns about a developer skill that ships. After `pip install your-package`,
+`skill install-from-package your-package --agent claude-code` finds `your_pkg/_skills`.
+setuptools cannot copy a folder from outside the package into the wheel: a setuptools
+package that wants skills in its wheel uses `package-data-skills` instead.
+
 ## Step 4: document install (README)
 
 `gh skill` is the primary, cross-agent path; pip is the bundled/offline path:

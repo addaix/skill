@@ -8,6 +8,7 @@ Usage::
     python -m skill validate ./my-skill/
     python -m skill list
     python -m skill link-skills /path/to/project
+    python -m skill check-wheel-skills dist/my_pkg-0.1.0-py3-none-any.whl
     python -m skill install-completion
     python -m skill sources
 """
@@ -26,6 +27,7 @@ from skill import show as _show
 from skill import link_skills as _link_skills
 from skill import sources as _sources
 from skill import check_dependencies
+from skill.wheel import check_wheel_skills as _check_wheel_skills
 from skill.stores import LocalSkillStore
 from skill.completion import install_completion, maybe_hint_completion
 from skill.cli_format import (
@@ -109,6 +111,19 @@ def install_from_package(
         )
         or f"No valid skills installed from {distribution}."
     )
+
+
+def check_wheel_skills(
+    wheel: str,
+    *,
+    repo_root: str = ".",
+    package: str | None = None,
+) -> str:
+    """Check a built wheel holds the repository's skills/ once, as <pkg>/_skills (wheel-included-skills)."""
+    report = _check_wheel_skills(wheel, repo_root, package=package)
+    if not report.ok:
+        raise SystemExit(str(report))
+    return str(report)
 
 
 def install(
@@ -196,6 +211,7 @@ COMMANDS = [
     search,
     install,
     install_from_package,
+    check_wheel_skills,
     gh_install,
     uninstall,
     create,

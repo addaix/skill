@@ -31,6 +31,7 @@ from skill.install import (
     find_package_skills,
 )
 from skill.bundled import install_bundled, claude_homes
+from skill.wheel import check_wheel_skills, wheel_skills_snippet
 from skill.create import create, scaffold, validate, check_dependencies
 from skill.base import Skill, SkillMeta, SkillInfo
 from skill.stores import LocalSkillStore
