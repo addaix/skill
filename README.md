@@ -72,7 +72,7 @@ skill link-skills /path/to/project --target ~/.claude/skills --force
 skill check-wheel-skills dist/my_pkg-0.1.0-py3-none-any.whl     # skills/ shipped once, as my_pkg/_skills
 ```
 
-To ship a package's top-level `skills/` inside its wheel too (the `wheel-included-skills` method), add `[tool.hatch.build.targets.wheel.force-include]` with `"skills" = "my_pkg/_skills"` to `pyproject.toml` and check each build with `skill check-wheel-skills`. Users then run `skill install-from-package my-pkg`.
+To ship a package's top-level `skills/` inside its wheel too (the `wheel-included-skills` method), add `[tool.hatch.build.targets.wheel.force-include]` with `"skills" = "my_pkg/_skills"` to `pyproject.toml` and check each build with `skill check-wheel-skills`. Users then run `skill install-from-package my-pkg` (for an editable install it reads the project's `skills/` in place).
 
 ### Shell completion
 

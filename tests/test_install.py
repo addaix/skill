@@ -354,3 +354,79 @@ def test_every_rules_file_target_names_its_host():
         'cursor', 'copilot', 'windsurf', 'cline', 'gemini'
     }
     assert all(t.host_name in AGENT_TARGETS for t in rules.values())
+
+
+# -- review findings on addaix/skill#27: a copy is recognised by more than its SKILL.md --
+
+
+def _store_skill_dir(store):
+    return store._key_to_path('alice/greet')
+
+
+def test_reinstalling_a_copy_refreshes_a_changed_supporting_file(tmp_path):
+    store, project = _setup_store_and_project(tmp_path)
+    kw = dict(scope='project', project_dir=project, store=store, copy=True)
+    src = _store_skill_dir(store)
+    (src / 'scripts').mkdir()
+    (src / 'scripts' / 'run.py').write_text("print('v1')\n")
+    install('alice/greet', agent_targets=['cursor'], **kw)
+    (src / 'scripts' / 'run.py').write_text("print('v2')\n")  # SKILL.md unchanged
+    result = install('alice/greet', agent_targets=['cursor'], **kw)
+    assert (result['cursor'] / 'scripts' / 'run.py').read_text() == "print('v2')\n"
+
+
+def test_an_unmarked_copy_with_other_files_is_not_overwritten_without_force(tmp_path):
+    import shutil
+
+    store, project = _setup_store_and_project(tmp_path)
+    src = _store_skill_dir(store)
+    dest = project / '.agents' / 'skills' / 'greet'
+    shutil.copytree(src, dest)  # e.g. made by hand, then edited
+    (dest / 'notes.md').write_text('my edits\n')
+    kw = dict(scope='project', project_dir=project, store=store, copy=True)
+    with pytest.raises(FileExistsError, match='force=True'):
+        install('alice/greet', agent_targets=['cursor'], **kw)
+    assert (dest / 'notes.md').is_file()
+
+
+def test_uninstall_removes_its_copy_after_the_store_skill_changed(tmp_path):
+    store, project = _setup_store_and_project(tmp_path)
+    kw = dict(scope='project', project_dir=project, store=store)
+    install('alice/greet', agent_targets=['claude-code'], copy=True, **kw)
+    src = _store_skill_dir(store)
+    (src / 'SKILL.md').write_text(
+        (src / 'SKILL.md').read_text().replace('Say hello to the user.', 'Say hi.')
+    )
+    removed = uninstall('alice/greet', agent_targets=['claude-code'], **kw)
+    assert not removed['claude-code'].exists()
+
+
+def test_uninstall_for_a_host_removes_its_older_rules_file_install(tmp_path):
+    store, project = _setup_store_and_project(tmp_path)
+    kw = dict(scope='project', project_dir=project, store=store)
+    install('alice/greet', agent_targets=['cursor-rules'], **kw)
+    mdc = project / '.cursor' / 'rules' / 'greet.mdc'
+    assert mdc.is_file()
+    removed = uninstall('alice/greet', agent_targets=['cursor'], **kw)
+    assert removed == {'cursor-rules': mdc} and not mdc.exists()
+
+
+def test_uninstall_for_a_host_flags_an_edited_rules_file_and_keeps_it(tmp_path):
+    store, project = _setup_store_and_project(tmp_path)
+    kw = dict(scope='project', project_dir=project, store=store)
+    install('alice/greet', agent_targets=['cursor-rules'], **kw)
+    mdc = project / '.cursor' / 'rules' / 'greet.mdc'
+    mdc.write_text(mdc.read_text() + '\nmy own rule\n')
+    with pytest.warns(UserWarning, match=r"agent_targets=\['cursor-rules'\]"):
+        removed = uninstall('alice/greet', agent_targets=['cursor'], **kw)
+    assert removed == {} and mdc.is_file()
+
+
+def test_uninstall_for_a_host_removes_its_section_of_a_shared_rules_file(tmp_path):
+    store, project = _setup_store_and_project(tmp_path)
+    kw = dict(scope='project', project_dir=project, store=store)
+    install('alice/greet', agent_targets=['copilot-instructions'], **kw)
+    shared = project / '.github' / 'copilot-instructions.md'
+    removed = uninstall('alice/greet', agent_targets=['copilot'], **kw)
+    assert removed == {'copilot-instructions': shared}
+    assert '<!-- skill:greet -->' not in shared.read_text()
