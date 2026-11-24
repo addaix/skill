@@ -529,7 +529,8 @@ def _create_link(
     copy of its whole tree, e.g. made for another host sharing the folder) is kept.
     One this package made (a link to ``source``, or a marked copy of the same ``key``,
     else the same skill ``name``, not edited since) is refreshed. Anything else, such
-    as a folder holding someone's edits, raises ``FileExistsError`` unless ``force``.
+    as a folder holding someone's edits, raises ``FileExistsError`` unless ``force``;
+    a dangling link (its target gone) is replaced, since it holds nothing.
     A copy carries a small marker file (:data:`INSTALL_MARKER`) so it is recognised
     later. The new installation is built next to ``target`` and swapped in, so a
     failure leaves the old one in place. ``target`` may never be ``source`` itself.
@@ -544,7 +545,13 @@ def _create_link(
             raise ValueError(f"{target} overlaps the skill's own source {source}")
         if _is_current(target, source, copy=copy):
             return target  # already there (e.g. another host sharing the folder)
-        if not force and not _is_install_of(target, source, key=key, name=name):
+        try:
+            dangling = _is_link(target) and not target.exists()  # nothing to lose
+        except OSError:  # unreadable: not known to be dangling
+            dangling = False
+        if not (force or dangling) and not _is_install_of(
+            target, source, key=key, name=name
+        ):
             raise FileExistsError(
                 f"Target already exists ({_check_existing(target)}): {target}. "
                 f"Use force=True to overwrite."

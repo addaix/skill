@@ -206,12 +206,117 @@ def test_only_skills_folders_count_as_duplicates(tmp_path):
 
 
 def test_setuptools_variant_and_config_dict():
-    assert wheel_skills_config("p", backend="setuptools")["tool"]["setuptools"][
-        "package-dir"
-    ] == {"p._skills": "skills"}
+    """setuptools cannot keep discovery and add the mapped package from pyproject.toml
+    alone (addaix/skill#44): the recipe is a setup.py, and the dict form says so."""
+    snippet = wheel_skills_snippet("p", backend="setuptools")
+    assert "find_packages(" in snippet and '"p._skills": "skills"' in snippet
+    with pytest.raises(ValueError, match="setup.py"):
+        wheel_skills_config("p", backend="setuptools")
     assert "force-include" in wheel_skills_snippet("p")
     with pytest.raises(ValueError):
         wheel_skills_config("p", backend="flit")
+
+
+def _setuptools_repo(root: Path, *, setup_py: str | None = None) -> Path:
+    """A flat-layout setuptools project with a subpackage and one skill."""
+    pkg = root / "p"
+    (pkg / "sub").mkdir(parents=True)
+    (pkg / "__init__.py").write_text("")
+    (pkg / "sub" / "__init__.py").write_text("")
+    skill_dir = root / "skills" / "demo"
+    (skill_dir / "scripts").mkdir(parents=True)
+    (skill_dir / "SKILL.md").write_text(SKILL_MD.format(name="demo", extra=""))
+    (skill_dir / "scripts" / "run.py").write_text("print(1)\n")
+    (root / "pyproject.toml").write_text(
+        "[build-system]\n"
+        'requires = ["setuptools>=64"]\n'
+        'build-backend = "setuptools.build_meta"\n\n'
+        '[project]\nname = "p"\nversion = "0.1.0"\n'
+    )
+    (root / "setup.py").write_text(
+        setup_py or wheel_skills_snippet("p", backend="setuptools") + "\n"
+    )
+    return root
+
+
+def _setuptools_build(repo: Path, out: Path, *, through_sdist: bool = True) -> Path:
+    """Build like a release (sdist, then the wheel from the unpacked sdist), in a
+    subprocess so setuptools' global state stays out of this one."""
+    import subprocess
+    import textwrap
+
+    out.mkdir()
+    script = textwrap.dedent(
+        """
+        import os, sys, tarfile
+        from setuptools import build_meta as b
+        repo, out, via_sdist = sys.argv[1], sys.argv[2], sys.argv[3] == "1"
+        os.chdir(repo)
+        if via_sdist:
+            sdist = b.build_sdist(out)
+            with tarfile.open(os.path.join(out, sdist)) as tf:
+                kw = {"filter": "data"} if hasattr(tarfile, "data_filter") else {}
+                tf.extractall(os.path.join(out, "src"), **kw)
+            os.chdir(os.path.join(out, "src", sdist[: -len(".tar.gz")]))
+        print(b.build_wheel(out))
+        """
+    )
+    done = subprocess.run(
+        [sys.executable, "-c", script, str(repo), str(out), "1" if through_sdist else "0"],
+        capture_output=True,
+        text=True,
+    )
+    assert done.returncode == 0, done.stderr[-2000:]
+    return out / done.stdout.strip().splitlines()[-1]
+
+
+def test_setuptools_recipe_keeps_subpackages_and_passes_the_check(tmp_path):
+    pytest.importorskip("setuptools")
+    repo = _setuptools_repo(tmp_path / "repo")
+    wheel = _setuptools_build(repo, tmp_path / "dist")
+    names = zipfile.ZipFile(wheel).namelist()
+    assert "p/sub/__init__.py" in names
+    assert f"p/{WHEEL_SKILLS_DIR}/demo/SKILL.md" in names
+    assert f"p/{WHEEL_SKILLS_DIR}/demo/scripts/run.py" in names
+    report = check_wheel_skills(wheel, repo)
+    assert report.ok, str(report)
+
+
+def test_check_fails_when_a_subpackage_is_missing_from_the_wheel(tmp_path):
+    """The old setuptools recipe (an explicit packages list) dropped subpackages."""
+    pytest.importorskip("setuptools")
+    old_recipe = (
+        "from setuptools import setup\n"
+        'setup(packages=["p", "p._skills"], package_dir={"p._skills": "skills"},\n'
+        '      package_data={"p._skills": ["**/*"]})\n'
+    )
+    repo = _setuptools_repo(tmp_path / "repo", setup_py=old_recipe)
+    wheel = _setuptools_build(repo, tmp_path / "dist", through_sdist=False)
+    assert "p/sub/__init__.py" not in zipfile.ZipFile(wheel).namelist()
+    report = check_wheel_skills(wheel, repo)
+    assert not report.ok
+    assert any("p.sub" in p and "not in the wheel" in p for p in report.problems)
+
+
+def test_a_subpackage_check_on_the_hatch_recipe(tmp_path):
+    repo = _fixture_repo(tmp_path / "repo")
+    (repo / "demo_skills_pkg" / "sub").mkdir()
+    (repo / "demo_skills_pkg" / "sub" / "__init__.py").write_text("")
+    (repo / "demo_skills_pkg" / "tests").mkdir()
+    (repo / "demo_skills_pkg" / "tests" / "__init__.py").write_text("")
+    wheel = _build(repo, tmp_path / "dist")
+    assert check_wheel_skills(wheel, repo).ok
+    # The same wheel without its subpackages: one is a problem, a tests package only
+    # a warning (leaving tests out of a wheel is often deliberate).
+    stripped = tmp_path / "stripped.whl"
+    with zipfile.ZipFile(wheel) as src, zipfile.ZipFile(stripped, "w") as dst:
+        for item in src.infolist():
+            if "/sub/" not in item.filename and "/tests/" not in item.filename:
+                dst.writestr(item, src.read(item.filename))
+    report = check_wheel_skills(stripped, repo)
+    assert any("demo_skills_pkg.sub" in p for p in report.problems)
+    assert any("demo_skills_pkg.tests" in w for w in report.warnings)
+    assert not any("demo_skills_pkg.tests" in p for p in report.problems)
 
 
 def test_cli_reports_a_missing_wheel_cleanly(tmp_path):
@@ -219,3 +324,50 @@ def test_cli_reports_a_missing_wheel_cleanly(tmp_path):
 
     with pytest.raises(SystemExit, match="Cannot read the wheel"):
         cli(str(tmp_path / "nope.whl"), repo_root=str(_fixture_repo(tmp_path / "repo")))
+
+
+def test_a_pyproject_find_table_overriding_setup_py_is_named(tmp_path):
+    """[tool.setuptools.packages.find] in pyproject.toml overrides setup.py's packages,
+    so the skills are dropped; the check says why."""
+    pytest.importorskip("setuptools")
+    repo = _setuptools_repo(tmp_path / "repo")
+    with (repo / "pyproject.toml").open("a") as f:
+        f.write('\n[tool.setuptools.packages.find]\ninclude = ["p", "p.*"]\n')
+    wheel = _setuptools_build(repo, tmp_path / "dist", through_sdist=False)
+    assert f"p/{WHEEL_SKILLS_DIR}/demo/SKILL.md" not in zipfile.ZipFile(wheel).namelist()
+    report = check_wheel_skills(wheel, repo)
+    assert not report.ok
+    assert any("[tool.setuptools.packages.find]" in p for p in report.problems)
+
+
+def test_an_excluded_tests_tree_is_one_warning_in_a_git_repo(tmp_path):
+    """Subpackages of a left-out tests package are not problems, a missing package is
+    reported once, and only tracked packages count."""
+    import subprocess
+
+    repo = _fixture_repo(tmp_path / "repo")
+    pkg = repo / "demo_skills_pkg"
+    for sub in ("tests", "tests/fixtures", "sub", "sub/deep", "scratch"):
+        (pkg / sub).mkdir(parents=True)
+        (pkg / sub / "__init__.py").write_text("")
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    subprocess.run(["git", "-C", str(repo), "add", "-A"], check=True)
+    subprocess.run(
+        ["git", "-C", str(repo), "rm", "-q", "--cached", "-r", "demo_skills_pkg/scratch"],
+        check=True,
+    )
+    wheel = _build(repo, tmp_path / "dist")
+    stripped = tmp_path / "stripped.whl"
+    with zipfile.ZipFile(wheel) as src, zipfile.ZipFile(stripped, "w") as dst:
+        for item in src.infolist():
+            if not any(f"/{d}/" in item.filename for d in ("tests", "sub", "scratch")):
+                dst.writestr(item, src.read(item.filename))
+    report = check_wheel_skills(stripped, repo)
+    assert [p for p in report.problems if "package of the repository" in p] == [
+        "demo_skills_pkg.sub: a package of the repository is not in the wheel "
+        "(demo_skills_pkg/sub/__init__.py)"
+    ]
+    assert [w for w in report.warnings if "package of the repository" in w] == [
+        "demo_skills_pkg.tests: a package of the repository is not in the wheel "
+        "(demo_skills_pkg/tests/__init__.py)"
+    ]

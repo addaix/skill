@@ -146,17 +146,23 @@ build time; decision record addaix/skill#8, recipe #31). hatchling:
 "skills" = "your_pkg/_skills"
 ```
 
-setuptools (the skills folder declared as a subpackage whose directory is `skills/`):
+setuptools: a `setup.py` beside `pyproject.toml` (which keeps the metadata), declaring the skills folder as a subpackage whose directory is `skills/` while keeping package discovery. `pyproject.toml` alone cannot do both: an explicit `[tool.setuptools] packages = [...]` list turns discovery off and every subpackage is left out of the wheel, and `[tool.setuptools.packages.find]` ignores a `package-dir` entry for a package it does not find (addaix/skill#44). Remove every `[tool.setuptools]` `packages`, `packages.find`, `package-dir` and `package-data` entry from `pyproject.toml` and move it into the `setup.py`: each one overrides the same `setup.py` setting, and the skills are silently dropped (`skill check-wheel-skills` names the table). setuptools prints a "Package would be ignored" notice for skill folders named like identifiers; they still ship as package data.
 
-```toml
-[tool.setuptools]
-packages = ["your_pkg", "your_pkg._skills"]
-package-dir = { "your_pkg._skills" = "skills" }
-package-data = { "your_pkg._skills" = ["**/*"] }
+```python
+# setup.py: keeps package discovery and adds skills/ to the wheel as your_pkg/_skills
+from setuptools import find_packages, setup
+
+setup(
+    packages=find_packages(include=["your_pkg", "your_pkg.*"]) + ["your_pkg._skills"],
+    package_dir={"your_pkg._skills": "skills"},
+    package_data={"your_pkg._skills": ["**/*"]},
+)
 ```
 
+(For a `src/` layout: `find_packages(where="src", ...)` and add `"": "src"` to `package_dir`.)
+
 `skill.wheel_skills_snippet('your_pkg', backend=...)` prints these, and
-`skill.wheel_skills_config(...)` gives them as a dict to merge into a `pyproject.toml` that
+`skill.wheel_skills_config(...)` gives the hatchling one as a dict to merge into a `pyproject.toml` that
 already has those tables. The copy exists only in the wheel: never commit
 `your_pkg/_skills/`, and never make it a symlink (whether `gh skill` follows one is
 unverified). Everything tracked in `skills/` ships, developer skills included, so keep
@@ -171,8 +177,9 @@ rm -rf dist && python -m build && skill check-wheel-skills dist/*.whl
 
 It fails unless every tracked `skills/<name>/` file is in the wheel under
 `your_pkg/_skills/<name>/` byte for byte, each `SKILL.md` is in the wheel once, and the
-repository holds each skill in one `skills/` folder; it warns about a developer skill that
-ships. After `pip install your-package`, `skill install-from-package your-package --agent
+repository holds each skill in one `skills/` folder, and every subpackage of `your_pkg` is in
+the wheel too; it warns about a developer skill that ships, and about a `tests` subpackage left
+out. After `pip install your-package`, `skill install-from-package your-package --agent
 claude-code` finds `your_pkg/_skills`.
 
 ## Step 4: document install (README)
