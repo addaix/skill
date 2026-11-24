@@ -545,7 +545,10 @@ def _create_link(
             raise ValueError(f"{target} overlaps the skill's own source {source}")
         if _is_current(target, source, copy=copy):
             return target  # already there (e.g. another host sharing the folder)
-        dangling = _is_link(target) and not target.exists()  # holds nothing to lose
+        try:
+            dangling = _is_link(target) and not target.exists()  # nothing to lose
+        except OSError:  # unreadable: not known to be dangling
+            dangling = False
         if not (force or dangling) and not _is_install_of(
             target, source, key=key, name=name
         ):

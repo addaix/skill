@@ -324,3 +324,50 @@ def test_cli_reports_a_missing_wheel_cleanly(tmp_path):
 
     with pytest.raises(SystemExit, match="Cannot read the wheel"):
         cli(str(tmp_path / "nope.whl"), repo_root=str(_fixture_repo(tmp_path / "repo")))
+
+
+def test_a_pyproject_find_table_overriding_setup_py_is_named(tmp_path):
+    """[tool.setuptools.packages.find] in pyproject.toml overrides setup.py's packages,
+    so the skills are dropped; the check says why."""
+    pytest.importorskip("setuptools")
+    repo = _setuptools_repo(tmp_path / "repo")
+    with (repo / "pyproject.toml").open("a") as f:
+        f.write('\n[tool.setuptools.packages.find]\ninclude = ["p", "p.*"]\n')
+    wheel = _setuptools_build(repo, tmp_path / "dist", through_sdist=False)
+    assert f"p/{WHEEL_SKILLS_DIR}/demo/SKILL.md" not in zipfile.ZipFile(wheel).namelist()
+    report = check_wheel_skills(wheel, repo)
+    assert not report.ok
+    assert any("[tool.setuptools.packages.find]" in p for p in report.problems)
+
+
+def test_an_excluded_tests_tree_is_one_warning_in_a_git_repo(tmp_path):
+    """Subpackages of a left-out tests package are not problems, a missing package is
+    reported once, and only tracked packages count."""
+    import subprocess
+
+    repo = _fixture_repo(tmp_path / "repo")
+    pkg = repo / "demo_skills_pkg"
+    for sub in ("tests", "tests/fixtures", "sub", "sub/deep", "scratch"):
+        (pkg / sub).mkdir(parents=True)
+        (pkg / sub / "__init__.py").write_text("")
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    subprocess.run(["git", "-C", str(repo), "add", "-A"], check=True)
+    subprocess.run(
+        ["git", "-C", str(repo), "rm", "-q", "--cached", "-r", "demo_skills_pkg/scratch"],
+        check=True,
+    )
+    wheel = _build(repo, tmp_path / "dist")
+    stripped = tmp_path / "stripped.whl"
+    with zipfile.ZipFile(wheel) as src, zipfile.ZipFile(stripped, "w") as dst:
+        for item in src.infolist():
+            if not any(f"/{d}/" in item.filename for d in ("tests", "sub", "scratch")):
+                dst.writestr(item, src.read(item.filename))
+    report = check_wheel_skills(stripped, repo)
+    assert [p for p in report.problems if "package of the repository" in p] == [
+        "demo_skills_pkg.sub: a package of the repository is not in the wheel "
+        "(demo_skills_pkg/sub/__init__.py)"
+    ]
+    assert [w for w in report.warnings if "package of the repository" in w] == [
+        "demo_skills_pkg.tests: a package of the repository is not in the wheel "
+        "(demo_skills_pkg/tests/__init__.py)"
+    ]

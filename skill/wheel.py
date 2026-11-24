@@ -108,8 +108,12 @@ def wheel_skills_snippet(
     text, for a file that has none of these tables yet (merge the dict instead when it
     has). setuptools: a ``setup.py`` that keeps package discovery (``find_packages``)
     and adds ``<package>.<target_dir>`` with ``source`` as its folder; the project's
-    metadata stays in ``pyproject.toml``, which must then set no
-    ``[tool.setuptools] packages``. The ``setup.py`` is for a flat layout
+    metadata stays in ``pyproject.toml``, which must then set none of
+    ``[tool.setuptools]`` ``packages``, ``packages.find``, ``package-dir`` or
+    ``package-data`` (each overrides the same ``setup.py`` setting: move them into
+    the ``setup.py``). setuptools prints a "Package would be ignored" notice for skill
+    folders whose names are identifiers; they are still shipped as package data. The
+    ``setup.py`` is for a flat layout
     (``<package>/`` at the root); for a ``src/`` layout pass ``where="src"`` to
     ``find_packages`` and add ``"": "src"`` to ``package_dir``.
 
@@ -316,6 +320,38 @@ def _repo_packages(repo_root: Path, package: str, target_dir: str) -> list[str]:
     return found
 
 
+#: ``[tool.setuptools]`` keys that, in ``pyproject.toml``, override the same settings of
+#: the ``setup.py`` recipe (so the skills are dropped, or the build fails).
+_SETUPTOOLS_OVERRIDES = ("packages", "package-dir", "package-data")
+
+
+def _setuptools_overrides(repo_root: Path) -> list[str]:
+    """The ``[tool.setuptools]`` tables of ``repo_root/pyproject.toml`` that override
+    the ``setup.py`` recipe, when there is a ``setup.py``; else ``[]``."""
+    pyproject = repo_root / "pyproject.toml"
+    if not (repo_root / "setup.py").is_file() or not pyproject.is_file():
+        return []
+    try:
+        import tomllib
+    except ImportError:  # Python < 3.11
+        import tomli as tomllib
+    try:
+        table = tomllib.loads(pyproject.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return []
+    setuptools = table.get("tool", {}).get("setuptools", {})
+    found = []
+    for key in _SETUPTOOLS_OVERRIDES:
+        if key in setuptools:
+            value = setuptools[key]
+            found.append(
+                "[tool.setuptools.packages.find]"
+                if key == "packages" and isinstance(value, dict)
+                else f"[tool.setuptools] {key}"
+            )
+    return found
+
+
 def _audience(skill_md: bytes) -> str | None:
     """The ``metadata.audience`` (or top-level ``audience``) of a SKILL.md, if any."""
     import yaml
@@ -361,7 +397,11 @@ def check_wheel_skills(
       out (addaix/skill#44).
 
     Warnings: a skill whose ``audience`` is ``developer`` ships to users; a ``tests``
-    (or ``test``) subpackage is not in the wheel (often deliberate).
+    (or ``test``) subpackage, or one inside it, is not in the wheel (often deliberate).
+    A missing package is reported once, not once per subpackage under it. When there
+    are problems and a ``setup.py`` sits beside a ``pyproject.toml`` whose
+    ``[tool.setuptools]`` sets packages, ``packages.find``, ``package-dir`` or
+    ``package-data`` (which override the ``setup.py`` recipe), the check names them.
 
     ``package`` defaults to the one import package that has a ``<target_dir>`` in the
     wheel.
@@ -386,6 +426,7 @@ def check_wheel_skills(
                 f"no single package holds {target_dir}/ in the wheel "
                 f"(found: {candidates or 'none'}); pass package="
             )
+            _explain_overrides(report, repo_root)
             return report
         package = candidates[0]
     prefix = PurePosixPath(package, target_dir)
@@ -435,14 +476,32 @@ def check_wheel_skills(
             f"{package}/{target_dir} exists in the repository: it must exist only in "
             "the wheel (the build makes it), or gh skill sees every skill twice"
         )
+    missing: list[str] = []
     for dotted in _repo_packages(repo_root, package, target_dir):
-        init = "/".join(dotted.split(".")) + "/__init__.py"
-        if init in members:
+        if "/".join(dotted.split(".")) + "/__init__.py" in members:
             continue
+        if any(dotted.startswith(m + ".") for m in missing):
+            continue  # reported with the package that holds it
+        missing.append(dotted)
+        init = "/".join(dotted.split(".")) + "/__init__.py"
         message = f"{dotted}: a package of the repository is not in the wheel ({init})"
-        if dotted.rsplit(".", 1)[-1] in _OFTEN_EXCLUDED_PACKAGES:
+        if _OFTEN_EXCLUDED_PACKAGES.intersection(dotted.split(".")[1:]):
             report.warnings.append(message)
         else:
             report.problems.append(message)
+    if report.problems:
+        _explain_overrides(report, repo_root)
     report.skills.sort()
     return report
+
+
+def _explain_overrides(report: WheelSkillsReport, repo_root: Path) -> None:
+    """Name the ``pyproject.toml`` tables that override the ``setup.py`` recipe, the
+    usual cause of a setuptools wheel without its skills."""
+    overrides = _setuptools_overrides(repo_root)
+    if overrides:
+        report.problems.append(
+            f"pyproject.toml sets {', '.join(overrides)}, which override the same "
+            "settings of setup.py: move them into setup.py (see "
+            "wheel_skills_snippet(..., backend='setuptools'))"
+        )

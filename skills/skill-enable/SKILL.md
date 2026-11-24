@@ -146,7 +146,7 @@ build time; decision record addaix/skill#8, recipe #31). hatchling:
 "skills" = "your_pkg/_skills"
 ```
 
-setuptools: a `setup.py` beside `pyproject.toml` (which keeps the metadata), declaring the skills folder as a subpackage whose directory is `skills/` while keeping package discovery. Do not put a `[tool.setuptools] packages = [...]` list in `pyproject.toml` instead: an explicit list turns discovery off and every subpackage is left out of the wheel, and `[tool.setuptools.packages.find]` ignores a `package-dir` entry for a package it does not find, so `pyproject.toml` alone cannot do both (addaix/skill#44).
+setuptools: a `setup.py` beside `pyproject.toml` (which keeps the metadata), declaring the skills folder as a subpackage whose directory is `skills/` while keeping package discovery. `pyproject.toml` alone cannot do both: an explicit `[tool.setuptools] packages = [...]` list turns discovery off and every subpackage is left out of the wheel, and `[tool.setuptools.packages.find]` ignores a `package-dir` entry for a package it does not find (addaix/skill#44). Remove every `[tool.setuptools]` `packages`, `packages.find`, `package-dir` and `package-data` entry from `pyproject.toml` and move it into the `setup.py`: each one overrides the same `setup.py` setting, and the skills are silently dropped (`skill check-wheel-skills` names the table). setuptools prints a "Package would be ignored" notice for skill folders named like identifiers; they still ship as package data.
 
 ```python
 # setup.py: keeps package discovery and adds skills/ to the wheel as your_pkg/_skills

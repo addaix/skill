@@ -91,7 +91,10 @@ def _tree(root: Path) -> dict[str, bytes]:
 def _is_dangling(dest: Path) -> bool:
     """``dest`` is a link whose target is gone (say, a removed virtual environment's
     package data): it holds nothing, so replacing it loses nothing."""
-    return dest.is_symlink() and not dest.exists()
+    try:
+        return dest.is_symlink() and not dest.exists()
+    except OSError:  # unreadable: not known to be dangling
+        return False
 
 
 def _remove(dest: Path) -> None:
