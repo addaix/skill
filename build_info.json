@@ -1,32 +1,32 @@
 {
   "schema_version": 1,
-  "built_at": "2026-11-23T22:59:43Z",
+  "built_at": "2026-11-24T01:50:06Z",
   "package": {
     "name": "skill",
-    "version": "0.1.26",
+    "version": "0.1.27",
     "display_name": "skill",
     "source": "pyproject.toml"
   },
   "git": {
     "available": true,
-    "commit": "025496ccb176c049eef53c3af7508c376d908764",
-    "short_commit": "025496c",
+    "commit": "984118079394b8cea1d22a06cd267bf1a6024d1e",
+    "short_commit": "9841180",
     "branch": "master",
     "tags": [],
     "dirty": false,
     "remote_url": "https://github.com/addaix/skill",
-    "commit_url": "https://github.com/addaix/skill/commit/025496ccb176c049eef53c3af7508c376d908764",
+    "commit_url": "https://github.com/addaix/skill/commit/984118079394b8cea1d22a06cd267bf1a6024d1e",
     "error": null
   },
   "ci": {
     "provider": "github",
     "repository": "addaix/skill",
-    "sha": "025496ccb176c049eef53c3af7508c376d908764",
+    "sha": "984118079394b8cea1d22a06cd267bf1a6024d1e",
     "sha_in_history": true,
     "ref": "refs/heads/master",
     "ref_name": "master",
-    "run_id": "45284606163",
-    "run_url": "https://github.com/addaix/skill/actions/runs/45284606163",
+    "run_id": "45307770315",
+    "run_url": "https://github.com/addaix/skill/actions/runs/45307770315",
     "server_url": "https://github.com"
   },
   "tools": {
@@ -56,15 +56,15 @@
   },
   "site": {
     "modules_documented": 22,
-    "objects_documented": 88
+    "objects_documented": 89
   },
   "pypi": {
     "checked": true,
-    "latest": "0.1.26",
+    "latest": "0.1.27",
     "relation": "same",
     "error": null
   },
-  "reproduce": "git clone https://github.com/addaix/skill && cd skill\ngit checkout 025496ccb176c049eef53c3af7508c376d908764\npip install \"epythet==0.2.25\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
+  "reproduce": "git clone https://github.com/addaix/skill && cd skill\ngit checkout 984118079394b8cea1d22a06cd267bf1a6024d1e\npip install \"epythet==0.2.25\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
   "warnings": [],
   "alignment": {
     "aligned": true,

@@ -1,4 +1,4 @@
-> built 2026-11-23 22:59 UTC from 025496c (master) · skill 0.1.26. Details: build_info.json
+> built 2026-11-24 01:50 UTC from 9841180 (master) · skill 0.1.27. Details: build_info.json
 
 # index.html.md
 
@@ -77,7 +77,7 @@ skill link-skills /path/to/project --target ~/.claude/skills --force
 skill check-wheel-skills dist/my_pkg-0.1.0-py3-none-any.whl     # skills/ shipped once, as my_pkg/_skills
 ```
 
-To ship a package’s top-level `skills/` inside its wheel too (the `wheel-included-skills` method), add `[tool.hatch.build.targets.wheel.force-include]` with `"skills" = "my_pkg/_skills"` to `pyproject.toml` and check each build with `skill check-wheel-skills`. Users then run `skill install-from-package my-pkg`.
+To ship a package’s top-level `skills/` inside its wheel too (the `wheel-included-skills` method), add `[tool.hatch.build.targets.wheel.force-include]` with `"skills" = "my_pkg/_skills"` to `pyproject.toml` and check each build with `skill check-wheel-skills`. Users then run `skill install-from-package my-pkg` (for an editable install it reads the project’s `skills/` in place).
 
 ### Shell completion
 
@@ -1595,6 +1595,11 @@ Registry of format translators (Skill -> target format string).
 
 Pure helpers with zero internal imports.
 
+### Module Attributes
+
+| [`INSTALL_MARKER`](_autosummary/skill.util.html.md#skill.util.INSTALL_MARKER)   | The marker file `skill.install` writes into each copy it makes (never shipped).   |
+|-------------------------------------------------------------------|-----------------------------------------------------------------------------------|
+
 ### Functions
 
 | [`atomic_write`](_autosummary/skill.util.html.md#skill.util.atomic_write)(path, content)   | Write `content` to `path` atomically via temp-then-rename.         |
@@ -1606,6 +1611,10 @@ Pure helpers with zero internal imports.
 
 | [`ParsedKey`](_autosummary/skill.util.html.md#skill.util.ParsedKey)(owner, name)   | A normalized skill key.   |
 |---------------------------------------------------------------------------|---------------------------|
+
+### skill.util.INSTALL_MARKER *= '.skill-install.json'*
+
+The marker file `skill.install` writes into each copy it makes (never shipped).
 
 ### *class* skill.util.ParsedKey(owner, name)
 
@@ -1813,7 +1822,7 @@ package-data = { "p._skills" = ["**/*"] }
 
 # About this build
 
-This documentation was built on **2026-11-23 22:59 UTC** from commit <a href="https://github.com/addaix/skill/commit/025496ccb176c049eef53c3af7508c376d908764"><code>025496c</code></a> on branch <code>master</code>, for **skill 0.1.26** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-24 01:50 UTC** from commit <a href="https://github.com/addaix/skill/commit/984118079394b8cea1d22a06cd267bf1a6024d1e"><code>9841180</code></a> on branch <code>master</code>, for **skill 0.1.27** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -1822,7 +1831,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                     |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/addaix/skill/commit/025496ccb176c049eef53c3af7508c376d908764"><code>025496ccb176c049eef53c3af7508c376d908764</code></a> |
+| Commit              | <a href="https://github.com/addaix/skill/commit/984118079394b8cea1d22a06cd267bf1a6024d1e"><code>984118079394b8cea1d22a06cd267bf1a6024d1e</code></a> |
 | Branch              | <code>master</code>                                                                                                                                 |
 | Tags at this commit | none                                                                                                                                                |
 | Working tree        | clean                                                                                                                                               |
@@ -1833,9 +1842,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>addaix/skill</code>                                                                  |
-| Run          | <a href="https://github.com/addaix/skill/actions/runs/45284606163">45284606163</a>         |
+| Run          | <a href="https://github.com/addaix/skill/actions/runs/45307770315">45307770315</a>         |
 | Ref          | <code>refs/heads/master</code>                                                             |
-| Event commit | <code>025496ccb176c049eef53c3af7508c376d908764</code> (in the history of the built commit) |
+| Event commit | <code>984118079394b8cea1d22a06cd267bf1a6024d1e</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -1860,13 +1869,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/skill/0.1.26/">0.1.26</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/skill/0.1.27/">0.1.27</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/addaix/skill && cd skill
-git checkout 025496ccb176c049eef53c3af7508c376d908764
+git checkout 984118079394b8cea1d22a06cd267bf1a6024d1e
 pip install "epythet==0.2.25"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

@@ -4,6 +4,12 @@ skill.util
 .. automodule:: skill.util
 
    
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      INSTALL_MARKER
+   
    .. rubric:: Functions
 
    .. autosummary::

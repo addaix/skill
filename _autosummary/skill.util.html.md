@@ -2,6 +2,11 @@
 
 Pure helpers with zero internal imports.
 
+### Module Attributes
+
+| [`INSTALL_MARKER`](#skill.util.INSTALL_MARKER)   | The marker file `skill.install` writes into each copy it makes (never shipped).   |
+|-------------------------------------------------------------------|-----------------------------------------------------------------------------------|
+
 ### Functions
 
 | [`atomic_write`](#skill.util.atomic_write)(path, content)   | Write `content` to `path` atomically via temp-then-rename.         |
@@ -13,6 +18,10 @@ Pure helpers with zero internal imports.
 
 | [`ParsedKey`](#skill.util.ParsedKey)(owner, name)   | A normalized skill key.   |
 |---------------------------------------------------------------------------|---------------------------|
+
+### skill.util.INSTALL_MARKER *= '.skill-install.json'*
+
+The marker file `skill.install` writes into each copy it makes (never shipped).
 
 ### *class* skill.util.ParsedKey(owner, name)
 
