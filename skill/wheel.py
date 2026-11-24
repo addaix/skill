@@ -7,12 +7,15 @@ The copy exists only in the built wheel, never in the repository, so ``gh skill`
 each skill once; it is a copy, never a symlink, because whether ``gh skill`` follows a
 symlink is unverified.
 
-- :func:`wheel_skills_config` gives the ``pyproject.toml`` settings as a dict (hatchling
-  or setuptools), to merge into an existing file; :func:`wheel_skills_snippet` the same
-  as TOML text, for a file that has no such table yet.
+- :func:`wheel_skills_config` gives the hatchling ``pyproject.toml`` settings as a dict,
+  to merge into an existing file; :func:`wheel_skills_snippet` the same as TOML text, for
+  a file that has no such table yet, or (setuptools) a ``setup.py``, since
+  ``pyproject.toml`` alone cannot keep setuptools' package discovery and add the
+  mapped ``<pkg>._skills`` package too (addaix/skill#44).
 - :func:`check_wheel_skills` checks a built wheel against the repository: every
   ``skills/<name>/`` file is in the wheel under ``<pkg>/_skills/<name>/``, byte for byte,
-  every ``SKILL.md`` exactly once, and the repository holds each skill once.
+  every ``SKILL.md`` exactly once, the repository holds each skill once, and every
+  subpackage of the import package is in the wheel too.
 - ``skill install-from-package <distribution>`` then finds ``<pkg>/_skills`` in the
   installed package (:data:`skill.install.PACKAGE_SKILLS_SUBPATHS`).
 
@@ -58,8 +61,12 @@ def wheel_skills_config(
 
     - ``hatch``: ``force-include``. hatchling copies the files, following links, and
       skips its built-in excludes (``.DS_Store``, ``.pytest_cache``...).
-    - ``setuptools``: ``<package>.<target_dir>`` declared as a package whose directory is
-      ``source``, with all its files as package data.
+    - ``setuptools``: not expressible in ``pyproject.toml``. An explicit
+      ``[tool.setuptools] packages`` list turns package discovery off, so every
+      subpackage would be left out of the wheel, and ``[tool.setuptools.packages.find]``
+      ignores a ``package-dir`` entry for a package it does not find, so the skills would
+      be. This raises ``ValueError`` pointing at the ``setup.py`` recipe of
+      :func:`wheel_skills_snippet`.
 
     The build must see ``source``: a wheel built from an sdist (the default of
     ``python -m build``) needs it in the sdist too.
@@ -82,16 +89,11 @@ def wheel_skills_config(
             }
         }
     if backend == "setuptools":
-        sub = f"{package}.{target_dir}"
-        return {
-            "tool": {
-                "setuptools": {
-                    "packages": [package, sub],
-                    "package-dir": {sub: source},
-                    "package-data": {sub: ["**/*"]},
-                }
-            }
-        }
+        raise ValueError(
+            "setuptools cannot keep package discovery and add the skills package from "
+            "pyproject.toml alone; use the setup.py that "
+            f"wheel_skills_snippet({package!r}, backend='setuptools') prints"
+        )
     raise ValueError(f"backend must be 'hatch' or 'setuptools', not {backend!r}")
 
 
@@ -102,14 +104,24 @@ def wheel_skills_snippet(
     source: str = "skills",
     target_dir: str = WHEEL_SKILLS_DIR,
 ) -> str:
-    """:func:`wheel_skills_config` as ``pyproject.toml`` text, for a file that has none
-    of these tables yet (merge the dict instead when it has).
+    """The recipe as text. hatchling: :func:`wheel_skills_config` as ``pyproject.toml``
+    text, for a file that has none of these tables yet (merge the dict instead when it
+    has). setuptools: a ``setup.py`` that keeps package discovery (``find_packages``)
+    and adds ``<package>.<target_dir>`` with ``source`` as its folder; the project's
+    metadata stays in ``pyproject.toml``, which must then set no
+    ``[tool.setuptools] packages``. The ``setup.py`` is for a flat layout
+    (``<package>/`` at the root); for a ``src/`` layout pass ``where="src"`` to
+    ``find_packages`` and add ``"": "src"`` to ``package_dir``.
 
     >>> print(wheel_skills_snippet("p", backend="setuptools"))
-    [tool.setuptools]
-    packages = ["p", "p._skills"]
-    package-dir = { "p._skills" = "skills" }
-    package-data = { "p._skills" = ["**/*"] }
+    # setup.py: keeps package discovery and adds skills/ to the wheel as p/_skills
+    from setuptools import find_packages, setup
+    <BLANKLINE>
+    setup(
+        packages=find_packages(include=["p", "p.*"]) + ["p._skills"],
+        package_dir={"p._skills": "skills"},
+        package_data={"p._skills": ["**/*"]},
+    )
     """
     if backend == "hatch":
         return (
@@ -119,10 +131,15 @@ def wheel_skills_snippet(
     if backend == "setuptools":
         sub = f"{package}.{target_dir}"
         return (
-            "[tool.setuptools]\n"
-            f'packages = ["{package}", "{sub}"]\n'
-            f'package-dir = {{ "{sub}" = "{source}" }}\n'
-            f'package-data = {{ "{sub}" = ["**/*"] }}'
+            f"# setup.py: keeps package discovery and adds {source}/ to the wheel as "
+            f"{package}/{target_dir}\n"
+            "from setuptools import find_packages, setup\n"
+            "\n"
+            "setup(\n"
+            f'    packages=find_packages(include=["{package}", "{package}.*"]) + ["{sub}"],\n'
+            f'    package_dir={{"{sub}": "{source}"}},\n'
+            f'    package_data={{"{sub}": ["**/*"]}},\n'
+            ")"
         )
     raise ValueError(f"backend must be 'hatch' or 'setuptools', not {backend!r}")
 
@@ -262,6 +279,43 @@ def _repo_skill_md_locations(repo_root: Path) -> dict[str, list[str]]:
     return found
 
 
+#: Subpackage names whose absence from a wheel is often deliberate: a warning, not a
+#: problem.
+_OFTEN_EXCLUDED_PACKAGES = frozenset({"tests", "test"})
+
+
+def _repo_packages(repo_root: Path, package: str, target_dir: str) -> list[str]:
+    """Dotted names of ``package`` and every subpackage of it in the repository (a
+    folder with an ``__init__.py`` under a chain of such folders), flat or ``src/``
+    layout; only tracked ones when the repository is a git working tree. The
+    build-made ``<package>/<target_dir>`` is not one of them."""
+    for base in (repo_root, repo_root / "src"):
+        top = base / package
+        if (top / "__init__.py").is_file():
+            break
+    else:
+        return []
+    tracked = _tracked(repo_root, top.relative_to(repo_root).as_posix())
+    found = []
+    for dirpath, dirnames, filenames in os.walk(top):
+        here = Path(dirpath)
+        init = (here / "__init__.py").relative_to(repo_root).as_posix()
+        if "__init__.py" not in filenames or (
+            tracked is not None and init not in tracked
+        ):
+            dirnames[:] = []
+            continue
+        found.append(".".join(here.relative_to(base).parts))
+        dirnames[:] = sorted(
+            d
+            for d in dirnames
+            if d not in _NEVER_SHIPPED_DIRS
+            and not d.startswith(".")
+            and not (here == top and d == target_dir)
+        )
+    return found
+
+
 def _audience(skill_md: bytes) -> str | None:
     """The ``metadata.audience`` (or top-level ``audience``) of a SKILL.md, if any."""
     import yaml
@@ -301,9 +355,13 @@ def check_wheel_skills(
       skill in the wheel's ``<target_dir>`` that the repository does not have;
     - a skill whose real ``SKILL.md`` the repository holds in more than one
       non-hidden place (``gh skill`` reports duplicates), or a committed copy of the
-      in-wheel folder (``<package>/<target_dir>``) in the repository.
+      in-wheel folder (``<package>/<target_dir>``) in the repository;
+    - a subpackage of ``package`` in the repository (a folder with an ``__init__.py``)
+      that is not in the wheel: a recipe that lists packages by hand leaves the others
+      out (addaix/skill#44).
 
-    Warnings: a skill whose ``audience`` is ``developer`` ships to users.
+    Warnings: a skill whose ``audience`` is ``developer`` ships to users; a ``tests``
+    (or ``test``) subpackage is not in the wheel (often deliberate).
 
     ``package`` defaults to the one import package that has a ``<target_dir>`` in the
     wheel.
@@ -377,5 +435,14 @@ def check_wheel_skills(
             f"{package}/{target_dir} exists in the repository: it must exist only in "
             "the wheel (the build makes it), or gh skill sees every skill twice"
         )
+    for dotted in _repo_packages(repo_root, package, target_dir):
+        init = "/".join(dotted.split(".")) + "/__init__.py"
+        if init in members:
+            continue
+        message = f"{dotted}: a package of the repository is not in the wheel ({init})"
+        if dotted.rsplit(".", 1)[-1] in _OFTEN_EXCLUDED_PACKAGES:
+            report.warnings.append(message)
+        else:
+            report.problems.append(message)
     report.skills.sort()
     return report

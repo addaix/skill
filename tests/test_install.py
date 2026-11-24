@@ -78,6 +78,15 @@ class TestCreateLink:
         _create_link(src, target, force=True)
         assert target.is_symlink()
 
+    def test_a_dangling_link_is_replaced_without_force(self, tmp_path):
+        """A link whose target is gone holds nothing to lose (addaix/skill#43)."""
+        src = tmp_path / 'source'
+        src.mkdir()
+        target = tmp_path / 'target'
+        os.symlink(tmp_path / 'removed-env' / 'greet', target)
+        _create_link(src, target)
+        assert target.resolve() == src.resolve()
+
     def test_existing_raises_without_force(self, tmp_path):
         src = tmp_path / 'source'
         src.mkdir()

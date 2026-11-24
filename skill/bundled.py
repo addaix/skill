@@ -88,6 +88,12 @@ def _tree(root: Path) -> dict[str, bytes]:
     }
 
 
+def _is_dangling(dest: Path) -> bool:
+    """``dest`` is a link whose target is gone (say, a removed virtual environment's
+    package data): it holds nothing, so replacing it loses nothing."""
+    return dest.is_symlink() and not dest.exists()
+
+
 def _remove(dest: Path) -> None:
     if dest.is_symlink() or dest.is_file():
         dest.unlink()
@@ -126,11 +132,15 @@ def install_bundled(
     - ``"install"``: installed now (or would be, under ``dry_run``); a ``"method"`` key
       says ``symlink`` or ``copy``;
     - ``"conflict"``: something else is at that name; left alone unless ``force``.
+      A dangling link at that name (its target gone) is not a conflict: it is replaced.
+
+    ``source_dir`` may be relative: it is resolved first, so links point at the real
+    source whatever the current directory is later.
 
     >>> install_bundled("/no/such/folder", homes=["/tmp/never-used"])
     []
     """
-    source_dir = Path(source_dir)
+    source_dir = Path(source_dir).expanduser().resolve()
     homes = [
         Path(h).expanduser() for h in (homes if homes is not None else claude_homes())
     ]
@@ -142,7 +152,8 @@ def install_bundled(
             if _is_ours(dest, src):
                 action = "ok"
             else:
-                action = "conflict" if exists and not force else "install"
+                replaceable = force or _is_dangling(dest)
+                action = "conflict" if exists and not replaceable else "install"
             row = {
                 "home": str(home),
                 "name": src.stem if src.is_file() else src.name,

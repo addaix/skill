@@ -60,3 +60,34 @@ def test_several_homes_and_copy_fallback(data, tmp_path, monkeypatch):
     rows = install_bundled(data, homes=homes)
     assert {r["method"] for r in rows} == {"copy"} and len(rows) == 4
     assert {r["action"] for r in install_bundled(data, homes=homes)} == {"ok"}
+
+
+def test_relative_source_dir_links_to_the_real_source(data, tmp_path, monkeypatch):
+    """A relative source_dir must not leave a dangling, relative link (#43)."""
+    home = tmp_path / "home"
+    monkeypatch.chdir(data.parent)
+    assert actions(install_bundled("data", homes=[home])) == {"alpha": "install", "scout": "install"}
+    assert (home / "skills/alpha/SKILL.md").read_text() == "alpha"
+    assert os.path.isabs(os.readlink(home / "skills/alpha"))
+    assert actions(install_bundled("data", homes=[home])) == {"alpha": "ok", "scout": "ok"}
+
+
+def test_a_dangling_link_at_the_name_is_replaced_without_force(data, tmp_path):
+    """A link left by a removed environment holds nothing; it is not a conflict (#43)."""
+    home = tmp_path / "home"
+    (home / "skills").mkdir(parents=True)
+    (home / "agents").mkdir(parents=True)
+    (home / "skills/alpha").symlink_to(tmp_path / "gone-venv/data/skills/alpha")
+    (home / "agents/scout.md").symlink_to(tmp_path / "gone-venv/data/agents/scout.md")
+    assert actions(install_bundled(data, homes=[home])) == {"alpha": "install", "scout": "install"}
+    assert (home / "skills/alpha/SKILL.md").read_text() == "alpha"
+    assert (home / "agents/scout.md").read_text() == "scout"
+
+
+def test_a_dangling_link_is_reported_as_install_under_dry_run(data, tmp_path):
+    home = tmp_path / "home"
+    (home / "skills").mkdir(parents=True)
+    (home / "skills/alpha").symlink_to(tmp_path / "gone")
+    rows = install_bundled(data, homes=[home], dry_run=True)
+    assert actions(rows)["alpha"] == "install"
+    assert (home / "skills/alpha").is_symlink()  # untouched
