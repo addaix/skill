@@ -57,6 +57,10 @@ row per (home, asset): `{"home", "name", "action"}` with `action` one of
 - `"install"`: installed now (or would be, under `dry_run`); a `"method"` key
   says `symlink` or `copy`;
 - `"conflict"`: something else is at that name; left alone unless `force`.
+  A dangling link at that name (its target gone) is not a conflict: it is replaced.
+
+`source_dir` may be relative: it is resolved first, so links point at the real
+source whatever the current directory is later.
 
 ```pycon
 >>> install_bundled("/no/such/folder", homes=["/tmp/never-used"])

@@ -189,8 +189,11 @@ row per (home, asset): <code class="docutils literal notranslate"><span class="p
 <li><p><code class="docutils literal notranslate"><span class="pre">"ok"</span></code>: already installed (a link to the source, or an identical copy);</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">"install"</span></code>: installed now (or would be, under <code class="docutils literal notranslate"><span class="pre">dry_run</span></code>); a <code class="docutils literal notranslate"><span class="pre">"method"</span></code> key
 says <code class="docutils literal notranslate"><span class="pre">symlink</span></code> or <code class="docutils literal notranslate"><span class="pre">copy</span></code>;</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">"conflict"</span></code>: something else is at that name; left alone unless <code class="docutils literal notranslate"><span class="pre">force</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">"conflict"</span></code>: something else is at that name; left alone unless <code class="docutils literal notranslate"><span class="pre">force</span></code>.
+A dangling link at that name (its target gone) is not a conflict: it is replaced.</p></li>
 </ul>
+<p><code class="docutils literal notranslate"><span class="pre">source_dir</span></code> may be relative: it is resolved first, so links point at the real
+source whatever the current directory is later.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="gp">&gt;&gt;&gt; </span><span class="n">install_bundled</span><span class="p">(</span><span class="s2">"/no/such/folder"</span><span class="p">,</span> <span class="n">homes</span><span class="o">=</span><span class="p">[</span><span class="s2">"/tmp/never-used"</span><span class="p">])</span>
 </span><span id="line-2"><span class="go">[]</span>
 </span></code></pre></div>
@@ -220,7 +223,7 @@ says <code class="docutils literal notranslate"><span class="pre">symlink</span>
 </div>
 </footer>
 </div>
-<script src="../_static/documentation_options.js?v=dc233e31"></script>
+<script src="../_static/documentation_options.js?v=34399df3"></script>
 <script src="../_static/doctools.js?v=fd6eb6e6"></script>
 <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="../_static/clipboard.min.js?v=a7894cd8"></script>

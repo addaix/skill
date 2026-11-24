@@ -273,74 +273,88 @@
 </span><span id="line-88">    <span class="p">}</span>
 </span><span id="line-89">
 </span><span id="line-90">
-</span><span id="line-91"><span class="k">def</span><span class="w"> </span><span class="nf">_remove</span><span class="p">(</span><span class="n">dest</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-92">    <span class="k">if</span> <span class="n">dest</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">()</span> <span class="ow">or</span> <span class="n">dest</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
-</span><span id="line-93">        <span class="n">dest</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
-</span><span id="line-94">    <span class="k">else</span><span class="p">:</span>
-</span><span id="line-95">        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span>
-</span><span id="line-96">
-</span><span id="line-97">
-</span><span id="line-98"><span class="k">def</span><span class="w"> </span><span class="nf">_place</span><span class="p">(</span><span class="n">src</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">dest</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="line-99"><span class="w">    </span><span class="sd">"""Link ``src`` at ``dest``; copy where symlinks are unavailable. Returns the method."""</span>
-</span><span id="line-100">    <span class="n">dest</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="line-101">    <span class="k">try</span><span class="p">:</span>
-</span><span id="line-102">        <span class="n">os</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dest</span><span class="p">,</span> <span class="n">target_is_directory</span><span class="o">=</span><span class="n">src</span><span class="o">.</span><span class="n">is_dir</span><span class="p">())</span>
-</span><span id="line-103">        <span class="k">return</span> <span class="s2">"symlink"</span>
-</span><span id="line-104">    <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">NotImplementedError</span><span class="p">):</span>
-</span><span id="line-105">        <span class="k">if</span> <span class="n">src</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
-</span><span id="line-106">            <span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dest</span><span class="p">)</span>
-</span><span id="line-107">        <span class="k">else</span><span class="p">:</span>
-</span><span id="line-108">            <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dest</span><span class="p">)</span>
-</span><span id="line-109">        <span class="k">return</span> <span class="s2">"copy"</span>
-</span><span id="line-110">
-</span><span id="line-111">
+</span><span id="line-91"><span class="k">def</span><span class="w"> </span><span class="nf">_is_dangling</span><span class="p">(</span><span class="n">dest</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="line-92"><span class="w">    </span><span class="sd">"""``dest`` is a link whose target is gone (say, a removed virtual environment's</span>
+</span><span id="line-93"><span class="sd">    package data): it holds nothing, so replacing it loses nothing."""</span>
+</span><span id="line-94">    <span class="k">try</span><span class="p">:</span>
+</span><span id="line-95">        <span class="k">return</span> <span class="n">dest</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">dest</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+</span><span id="line-96">    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>  <span class="c1"># unreadable: not known to be dangling</span>
+</span><span id="line-97">        <span class="k">return</span> <span class="kc">False</span>
+</span><span id="line-98">
+</span><span id="line-99">
+</span><span id="line-100"><span class="k">def</span><span class="w"> </span><span class="nf">_remove</span><span class="p">(</span><span class="n">dest</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-101">    <span class="k">if</span> <span class="n">dest</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">()</span> <span class="ow">or</span> <span class="n">dest</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+</span><span id="line-102">        <span class="n">dest</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+</span><span id="line-103">    <span class="k">else</span><span class="p">:</span>
+</span><span id="line-104">        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span>
+</span><span id="line-105">
+</span><span id="line-106">
+</span><span id="line-107"><span class="k">def</span><span class="w"> </span><span class="nf">_place</span><span class="p">(</span><span class="n">src</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">dest</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="line-108"><span class="w">    </span><span class="sd">"""Link ``src`` at ``dest``; copy where symlinks are unavailable. Returns the method."""</span>
+</span><span id="line-109">    <span class="n">dest</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="line-110">    <span class="k">try</span><span class="p">:</span>
+</span><span id="line-111">        <span class="n">os</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dest</span><span class="p">,</span> <span class="n">target_is_directory</span><span class="o">=</span><span class="n">src</span><span class="o">.</span><span class="n">is_dir</span><span class="p">())</span>
+</span><span id="line-112">        <span class="k">return</span> <span class="s2">"symlink"</span>
+</span><span id="line-113">    <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">NotImplementedError</span><span class="p">):</span>
+</span><span id="line-114">        <span class="k">if</span> <span class="n">src</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+</span><span id="line-115">            <span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dest</span><span class="p">)</span>
+</span><span id="line-116">        <span class="k">else</span><span class="p">:</span>
+</span><span id="line-117">            <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dest</span><span class="p">)</span>
+</span><span id="line-118">        <span class="k">return</span> <span class="s2">"copy"</span>
+</span><span id="line-119">
+</span><span id="line-120">
 <div class="viewcode-block" id="install_bundled">
 <a class="viewcode-back" href="../../_autosummary/skill.bundled.html#skill.bundled.install_bundled">[docs]</a>
-</span><span id="line-112"><span class="k">def</span><span class="w"> </span><span class="nf">install_bundled</span><span class="p">(</span>
-</span><span id="line-113">    <span class="n">source_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
-</span><span id="line-114">    <span class="o">*</span><span class="p">,</span>
-</span><span id="line-115">    <span class="n">homes</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="line-116">    <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-</span><span id="line-117">    <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-</span><span id="line-118"><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
-</span><span id="line-119"><span class="w">    </span><span class="sd">"""Install a package's bundled skills and agents into each Claude home.</span>
-</span><span id="line-120">
-</span><span id="line-121"><span class="sd">    ``source_dir`` holds ``skills/&lt;name&gt;/`` directories and/or ``agents/&lt;name&gt;.md`` files</span>
-</span><span id="line-122"><span class="sd">    (a package's ``data`` folder). ``homes`` defaults to :func:`claude_homes`. Returns one</span>
-</span><span id="line-123"><span class="sd">    row per (home, asset): ``{"home", "name", "action"}`` with ``action`` one of</span>
-</span><span id="line-124">
-</span><span id="line-125"><span class="sd">    - ``"ok"``: already installed (a link to the source, or an identical copy);</span>
-</span><span id="line-126"><span class="sd">    - ``"install"``: installed now (or would be, under ``dry_run``); a ``"method"`` key</span>
-</span><span id="line-127"><span class="sd">      says ``symlink`` or ``copy``;</span>
-</span><span id="line-128"><span class="sd">    - ``"conflict"``: something else is at that name; left alone unless ``force``.</span>
+</span><span id="line-121"><span class="k">def</span><span class="w"> </span><span class="nf">install_bundled</span><span class="p">(</span>
+</span><span id="line-122">    <span class="n">source_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
+</span><span id="line-123">    <span class="o">*</span><span class="p">,</span>
+</span><span id="line-124">    <span class="n">homes</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-125">    <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+</span><span id="line-126">    <span class="n">dry_run</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+</span><span id="line-127"><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+</span><span id="line-128"><span class="w">    </span><span class="sd">"""Install a package's bundled skills and agents into each Claude home.</span>
 </span><span id="line-129">
-</span><span id="line-130"><span class="sd">    &gt;&gt;&gt; install_bundled("/no/such/folder", homes=["/tmp/never-used"])</span>
-</span><span id="line-131"><span class="sd">    []</span>
-</span><span id="line-132"><span class="sd">    """</span>
-</span><span id="line-133">    <span class="n">source_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">source_dir</span><span class="p">)</span>
-</span><span id="line-134">    <span class="n">homes</span> <span class="o">=</span> <span class="p">[</span>
-</span><span id="line-135">        <span class="n">Path</span><span class="p">(</span><span class="n">h</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="p">(</span><span class="n">homes</span> <span class="k">if</span> <span class="n">homes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">claude_homes</span><span class="p">())</span>
-</span><span id="line-136">    <span class="p">]</span>
-</span><span id="line-137">    <span class="n">rows</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="line-138">    <span class="k">for</span> <span class="n">home</span> <span class="ow">in</span> <span class="n">homes</span><span class="p">:</span>
-</span><span id="line-139">        <span class="k">for</span> <span class="n">src</span><span class="p">,</span> <span class="n">rel</span> <span class="ow">in</span> <span class="n">_assets</span><span class="p">(</span><span class="n">source_dir</span><span class="p">):</span>
-</span><span id="line-140">            <span class="n">dest</span> <span class="o">=</span> <span class="n">home</span> <span class="o">/</span> <span class="n">rel</span>
-</span><span id="line-141">            <span class="n">exists</span> <span class="o">=</span> <span class="n">dest</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">or</span> <span class="n">dest</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">()</span>
-</span><span id="line-142">            <span class="k">if</span> <span class="n">_is_ours</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="n">src</span><span class="p">):</span>
-</span><span id="line-143">                <span class="n">action</span> <span class="o">=</span> <span class="s2">"ok"</span>
-</span><span id="line-144">            <span class="k">else</span><span class="p">:</span>
-</span><span id="line-145">                <span class="n">action</span> <span class="o">=</span> <span class="s2">"conflict"</span> <span class="k">if</span> <span class="n">exists</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">force</span> <span class="k">else</span> <span class="s2">"install"</span>
-</span><span id="line-146">            <span class="n">row</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="line-147">                <span class="s2">"home"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">home</span><span class="p">),</span>
-</span><span id="line-148">                <span class="s2">"name"</span><span class="p">:</span> <span class="n">src</span><span class="o">.</span><span class="n">stem</span> <span class="k">if</span> <span class="n">src</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="k">else</span> <span class="n">src</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-</span><span id="line-149">                <span class="s2">"action"</span><span class="p">:</span> <span class="n">action</span><span class="p">,</span>
-</span><span id="line-150">            <span class="p">}</span>
-</span><span id="line-151">            <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">"install"</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">dry_run</span><span class="p">:</span>
-</span><span id="line-152">                <span class="k">if</span> <span class="n">exists</span><span class="p">:</span>
-</span><span id="line-153">                    <span class="n">_remove</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span>
-</span><span id="line-154">                <span class="n">row</span><span class="p">[</span><span class="s2">"method"</span><span class="p">]</span> <span class="o">=</span> <span class="n">_place</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dest</span><span class="p">)</span>
-</span><span id="line-155">            <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
-</span><span id="line-156">    <span class="k">return</span> <span class="n">rows</span></div>
+</span><span id="line-130"><span class="sd">    ``source_dir`` holds ``skills/&lt;name&gt;/`` directories and/or ``agents/&lt;name&gt;.md`` files</span>
+</span><span id="line-131"><span class="sd">    (a package's ``data`` folder). ``homes`` defaults to :func:`claude_homes`. Returns one</span>
+</span><span id="line-132"><span class="sd">    row per (home, asset): ``{"home", "name", "action"}`` with ``action`` one of</span>
+</span><span id="line-133">
+</span><span id="line-134"><span class="sd">    - ``"ok"``: already installed (a link to the source, or an identical copy);</span>
+</span><span id="line-135"><span class="sd">    - ``"install"``: installed now (or would be, under ``dry_run``); a ``"method"`` key</span>
+</span><span id="line-136"><span class="sd">      says ``symlink`` or ``copy``;</span>
+</span><span id="line-137"><span class="sd">    - ``"conflict"``: something else is at that name; left alone unless ``force``.</span>
+</span><span id="line-138"><span class="sd">      A dangling link at that name (its target gone) is not a conflict: it is replaced.</span>
+</span><span id="line-139">
+</span><span id="line-140"><span class="sd">    ``source_dir`` may be relative: it is resolved first, so links point at the real</span>
+</span><span id="line-141"><span class="sd">    source whatever the current directory is later.</span>
+</span><span id="line-142">
+</span><span id="line-143"><span class="sd">    &gt;&gt;&gt; install_bundled("/no/such/folder", homes=["/tmp/never-used"])</span>
+</span><span id="line-144"><span class="sd">    []</span>
+</span><span id="line-145"><span class="sd">    """</span>
+</span><span id="line-146">    <span class="n">source_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">source_dir</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+</span><span id="line-147">    <span class="n">homes</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="line-148">        <span class="n">Path</span><span class="p">(</span><span class="n">h</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="p">(</span><span class="n">homes</span> <span class="k">if</span> <span class="n">homes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">claude_homes</span><span class="p">())</span>
+</span><span id="line-149">    <span class="p">]</span>
+</span><span id="line-150">    <span class="n">rows</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="line-151">    <span class="k">for</span> <span class="n">home</span> <span class="ow">in</span> <span class="n">homes</span><span class="p">:</span>
+</span><span id="line-152">        <span class="k">for</span> <span class="n">src</span><span class="p">,</span> <span class="n">rel</span> <span class="ow">in</span> <span class="n">_assets</span><span class="p">(</span><span class="n">source_dir</span><span class="p">):</span>
+</span><span id="line-153">            <span class="n">dest</span> <span class="o">=</span> <span class="n">home</span> <span class="o">/</span> <span class="n">rel</span>
+</span><span id="line-154">            <span class="n">exists</span> <span class="o">=</span> <span class="n">dest</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">or</span> <span class="n">dest</span><span class="o">.</span><span class="n">is_symlink</span><span class="p">()</span>
+</span><span id="line-155">            <span class="k">if</span> <span class="n">_is_ours</span><span class="p">(</span><span class="n">dest</span><span class="p">,</span> <span class="n">src</span><span class="p">):</span>
+</span><span id="line-156">                <span class="n">action</span> <span class="o">=</span> <span class="s2">"ok"</span>
+</span><span id="line-157">            <span class="k">else</span><span class="p">:</span>
+</span><span id="line-158">                <span class="n">replaceable</span> <span class="o">=</span> <span class="n">force</span> <span class="ow">or</span> <span class="n">_is_dangling</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span>
+</span><span id="line-159">                <span class="n">action</span> <span class="o">=</span> <span class="s2">"conflict"</span> <span class="k">if</span> <span class="n">exists</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">replaceable</span> <span class="k">else</span> <span class="s2">"install"</span>
+</span><span id="line-160">            <span class="n">row</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="line-161">                <span class="s2">"home"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">home</span><span class="p">),</span>
+</span><span id="line-162">                <span class="s2">"name"</span><span class="p">:</span> <span class="n">src</span><span class="o">.</span><span class="n">stem</span> <span class="k">if</span> <span class="n">src</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="k">else</span> <span class="n">src</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+</span><span id="line-163">                <span class="s2">"action"</span><span class="p">:</span> <span class="n">action</span><span class="p">,</span>
+</span><span id="line-164">            <span class="p">}</span>
+</span><span id="line-165">            <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">"install"</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">dry_run</span><span class="p">:</span>
+</span><span id="line-166">                <span class="k">if</span> <span class="n">exists</span><span class="p">:</span>
+</span><span id="line-167">                    <span class="n">_remove</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span>
+</span><span id="line-168">                <span class="n">row</span><span class="p">[</span><span class="s2">"method"</span><span class="p">]</span> <span class="o">=</span> <span class="n">_place</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dest</span><span class="p">)</span>
+</span><span id="line-169">            <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+</span><span id="line-170">    <span class="k">return</span> <span class="n">rows</span></div>
 
 </span></code></pre></div>
     </div></div>
@@ -355,7 +369,7 @@
 </footer>
     </div>
     
-    <script src="../../_static/documentation_options.js?v=dc233e31"></script>
+    <script src="../../_static/documentation_options.js?v=34399df3"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>

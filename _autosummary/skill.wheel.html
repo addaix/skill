@@ -139,12 +139,15 @@ The copy exists only in the built wheel, never in the repository, so <code class
 each skill once; it is a copy, never a symlink, because whether <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">skill</span></code> follows a
 symlink is unverified.</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="#skill.wheel.wheel_skills_config" title="skill.wheel.wheel_skills_config"><code class="xref py py-func docutils literal notranslate"><span class="pre">wheel_skills_config()</span></code></a> gives the <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> settings as a dict (hatchling
-or setuptools), to merge into an existing file; <a class="reference internal" href="#skill.wheel.wheel_skills_snippet" title="skill.wheel.wheel_skills_snippet"><code class="xref py py-func docutils literal notranslate"><span class="pre">wheel_skills_snippet()</span></code></a> the same
-as TOML text, for a file that has no such table yet.</p></li>
+<li><p><a class="reference internal" href="#skill.wheel.wheel_skills_config" title="skill.wheel.wheel_skills_config"><code class="xref py py-func docutils literal notranslate"><span class="pre">wheel_skills_config()</span></code></a> gives the hatchling <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> settings as a dict,
+to merge into an existing file; <a class="reference internal" href="#skill.wheel.wheel_skills_snippet" title="skill.wheel.wheel_skills_snippet"><code class="xref py py-func docutils literal notranslate"><span class="pre">wheel_skills_snippet()</span></code></a> the same as TOML text, for
+a file that has no such table yet, or (setuptools) a <code class="docutils literal notranslate"><span class="pre">setup.py</span></code>, since
+<code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> alone cannot keep setuptools’ package discovery and add the
+mapped <code class="docutils literal notranslate"><span class="pre">&lt;pkg&gt;._skills</span></code> package too (addaix/skill#44).</p></li>
 <li><p><a class="reference internal" href="#skill.wheel.check_wheel_skills" title="skill.wheel.check_wheel_skills"><code class="xref py py-func docutils literal notranslate"><span class="pre">check_wheel_skills()</span></code></a> checks a built wheel against the repository: every
 <code class="docutils literal notranslate"><span class="pre">skills/&lt;name&gt;/</span></code> file is in the wheel under <code class="docutils literal notranslate"><span class="pre">&lt;pkg&gt;/_skills/&lt;name&gt;/</span></code>, byte for byte,
-every <code class="docutils literal notranslate"><span class="pre">SKILL.md</span></code> exactly once, and the repository holds each skill once.</p></li>
+every <code class="docutils literal notranslate"><span class="pre">SKILL.md</span></code> exactly once, the repository holds each skill once, and every
+subpackage of the import package is in the wheel too.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">skill</span> <span class="pre">install-from-package</span> <span class="pre">&lt;distribution&gt;</span></code> then finds <code class="docutils literal notranslate"><span class="pre">&lt;pkg&gt;/_skills</span></code> in the
 installed package (<code class="xref py py-data docutils literal notranslate"><span class="pre">skill.install.PACKAGE_SKILLS_SUBPATHS</span></code>).</p></li>
 </ul>
@@ -168,7 +171,7 @@ installed package (<code class="xref py py-data docutils literal notranslate"><s
 <td><p>The <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> settings that put <code class="docutils literal notranslate"><span class="pre">source</span></code> into the wheel as <code class="docutils literal notranslate"><span class="pre">&lt;package&gt;/&lt;target_dir&gt;</span></code>, as a nested dict to merge into the file (with tomlkit, say) rather than append to it.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#skill.wheel.wheel_skills_snippet" title="skill.wheel.wheel_skills_snippet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wheel_skills_snippet</span></code></a>(package, *[, backend, ...])</p></td>
-<td><p><a class="reference internal" href="#skill.wheel.wheel_skills_config" title="skill.wheel.wheel_skills_config"><code class="xref py py-func docutils literal notranslate"><span class="pre">wheel_skills_config()</span></code></a> as <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> text, for a file that has none of these tables yet (merge the dict instead when it has).</p></td>
+<td><p>The recipe as text.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#skill.wheel.check_wheel_skills" title="skill.wheel.check_wheel_skills"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_wheel_skills</span></code></a>(wheel[, repo_root, ...])</p></td>
 <td><p>Check a built wheel against the repository it was built from.</p></td>
@@ -209,11 +212,19 @@ files missing or different in <code class="docutils literal notranslate"><span c
 skill in the wheel’s <code class="docutils literal notranslate"><span class="pre">&lt;target_dir&gt;</span></code> that the repository does not have;</p></li>
 <li><p>a skill whose real <code class="docutils literal notranslate"><span class="pre">SKILL.md</span></code> the repository holds in more than one
 non-hidden place (<code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">skill</span></code> reports duplicates), or a committed copy of the
-in-wheel folder (<code class="docutils literal notranslate"><span class="pre">&lt;package&gt;/&lt;target_dir&gt;</span></code>) in the repository.</p></li>
+in-wheel folder (<code class="docutils literal notranslate"><span class="pre">&lt;package&gt;/&lt;target_dir&gt;</span></code>) in the repository;</p></li>
+<li><p>a subpackage of <code class="docutils literal notranslate"><span class="pre">package</span></code> in the repository (a folder with an <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code>)
+that is not in the wheel: a recipe that lists packages by hand leaves the others
+out (addaix/skill#44).</p></li>
 </ul>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>a skill whose <code class="docutils literal notranslate"><span class="pre">audience</span></code> is <code class="docutils literal notranslate"><span class="pre">developer</span></code> ships to users.</p>
+<p>a skill whose <code class="docutils literal notranslate"><span class="pre">audience</span></code> is <code class="docutils literal notranslate"><span class="pre">developer</span></code> ships to users; a <code class="docutils literal notranslate"><span class="pre">tests</span></code>
+(or <code class="docutils literal notranslate"><span class="pre">test</span></code>) subpackage, or one inside it, is not in the wheel (often deliberate).
+A missing package is reported once, not once per subpackage under it. When there
+are problems and a <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> sits beside a <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> whose
+<code class="docutils literal notranslate"><span class="pre">[tool.setuptools]</span></code> sets packages, <code class="docutils literal notranslate"><span class="pre">packages.find</span></code>, <code class="docutils literal notranslate"><span class="pre">package-dir</span></code> or
+<code class="docutils literal notranslate"><span class="pre">package-data</span></code> (which override the <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> recipe), the check names them.</p>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">package</span></code> defaults to the one import package that has a <code class="docutils literal notranslate"><span class="pre">&lt;target_dir&gt;</span></code> in the
 wheel.</p>
@@ -232,8 +243,12 @@ say) rather than append to it.</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">hatch</span></code>: <code class="docutils literal notranslate"><span class="pre">force-include</span></code>. hatchling copies the files, following links, and
 skips its built-in excludes (<code class="docutils literal notranslate"><span class="pre">.DS_Store</span></code>, <code class="docutils literal notranslate"><span class="pre">.pytest_cache</span></code>…).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">setuptools</span></code>: <code class="docutils literal notranslate"><span class="pre">&lt;package&gt;.&lt;target_dir&gt;</span></code> declared as a package whose directory is
-<code class="docutils literal notranslate"><span class="pre">source</span></code>, with all its files as package data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">setuptools</span></code>: not expressible in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>. An explicit
+<code class="docutils literal notranslate"><span class="pre">[tool.setuptools]</span> <span class="pre">packages</span></code> list turns package discovery off, so every
+subpackage would be left out of the wheel, and <code class="docutils literal notranslate"><span class="pre">[tool.setuptools.packages.find]</span></code>
+ignores a <code class="docutils literal notranslate"><span class="pre">package-dir</span></code> entry for a package it does not find, so the skills would
+be. This raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> pointing at the <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> recipe of
+<a class="reference internal" href="#skill.wheel.wheel_skills_snippet" title="skill.wheel.wheel_skills_snippet"><code class="xref py py-func docutils literal notranslate"><span class="pre">wheel_skills_snippet()</span></code></a>.</p></li>
 </ul>
 <p>The build must see <code class="docutils literal notranslate"><span class="pre">source</span></code>: a wheel built from an sdist (the default of
 <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">build</span></code>) needs it in the sdist too.</p>
@@ -250,13 +265,27 @@ skips its built-in excludes (<code class="docutils literal notranslate"><span cl
 <dl class="py function">
 <dt class="sig sig-object py" id="skill.wheel.wheel_skills_snippet">
 <span class="sig-prename descclassname"><span class="pre">skill.wheel.</span></span><span class="sig-name descname"><span class="pre">wheel_skills_snippet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'hatch'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'skills'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'_skills'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/skill/wheel.html#wheel_skills_snippet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#skill.wheel.wheel_skills_snippet" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#skill.wheel.wheel_skills_snippet'">¶</a></dt>
-<dd><p><a class="reference internal" href="#skill.wheel.wheel_skills_config" title="skill.wheel.wheel_skills_config"><code class="xref py py-func docutils literal notranslate"><span class="pre">wheel_skills_config()</span></code></a> as <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> text, for a file that has none
-of these tables yet (merge the dict instead when it has).</p>
+<dd><p>The recipe as text. hatchling: <a class="reference internal" href="#skill.wheel.wheel_skills_config" title="skill.wheel.wheel_skills_config"><code class="xref py py-func docutils literal notranslate"><span class="pre">wheel_skills_config()</span></code></a> as <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>
+text, for a file that has none of these tables yet (merge the dict instead when it
+has). setuptools: a <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> that keeps package discovery (<code class="docutils literal notranslate"><span class="pre">find_packages</span></code>)
+and adds <code class="docutils literal notranslate"><span class="pre">&lt;package&gt;.&lt;target_dir&gt;</span></code> with <code class="docutils literal notranslate"><span class="pre">source</span></code> as its folder; the project’s
+metadata stays in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>, which must then set none of
+<code class="docutils literal notranslate"><span class="pre">[tool.setuptools]</span></code> <code class="docutils literal notranslate"><span class="pre">packages</span></code>, <code class="docutils literal notranslate"><span class="pre">packages.find</span></code>, <code class="docutils literal notranslate"><span class="pre">package-dir</span></code> or
+<code class="docutils literal notranslate"><span class="pre">package-data</span></code> (each overrides the same <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> setting: move them into
+the <code class="docutils literal notranslate"><span class="pre">setup.py</span></code>). setuptools prints a “Package would be ignored” notice for skill
+folders whose names are identifiers; they are still shipped as package data. The
+<code class="docutils literal notranslate"><span class="pre">setup.py</span></code> is for a flat layout
+(<code class="docutils literal notranslate"><span class="pre">&lt;package&gt;/</span></code> at the root); for a <code class="docutils literal notranslate"><span class="pre">src/</span></code> layout pass <code class="docutils literal notranslate"><span class="pre">where="src"</span></code> to
+<code class="docutils literal notranslate"><span class="pre">find_packages</span></code> and add <code class="docutils literal notranslate"><span class="pre">"":</span> <span class="pre">"src"</span></code> to <code class="docutils literal notranslate"><span class="pre">package_dir</span></code>.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">wheel_skills_snippet</span><span class="p">(</span><span class="s2">"p"</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">"setuptools"</span><span class="p">))</span>
-</span><span id="line-2"><span class="go">[tool.setuptools]</span>
-</span><span id="line-3"><span class="go">packages = ["p", "p._skills"]</span>
-</span><span id="line-4"><span class="go">package-dir = { "p._skills" = "skills" }</span>
-</span><span id="line-5"><span class="go">package-data = { "p._skills" = ["**/*"] }</span>
+</span><span id="line-2"><span class="go"># setup.py: keeps package discovery and adds skills/ to the wheel as p/_skills</span>
+</span><span id="line-3"><span class="go">from setuptools import find_packages, setup</span>
+</span><span id="line-4">
+</span><span id="line-5"><span class="go">setup(</span>
+</span><span id="line-6"><span class="go">    packages=find_packages(include=["p", "p.*"]) + ["p._skills"],</span>
+</span><span id="line-7"><span class="go">    package_dir={"p._skills": "skills"},</span>
+</span><span id="line-8"><span class="go">    package_data={"p._skills": ["**/*"]},</span>
+</span><span id="line-9"><span class="go">)</span>
 </span></code></pre></div>
 </div>
 <dl class="field-list simple">
@@ -287,7 +316,7 @@ of these tables yet (merge the dict instead when it has).</p>
 </div>
 </footer>
 </div>
-<script src="../_static/documentation_options.js?v=dc233e31"></script>
+<script src="../_static/documentation_options.js?v=34399df3"></script>
 <script src="../_static/doctools.js?v=fd6eb6e6"></script>
 <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="../_static/clipboard.min.js?v=a7894cd8"></script>

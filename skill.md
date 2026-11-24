@@ -1,4 +1,4 @@
-> built 2026-11-24 01:50 UTC from 9841180 (master) · skill 0.1.27. Details: build_info.json
+> built 2026-11-24 05:56 UTC from 39286b1 (master) · skill 0.1.28. Details: build_info.json
 
 # index.html.md
 
@@ -758,6 +758,10 @@ row per (home, asset): `{"home", "name", "action"}` with `action` one of
 - `"install"`: installed now (or would be, under `dry_run`); a `"method"` key
   says `symlink` or `copy`;
 - `"conflict"`: something else is at that name; left alone unless `force`.
+  A dangling link at that name (its target gone) is not a conflict: it is replaced.
+
+`source_dir` may be relative: it is resolved first, so links point at the real
+source whatever the current directory is later.
 
 ```pycon
 >>> install_bundled("/no/such/folder", homes=["/tmp/never-used"])
@@ -1711,12 +1715,15 @@ The copy exists only in the built wheel, never in the repository, so `gh skill` 
 each skill once; it is a copy, never a symlink, because whether `gh skill` follows a
 symlink is unverified.
 
-- [`wheel_skills_config()`](_autosummary/skill.wheel.html.md#skill.wheel.wheel_skills_config) gives the `pyproject.toml` settings as a dict (hatchling
-  or setuptools), to merge into an existing file; [`wheel_skills_snippet()`](_autosummary/skill.wheel.html.md#skill.wheel.wheel_skills_snippet) the same
-  as TOML text, for a file that has no such table yet.
+- [`wheel_skills_config()`](_autosummary/skill.wheel.html.md#skill.wheel.wheel_skills_config) gives the hatchling `pyproject.toml` settings as a dict,
+  to merge into an existing file; [`wheel_skills_snippet()`](_autosummary/skill.wheel.html.md#skill.wheel.wheel_skills_snippet) the same as TOML text, for
+  a file that has no such table yet, or (setuptools) a `setup.py`, since
+  `pyproject.toml` alone cannot keep setuptools’ package discovery and add the
+  mapped `<pkg>._skills` package too (addaix/skill#44).
 - [`check_wheel_skills()`](_autosummary/skill.wheel.html.md#skill.wheel.check_wheel_skills) checks a built wheel against the repository: every
   `skills/<name>/` file is in the wheel under `<pkg>/_skills/<name>/`, byte for byte,
-  every `SKILL.md` exactly once, and the repository holds each skill once.
+  every `SKILL.md` exactly once, the repository holds each skill once, and every
+  subpackage of the import package is in the wheel too.
 - `skill install-from-package <distribution>` then finds `<pkg>/_skills` in the
   installed package (`skill.install.PACKAGE_SKILLS_SUBPATHS`).
 
@@ -1735,7 +1742,7 @@ symlink is unverified.
 
 | [`wheel_skills_config`](_autosummary/skill.wheel.html.md#skill.wheel.wheel_skills_config)(package, \*[, backend, ...])   | The `pyproject.toml` settings that put `source` into the wheel as `<package>/<target_dir>`, as a nested dict to merge into the file (with tomlkit, say) rather than append to it.   |
 |-----------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [`wheel_skills_snippet`](_autosummary/skill.wheel.html.md#skill.wheel.wheel_skills_snippet)(package, \*[, backend, ...])  | [`wheel_skills_config()`](_autosummary/skill.wheel.html.md#skill.wheel.wheel_skills_config) as `pyproject.toml` text, for a file that has none of these tables yet (merge the dict instead when it has). |
+| [`wheel_skills_snippet`](_autosummary/skill.wheel.html.md#skill.wheel.wheel_skills_snippet)(package, \*[, backend, ...])  | The recipe as text.                                                                                                                                                                 |
 | [`check_wheel_skills`](_autosummary/skill.wheel.html.md#skill.wheel.check_wheel_skills)(wheel[, repo_root, ...])        | Check a built wheel against the repository it was built from.                                                                                                                       |
 
 ### Classes
@@ -1766,10 +1773,18 @@ Problems (`report.ok` is false):
   skill in the wheel’s `<target_dir>` that the repository does not have;
 - a skill whose real `SKILL.md` the repository holds in more than one
   non-hidden place (`gh skill` reports duplicates), or a committed copy of the
-  in-wheel folder (`<package>/<target_dir>`) in the repository.
+  in-wheel folder (`<package>/<target_dir>`) in the repository;
+- a subpackage of `package` in the repository (a folder with an `__init__.py`)
+  that is not in the wheel: a recipe that lists packages by hand leaves the others
+  out (addaix/skill#44).
 
 #### WARNING
-a skill whose `audience` is `developer` ships to users.
+a skill whose `audience` is `developer` ships to users; a `tests`
+(or `test`) subpackage, or one inside it, is not in the wheel (often deliberate).
+A missing package is reported once, not once per subpackage under it. When there
+are problems and a `setup.py` sits beside a `pyproject.toml` whose
+`[tool.setuptools]` sets packages, `packages.find`, `package-dir` or
+`package-data` (which override the `setup.py` recipe), the check names them.
 
 `package` defaults to the one import package that has a `<target_dir>` in the
 wheel.
@@ -1785,8 +1800,12 @@ say) rather than append to it.
 
 - `hatch`: `force-include`. hatchling copies the files, following links, and
   skips its built-in excludes (`.DS_Store`, `.pytest_cache`…).
-- `setuptools`: `<package>.<target_dir>` declared as a package whose directory is
-  `source`, with all its files as package data.
+- `setuptools`: not expressible in `pyproject.toml`. An explicit
+  `[tool.setuptools] packages` list turns package discovery off, so every
+  subpackage would be left out of the wheel, and `[tool.setuptools.packages.find]`
+  ignores a `package-dir` entry for a package it does not find, so the skills would
+  be. This raises `ValueError` pointing at the `setup.py` recipe of
+  [`wheel_skills_snippet()`](_autosummary/skill.wheel.html.md#skill.wheel.wheel_skills_snippet).
 
 The build must see `source`: a wheel built from an sdist (the default of
 `python -m build`) needs it in the sdist too.
@@ -1801,15 +1820,29 @@ The build must see `source`: a wheel built from an sdist (the default of
 
 ### skill.wheel.wheel_skills_snippet(package, , backend='hatch', source='skills', target_dir='_skills')
 
-[`wheel_skills_config()`](_autosummary/skill.wheel.html.md#skill.wheel.wheel_skills_config) as `pyproject.toml` text, for a file that has none
-of these tables yet (merge the dict instead when it has).
+The recipe as text. hatchling: [`wheel_skills_config()`](_autosummary/skill.wheel.html.md#skill.wheel.wheel_skills_config) as `pyproject.toml`
+text, for a file that has none of these tables yet (merge the dict instead when it
+has). setuptools: a `setup.py` that keeps package discovery (`find_packages`)
+and adds `<package>.<target_dir>` with `source` as its folder; the project’s
+metadata stays in `pyproject.toml`, which must then set none of
+`[tool.setuptools]` `packages`, `packages.find`, `package-dir` or
+`package-data` (each overrides the same `setup.py` setting: move them into
+the `setup.py`). setuptools prints a “Package would be ignored” notice for skill
+folders whose names are identifiers; they are still shipped as package data. The
+`setup.py` is for a flat layout
+(`<package>/` at the root); for a `src/` layout pass `where="src"` to
+`find_packages` and add `"": "src"` to `package_dir`.
 
 ```pycon
 >>> print(wheel_skills_snippet("p", backend="setuptools"))
-[tool.setuptools]
-packages = ["p", "p._skills"]
-package-dir = { "p._skills" = "skills" }
-package-data = { "p._skills" = ["**/*"] }
+# setup.py: keeps package discovery and adds skills/ to the wheel as p/_skills
+from setuptools import find_packages, setup
+
+setup(
+    packages=find_packages(include=["p", "p.*"]) + ["p._skills"],
+    package_dir={"p._skills": "skills"},
+    package_data={"p._skills": ["**/*"]},
+)
 ```
 
 * **Return type:**
@@ -1822,7 +1855,7 @@ package-data = { "p._skills" = ["**/*"] }
 
 # About this build
 
-This documentation was built on **2026-11-24 01:50 UTC** from commit <a href="https://github.com/addaix/skill/commit/984118079394b8cea1d22a06cd267bf1a6024d1e"><code>9841180</code></a> on branch <code>master</code>, for **skill 0.1.27** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-24 05:56 UTC** from commit <a href="https://github.com/addaix/skill/commit/39286b1736b8bc5ee6ec0ea59b0ce069ccf1f755"><code>39286b1</code></a> on branch <code>master</code>, for **skill 0.1.28** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -1831,7 +1864,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                     |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/addaix/skill/commit/984118079394b8cea1d22a06cd267bf1a6024d1e"><code>984118079394b8cea1d22a06cd267bf1a6024d1e</code></a> |
+| Commit              | <a href="https://github.com/addaix/skill/commit/39286b1736b8bc5ee6ec0ea59b0ce069ccf1f755"><code>39286b1736b8bc5ee6ec0ea59b0ce069ccf1f755</code></a> |
 | Branch              | <code>master</code>                                                                                                                                 |
 | Tags at this commit | none                                                                                                                                                |
 | Working tree        | clean                                                                                                                                               |
@@ -1842,9 +1875,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>addaix/skill</code>                                                                  |
-| Run          | <a href="https://github.com/addaix/skill/actions/runs/45307770315">45307770315</a>         |
+| Run          | <a href="https://github.com/addaix/skill/actions/runs/45336697502">45336697502</a>         |
 | Ref          | <code>refs/heads/master</code>                                                             |
-| Event commit | <code>984118079394b8cea1d22a06cd267bf1a6024d1e</code> (in the history of the built commit) |
+| Event commit | <code>39286b1736b8bc5ee6ec0ea59b0ce069ccf1f755</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -1869,13 +1902,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/skill/0.1.27/">0.1.27</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/skill/0.1.28/">0.1.28</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/addaix/skill && cd skill
-git checkout 984118079394b8cea1d22a06cd267bf1a6024d1e
+git checkout 39286b1736b8bc5ee6ec0ea59b0ce069ccf1f755
 pip install "epythet==0.2.25"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
