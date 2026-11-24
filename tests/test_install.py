@@ -430,3 +430,150 @@ def test_uninstall_for_a_host_removes_its_section_of_a_shared_rules_file(tmp_pat
     removed = uninstall('alice/greet', agent_targets=['copilot'], **kw)
     assert removed == {'copilot-instructions': shared}
     assert '<!-- skill:greet -->' not in shared.read_text()
+
+
+# -- review of the fix: never lose edits, no path in the marker, noise, atomic refresh --
+
+
+def test_a_copy_edited_since_install_is_not_replaced_or_removed_without_force(tmp_path):
+    store, project = _setup_store_and_project(tmp_path)
+    kw = dict(scope='project', project_dir=project, store=store)
+    dest = install('alice/greet', agent_targets=['claude-code'], copy=True, **kw)['claude-code']
+    (dest / 'notes.md').write_text('my edits\n')
+    with pytest.raises(FileExistsError, match='force=True'):
+        install('alice/greet', agent_targets=['claude-code'], copy=True, **kw)
+    with pytest.warns(UserWarning, match='not an installation'):
+        assert uninstall('alice/greet', agent_targets=['claude-code'], **kw) == {}
+    assert (dest / 'notes.md').is_file()
+
+
+def test_link_skills_keeps_an_edited_copy(tmp_path):
+    from skill.install import link_skills
+
+    src = tmp_path / 'src' / 'greet'
+    src.mkdir(parents=True)
+    (src / 'SKILL.md').write_text('---\nname: greet\ndescription: Say hello. Use when greeting.\n---\nv1\n')
+    target = tmp_path / 'target'
+    target.mkdir()
+    link_skills(str(src.parent), target=str(target), copy=True)
+    (target / 'greet' / 'SKILL.md').write_text('edited\n')
+    with pytest.raises(FileExistsError):
+        link_skills(str(src.parent), target=str(target), copy=True)
+    assert (target / 'greet' / 'SKILL.md').read_text() == 'edited\n'
+
+
+def test_the_marker_holds_no_path(tmp_path):
+    import json
+
+    from skill.install import INSTALL_MARKER
+
+    store, project = _setup_store_and_project(tmp_path)
+    dest = install('alice/greet', agent_targets=['claude-code'], copy=True,
+                   scope='project', project_dir=project, store=store)['claude-code']
+    marker = json.loads((dest / INSTALL_MARKER).read_text())
+    assert set(marker) == {'key', 'name', 'digest'}
+    assert str(tmp_path) not in json.dumps(marker)
+
+
+def test_build_noise_does_not_make_an_identical_copy_foreign(tmp_path):
+    import shutil
+
+    store, project = _setup_store_and_project(tmp_path)
+    dest = project / '.agents' / 'skills' / 'greet'
+    shutil.copytree(_store_skill_dir(store), dest)
+    (dest / '.DS_Store').write_bytes(b'\0')
+    (dest / '__pycache__').mkdir()
+    install('alice/greet', agent_targets=['codex'], scope='project', project_dir=project, store=store)
+
+
+def test_a_read_only_source_is_copied_and_marked(tmp_path):
+    import stat
+
+    from skill.install import INSTALL_MARKER
+
+    store, project = _setup_store_and_project(tmp_path)
+    src = _store_skill_dir(store)
+    src.chmod(stat.S_IRUSR | stat.S_IXUSR)
+    try:
+        dest = install('alice/greet', agent_targets=['claude-code'], copy=True,
+                       scope='project', project_dir=project, store=store)['claude-code']
+        assert (dest / INSTALL_MARKER).is_file()
+        uninstall('alice/greet', agent_targets=['claude-code'], scope='project',
+                  project_dir=project, store=store)
+        assert not dest.exists()
+    finally:
+        src.chmod(stat.S_IRWXU)
+
+
+def test_a_failed_refresh_leaves_the_old_install(tmp_path, monkeypatch):
+    import shutil
+
+    store, project = _setup_store_and_project(tmp_path)
+    kw = dict(scope='project', project_dir=project, store=store, copy=True)
+    dest = install('alice/greet', agent_targets=['claude-code'], **kw)['claude-code']
+    (_store_skill_dir(store) / 'extra.md').write_text('new\n')
+
+    def broken_copytree(*a, **k):
+        raise OSError('disk full')
+
+    monkeypatch.setattr(shutil, 'copytree', broken_copytree)
+    with pytest.raises(OSError, match='disk full'):
+        install('alice/greet', agent_targets=['claude-code'], **kw)
+    assert (dest / 'SKILL.md').is_file()
+    assert [p.name for p in dest.parent.iterdir()] == ['greet']
+
+
+def test_a_target_reached_through_a_linked_folder_is_never_the_victim(tmp_path):
+    repo = tmp_path / 'repo'
+    src = repo / 'skills' / 'greet'
+    src.mkdir(parents=True)
+    (src / 'SKILL.md').write_text('---\nname: greet\ndescription: d\n---\nbody\n')
+    (repo / '.claude').mkdir()
+    os.symlink(repo / 'skills', repo / '.claude' / 'skills')
+    target = repo / '.claude' / 'skills' / 'greet'
+    assert _create_link(src, target, force=True) == target
+    assert (src / 'SKILL.md').is_file() and not src.is_symlink()
+
+
+def test_copy_over_a_link_to_the_source_makes_a_copy(tmp_path):
+    store, project = _setup_store_and_project(tmp_path)
+    kw = dict(scope='project', project_dir=project, store=store)
+    dest = install('alice/greet', agent_targets=['claude-code'], **kw)['claude-code']
+    assert dest.is_symlink()
+    install('alice/greet', agent_targets=['claude-code'], copy=True, **kw)
+    assert dest.is_dir() and not dest.is_symlink()
+
+
+def test_uninstall_keeps_an_unmarked_copy_with_other_files(tmp_path):
+    import shutil
+
+    store, project = _setup_store_and_project(tmp_path)
+    dest = project / '.agents' / 'skills' / 'greet'
+    shutil.copytree(_store_skill_dir(store), dest)
+    (dest / 'notes.md').write_text('mine\n')
+    with pytest.warns(UserWarning, match='not an installation'):
+        uninstall('alice/greet', agent_targets=['codex'], scope='project',
+                  project_dir=project, store=store)
+    assert (dest / 'notes.md').is_file()
+
+
+def test_uninstall_keeps_an_edited_section_of_a_shared_rules_file(tmp_path):
+    store, project = _setup_store_and_project(tmp_path)
+    kw = dict(scope='project', project_dir=project, store=store)
+    install('alice/greet', agent_targets=['copilot-instructions'], **kw)
+    shared = project / '.github' / 'copilot-instructions.md'
+    shared.write_text(shared.read_text().replace('<!-- /skill:greet -->', 'team rule\n<!-- /skill:greet -->'))
+    with pytest.warns(UserWarning, match='copilot-instructions'):
+        assert uninstall('alice/greet', agent_targets=['copilot'], **kw) == {}
+    assert 'team rule' in shared.read_text()
+
+
+def test_naming_both_targets_removes_an_edited_rules_file_without_a_warning(tmp_path, recwarn):
+    store, project = _setup_store_and_project(tmp_path)
+    kw = dict(scope='project', project_dir=project, store=store)
+    install('alice/greet', agent_targets=['cursor-rules'], **kw)
+    mdc = project / '.cursor' / 'rules' / 'greet.mdc'
+    mdc.write_text(mdc.read_text() + 'edited\n')
+    removed = uninstall('alice/greet', agent_targets=['cursor', 'cursor-rules'], **kw)
+    assert removed == {'cursor-rules': mdc} and not mdc.exists()
+    assert not [w for w in recwarn if 'differs' in str(w.message)]

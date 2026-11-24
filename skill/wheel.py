@@ -29,6 +29,8 @@ import zipfile
 from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
 
+from skill.util import INSTALL_MARKER
+
 __all__ = [
     "WHEEL_SKILLS_DIR",
     "WheelSkillsReport",
@@ -152,8 +154,9 @@ class WheelSkillsReport:
 
 #: What a build leaves out of a copied folder however it is configured (hatchling's
 #: built-in excludes), so the check does not expect them in the wheel.
-_NEVER_SHIPPED_FILES = frozenset({".DS_Store", "Thumbs.db"})
-_NEVER_SHIPPED_DIRS = frozenset(
+#: ``skill.install`` compares and fingerprints copies with the same lists, plus its marker.
+NEVER_SHIPPED_FILES = frozenset({".DS_Store", "Thumbs.db", INSTALL_MARKER})
+NEVER_SHIPPED_DIRS = frozenset(
     {
         "__pycache__",
         ".git",
@@ -166,6 +169,7 @@ _NEVER_SHIPPED_DIRS = frozenset(
         ".hg",
     }
 )
+_NEVER_SHIPPED_FILES, _NEVER_SHIPPED_DIRS = NEVER_SHIPPED_FILES, NEVER_SHIPPED_DIRS
 
 
 def _tracked(repo_root: Path, source: str) -> set[str] | None:
