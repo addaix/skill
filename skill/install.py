@@ -731,9 +731,7 @@ def _install_to_targets(
         else:
             # Symlink/copy the skill directory
             source = source_path
-            _create_link(
-                source, dest, copy=copy, force=force, key=key, name=skill_name
-            )
+            _create_link(source, dest, copy=copy, force=force, key=key, name=skill_name)
             installed[target_name] = dest
             if scope == "project":
                 for old in _legacy_artifacts(target.host_name, project_dir, skill_name):
@@ -859,9 +857,7 @@ def _maps_skills_into_wheel(root: Path, subpath: tuple[str, ...]) -> bool:
     except (OSError, ValueError, ImportError):
         return False
     rel = "/".join(subpath)
-    hatch = (
-        tool.get("hatch", {}).get("build", {}).get("targets", {}).get("wheel", {})
-    )
+    hatch = tool.get("hatch", {}).get("build", {}).get("targets", {}).get("wheel", {})
     force_include = hatch.get("force-include", {}) if isinstance(hatch, dict) else {}
     package_dir = tool.get("setuptools", {}).get("package-dir", {})
     sources = list(force_include) if isinstance(force_include, dict) else []
