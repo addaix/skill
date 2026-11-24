@@ -6,6 +6,9 @@ import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
+#: The marker file ``skill.install`` writes into each copy it makes (never shipped).
+INSTALL_MARKER = ".skill-install.json"
+
 
 @dataclass(frozen=True)
 class ParsedKey:

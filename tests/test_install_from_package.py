@@ -121,3 +121,84 @@ def test_a_fresh_claude_home_without_skills_is_still_a_home(tmp_path, monkeypatc
     monkeypatch.setenv("USERPROFILE", str(home))  # Windows reads this, not HOME
     monkeypatch.delenv("CLAUDE_CONFIG_DIR", raising=False)
     assert claude_homes() == [home / ".claude"]
+
+
+_HATCH_MAPPING = '[tool.hatch.build.targets.wheel.force-include]\n"skills" = "{pkg}/_skills"\n'
+_SETUPTOOLS_MAPPING = '[tool.setuptools]\npackage-dir = {{ "{pkg}._skills" = "skills" }}\n'
+
+
+def _make_editable_dist(
+    site, project, *, dist="edit-dist", pkg="edit_pkg", editable=True, mapping=_HATCH_MAPPING, url=None
+):
+    """An editable install of ``project`` (``wheel-included-skills`` layout) seen from ``site``.
+
+    The skills sit in the project's top-level ``skills/``, which a wheel build maps into
+    the package; an editable install has no such mapping, only ``direct_url.json``.
+    """
+    import json
+
+    (project / pkg).mkdir(parents=True)
+    (project / pkg / "__init__.py").write_text("")
+    if mapping is not None:
+        (project / "pyproject.toml").write_text(mapping.format(pkg=pkg))
+    skill_dir = project / "skills" / "beta"
+    skill_dir.mkdir(parents=True)
+    (skill_dir / "SKILL.md").write_text(_SKILL.format(name="beta"))
+    info = site / f"{dist.replace('-', '_')}-1.0.dist-info"
+    info.mkdir()
+    (info / "METADATA").write_text(f"Metadata-Version: 2.1\nName: {dist}\nVersion: 1.0\n")
+    (info / "top_level.txt").write_text(pkg + "\n")
+    (info / "direct_url.json").write_text(
+        json.dumps(
+            {"url": project.resolve().as_uri(), "dir_info": {"editable": editable}}
+            if url is None
+            else url
+        )
+    )
+    importlib.invalidate_caches()
+
+
+@pytest.mark.parametrize("mapping", [_HATCH_MAPPING, _SETUPTOOLS_MAPPING])
+def test_an_editable_install_finds_the_projects_top_level_skills(
+    fake_dist, tmp_path, monkeypatch, mapping
+):
+    project = tmp_path / "my project"  # a space: the URL is percent-encoded
+    _make_editable_dist(fake_dist, project, mapping=mapping)
+    monkeypatch.syspath_prepend(str(project))  # what the editable .pth does
+    found = find_package_skills("edit-dist")
+    assert found == (project / "skills").resolve()
+    proj = tmp_path / "consumer"
+    (proj / ".git").mkdir(parents=True)
+    result = install_from_package("edit-dist", agent_targets=["claude-code"], project_dir=proj)
+    assert (result["beta"]["claude-code"] / "SKILL.md").is_file()
+    sys.modules.pop("edit_pkg", None)
+
+
+def test_a_non_editable_install_does_not_read_the_source_folder(fake_dist, tmp_path, monkeypatch):
+    project = tmp_path / "src"
+    _make_editable_dist(fake_dist, project, editable=False)
+    monkeypatch.syspath_prepend(str(project))
+    with pytest.raises(LookupError, match="ships no skills"):
+        find_package_skills("edit-dist")
+    sys.modules.pop("edit_pkg", None)
+
+
+def test_an_editable_install_whose_wheel_does_not_ship_skills_is_not_read(fake_dist, tmp_path, monkeypatch):
+    project = tmp_path / "dev-only"
+    _make_editable_dist(fake_dist, project, mapping=None)  # skills/ never reaches the wheel
+    monkeypatch.syspath_prepend(str(project))
+    with pytest.raises(LookupError, match="ships no skills"):
+        find_package_skills("edit-dist")
+    sys.modules.pop("edit_pkg", None)
+
+
+@pytest.mark.parametrize(
+    "direct_url", [{"dir_info": "yes", "url": "file:///x"}, {"dir_info": {"editable": True}, "url": 5}, [1]]
+)
+def test_a_malformed_direct_url_reads_as_no_skills(fake_dist, tmp_path, monkeypatch, direct_url):
+    project = tmp_path / "odd"
+    _make_editable_dist(fake_dist, project, url=direct_url)
+    monkeypatch.syspath_prepend(str(project))
+    with pytest.raises(LookupError, match="ships no skills"):
+        find_package_skills("edit-dist")
+    sys.modules.pop("edit_pkg", None)

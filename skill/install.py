@@ -8,6 +8,7 @@ GitHub into the user's agent host.
 import os
 import shutil
 import subprocess
+import sys
 import warnings
 from dataclasses import dataclass
 from pathlib import Path
@@ -18,6 +19,8 @@ from skill.translate import translators
 from skill.util import find_project_root
 from skill.config import load_config
 from skill.registry import Registry
+from skill.util import INSTALL_MARKER as _INSTALL_MARKER
+from skill.wheel import NEVER_SHIPPED_DIRS, NEVER_SHIPPED_FILES
 from skill.create import _validate_skill, check_dependencies
 
 
@@ -333,28 +336,164 @@ def _check_existing(target: Path) -> str:
     return "file"
 
 
-def _is_install_of(dest: Path, source: Path) -> bool:
-    """True when ``dest`` is a link to ``source`` or a copy of it (same SKILL.md).
+#: Written into every copy :func:`_create_link` makes: the skill's key and name, and a
+#: digest of the copy as installed. A later install or uninstall recognises its own copy
+#: by it (even after the source changed) and refuses to replace one edited since. It
+#: holds no path, so a committed skills folder does not leak one.
+INSTALL_MARKER = _INSTALL_MARKER
 
-    Several hosts share one folder (``.agents/skills``), and a skill installed for one
-    of them in an earlier call must be recognised, not refused or deleted as foreign.
+
+def _is_link(path: Path) -> bool:
+    """A symlink, or a Windows directory junction (which ``is_symlink`` misses)."""
+    return path.is_symlink() or bool(
+        getattr(os.path, "isjunction", None) and os.path.isjunction(path)
+    )
+
+
+def _tree_files(root: Path) -> dict[str, Path]:
+    """``{relative path: path}`` of the files under ``root``, without the noise a build
+    leaves out (``.DS_Store``, ``__pycache__``, ``.pyc``...) and without the marker.
+    Linked folders are not followed (a copy holds real folders where the source may
+    hold links: such a copy is told apart by its marker, not by comparison)."""
+    files = {}
+    for folder, dirs, names in os.walk(root):
+        dirs[:] = [d for d in dirs if d not in NEVER_SHIPPED_DIRS]
+        for name in names:
+            if name in NEVER_SHIPPED_FILES or name.endswith((".pyc", ".pyo")):
+                continue
+            path = Path(folder, name)
+            files[path.relative_to(root).as_posix()] = path
+    return files
+
+
+def _same_tree(a: Path, b: Path) -> bool:
+    """Whether two folders hold the same files with the same bytes (noise ignored)."""
+    fa, fb = _tree_files(a), _tree_files(b)
+    if fa.keys() != fb.keys():
+        return False
+    return all(_file_digest(fa[k]) == _file_digest(fb[k]) for k in sorted(fa))
+
+
+def _file_digest(path: Path) -> str:
+    import hashlib
+
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 16), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _tree_digest(root: Path) -> str:
+    import hashlib
+
+    h = hashlib.sha256()
+    for rel, path in sorted(_tree_files(root).items()):
+        h.update(f"{rel}\0{_file_digest(path)}\n".encode())
+    return h.hexdigest()
+
+
+def _read_marker(dest: Path) -> dict | None:
+    import json
+
+    try:
+        data = json.loads((dest / INSTALL_MARKER).read_text())
+    except (OSError, ValueError):
+        return None
+    return data if isinstance(data, dict) else None
+
+
+def _write_marker(dest: Path, *, key: str | None, name: str) -> None:
+    import json
+    import stat
+
+    # A copy keeps the source's modes: a read-only source gives a read-only folder.
+    dest.chmod(dest.stat().st_mode | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRUSR)
+    (dest / INSTALL_MARKER).write_text(
+        json.dumps({"key": key, "name": name, "digest": _tree_digest(dest)}, indent=2)
+        + "\n"
+    )
+
+
+def _is_current(dest: Path, source: Path, *, copy: bool = False) -> bool:
+    """True when ``dest`` already serves ``source`` as it is now, in a form that does:
+    a link to it (unless a copy was asked for), or a copy of its whole skill tree
+    (every file, not only its ``SKILL.md``).
+
+    >>> _is_current(Path('/nonexistent/a'), Path('/nonexistent/b'))
+    False
+    """
+    try:
+        if _is_link(dest):
+            return not copy and dest.resolve() == source.resolve()
+        if dest.is_dir() and source.is_dir():
+            return (source / "SKILL.md").is_file() and _same_tree(dest, source)
+    except OSError:
+        return False
+    return False
+
+
+def _is_install_of(
+    dest: Path, source: Path, *, key: str | None = None, name: str | None = None
+) -> bool:
+    """True when ``dest`` is an installation of ``source`` this package may replace or
+    remove without ``force``.
+
+    That is: a link to ``source``; a copy carrying the marker :func:`_create_link`
+    writes, for this ``key`` (or, without a key, this skill ``name``), not edited since
+    it was installed (recognised even after the source changed); or an unmarked copy of
+    ``source``'s whole current tree. Several hosts share one folder (``.agents/skills``),
+    and a skill installed for one of them in an earlier call must be recognised, not
+    refused or deleted as foreign; a folder holding someone's edits is never ours.
 
     >>> _is_install_of(Path('/nonexistent/a'), Path('/nonexistent/b'))
     False
     """
     try:
-        if dest.is_symlink():
+        if _is_link(dest):
             return dest.resolve() == source.resolve()
         if dest.is_dir():
-            ours, theirs = dest / "SKILL.md", source / "SKILL.md"
-            return (
-                ours.is_file()
-                and theirs.is_file()
-                and ours.read_bytes() == theirs.read_bytes()
+            marker = _read_marker(dest)
+            if marker is None:
+                return _is_current(dest, source)
+            same_skill = (
+                marker.get("key") == key
+                if key is not None
+                else marker.get("key") is None and marker.get("name") == name
             )
+            return same_skill and marker.get("digest") == _tree_digest(dest)
     except OSError:
         return False
     return False
+
+
+def _remove_tree(path: Path) -> None:
+    """Remove a file, a link (or junction) or a folder, read-only content included."""
+    import stat
+
+    def make_writable_and_retry(func, p, _exc):
+        os.chmod(p, stat.S_IWUSR | stat.S_IRUSR | stat.S_IXUSR)
+        parent = os.path.dirname(p)
+        os.chmod(parent, os.stat(parent).st_mode | stat.S_IWUSR)
+        func(p)
+
+    if _is_link(path):
+        try:
+            path.unlink()
+        except OSError:
+            os.rmdir(path)  # a junction on Windows
+    elif path.is_dir():
+        if sys.version_info >= (3, 12):
+            shutil.rmtree(path, onexc=make_writable_and_retry)
+        else:  # pragma: no cover - older interpreters
+            shutil.rmtree(path, onerror=make_writable_and_retry)
+    elif path.exists():
+        path.unlink()
+
+
+def _overlaps(a: Path, b: Path) -> bool:
+    ra, rb = a.resolve(), b.resolve()
+    return ra == rb or ra in rb.parents or rb in ra.parents
 
 
 def _legacy_artifacts(host: str, project_dir, skill_name: str) -> list[Path]:
@@ -381,39 +520,70 @@ def _create_link(
     *,
     copy: bool = False,
     force: bool = False,
+    key: str | None = None,
+    name: str | None = None,
 ) -> Path:
     """Create a symlink (or copy) from ``target`` pointing to ``source``.
 
-    On Windows, uses a directory junction instead of symlink.
+    An installation that already serves ``source`` as it is now (a link to it, or a
+    copy of its whole tree, e.g. made for another host sharing the folder) is kept.
+    One this package made (a link to ``source``, or a marked copy of the same ``key``,
+    else the same skill ``name``, not edited since) is refreshed. Anything else, such
+    as a folder holding someone's edits, raises ``FileExistsError`` unless ``force``.
+    A copy carries a small marker file (:data:`INSTALL_MARKER`) so it is recognised
+    later. The new installation is built next to ``target`` and swapped in, so a
+    failure leaves the old one in place. ``target`` may never be ``source`` itself.
     """
-    existing = _check_existing(target)
-    if existing != "none" and not force and _is_install_of(target, source):
-        return target  # this skill is already there (another host sharing the folder)
-    if existing == "our_symlink":
-        # Already linked by us — update if source changed
-        target.unlink()
-    elif existing != "none":
-        if not force:
+    name = name or target.name
+    if _check_existing(target) != "none":
+        if not _is_link(target) and _overlaps(target, source):
+            # Reached through a linked folder (``.claude/skills -> ../skills``): the
+            # target is the source itself, or holds it. Never delete it.
+            if target.resolve() == source.resolve():
+                return target
+            raise ValueError(f"{target} overlaps the skill's own source {source}")
+        if _is_current(target, source, copy=copy):
+            return target  # already there (e.g. another host sharing the folder)
+        if not force and not _is_install_of(target, source, key=key, name=name):
             raise FileExistsError(
-                f"Target already exists ({existing}): {target}. "
+                f"Target already exists ({_check_existing(target)}): {target}. "
                 f"Use force=True to overwrite."
             )
-        if target.is_symlink() or target.is_file():
-            target.unlink()
-        elif target.is_dir():
-            shutil.rmtree(target)
-
     target.parent.mkdir(parents=True, exist_ok=True)
-
-    if copy:
-        if source.is_dir():
-            shutil.copytree(source, target)
-        else:
-            shutil.copy2(source, target)
-    else:
-        os.symlink(source, target)
-
+    _place(source, target, copy=copy, key=key, name=name)
     return target
+
+
+def _place(source: Path, target: Path, *, copy: bool, key, name: str) -> None:
+    """Build the link or copy beside ``target``, then swap it in (old one kept on failure)."""
+    import uuid
+
+    tag = uuid.uuid4().hex[:8]
+    fresh = target.parent / f".{target.name}.skill-new-{tag}"
+    try:
+        if copy and source.is_dir():
+            shutil.copytree(source, fresh)
+            _write_marker(fresh, key=key, name=name)
+        elif copy:
+            shutil.copy2(source, fresh)
+        else:
+            os.symlink(source, fresh)
+    except BaseException:
+        if fresh.exists() or fresh.is_symlink():
+            _remove_tree(fresh)
+        raise
+    if not (target.exists() or target.is_symlink()):
+        os.rename(fresh, target)
+        return
+    old = target.parent / f".{target.name}.skill-old-{tag}"
+    os.rename(target, old)
+    try:
+        os.rename(fresh, target)
+    except BaseException:
+        os.rename(old, target)
+        _remove_tree(fresh)
+        raise
+    _remove_tree(old)
 
 
 # ---------------------------------------------------------------------------
@@ -561,7 +731,9 @@ def _install_to_targets(
         else:
             # Symlink/copy the skill directory
             source = source_path
-            _create_link(source, dest, copy=copy, force=force)
+            _create_link(
+                source, dest, copy=copy, force=force, key=key, name=skill_name
+            )
             installed[target_name] = dest
             if scope == "project":
                 for old in _legacy_artifacts(target.host_name, project_dir, skill_name):
@@ -590,7 +762,11 @@ def find_package_skills(distribution: str) -> Path:
 
     The import packages come from the distribution's metadata (``top_level.txt``,
     its file list, and its normalised name), never from a folder name, and each
-    is located with ``importlib`` so editable installs work too.
+    is located with ``importlib`` so editable installs work too. An editable install
+    is also looked up in its project folder (``<project>/skills``), where the
+    ``wheel-included-skills`` layout keeps them until a wheel is built, when the
+    project's ``pyproject.toml`` maps that folder into the wheel (so it is what the
+    published package ships).
 
     Raises ``LookupError`` if the distribution is not installed or ships no skills.
     """
@@ -623,11 +799,74 @@ def find_package_skills(distribution: str) -> Path:
                 candidate = Path(location, *subpath)
                 if _has_skills(candidate):
                     return candidate
+    root = _editable_project_root(dist)
+    if root is not None:
+        for subpath in EDITABLE_SKILLS_SUBPATHS:
+            candidate = Path(root, *subpath)
+            if _has_skills(candidate) and _maps_skills_into_wheel(root, subpath):
+                return candidate
     raise LookupError(
         f"Distribution {distribution!r} ships no skills (looked for "
         + ", ".join("<pkg>/" + "/".join(p) for p in PACKAGE_SKILLS_SUBPATHS)
-        + ")"
+        + ", and <project>/"
+        + ", <project>/".join("/".join(p) for p in EDITABLE_SKILLS_SUBPATHS)
+        + " for an editable install whose pyproject.toml ships it in the wheel)"
     )
+
+
+#: Where an editable install's skills live, relative to its project root: the
+#: ``wheel-included-skills`` recipe maps the repository's top-level ``skills/`` into
+#: the package only when a wheel is built, so an editable install reads it in place.
+EDITABLE_SKILLS_SUBPATHS: tuple[tuple[str, ...], ...] = (("skills",),)
+
+
+def _editable_project_root(dist) -> Path | None:
+    """The project folder of an editable install (PEP 660 ``direct_url.json``), else None."""
+    import json
+    from urllib.parse import urlparse
+    from urllib.request import url2pathname
+
+    try:
+        info = json.loads(dist.read_text("direct_url.json") or "null")
+    except ValueError:
+        return None
+    dir_info = info.get("dir_info") if isinstance(info, dict) else None
+    url = info.get("url") if isinstance(info, dict) else None
+    if not (isinstance(dir_info, dict) and dir_info.get("editable") is True):
+        return None
+    if not isinstance(url, str):
+        return None
+    parsed = urlparse(url)
+    if parsed.scheme != "file":
+        return None
+    path = url2pathname(parsed.path)
+    if parsed.netloc and parsed.netloc != "localhost":  # a UNC share on Windows
+        path = f"//{parsed.netloc}{path}"
+    return Path(path)
+
+
+def _maps_skills_into_wheel(root: Path, subpath: tuple[str, ...]) -> bool:
+    """Whether ``root/pyproject.toml`` ships ``subpath`` inside the wheel (the
+    ``wheel-included-skills`` recipe: hatch ``force-include`` or a setuptools
+    ``package-dir`` entry), so an editable install's skills are the published ones."""
+    try:
+        try:
+            import tomllib
+        except ModuleNotFoundError:  # pragma: no cover - Python 3.10
+            import tomli as tomllib
+        with open(root / "pyproject.toml", "rb") as f:
+            tool = tomllib.load(f).get("tool", {})
+    except (OSError, ValueError, ImportError):
+        return False
+    rel = "/".join(subpath)
+    hatch = (
+        tool.get("hatch", {}).get("build", {}).get("targets", {}).get("wheel", {})
+    )
+    force_include = hatch.get("force-include", {}) if isinstance(hatch, dict) else {}
+    package_dir = tool.get("setuptools", {}).get("package-dir", {})
+    sources = list(force_include) if isinstance(force_include, dict) else []
+    sources += list(package_dir.values()) if isinstance(package_dir, dict) else []
+    return any(str(src).strip("./").rstrip("/") == rel for src in sources)
 
 
 def install_from_package(
@@ -775,11 +1014,12 @@ def uninstall(
             removed[target_name] = dest  # a shared folder, already removed in this call
         elif dest.exists() or dest.is_symlink():
             source = skill.source_path or store._key_to_path(key)
-            if not target.needs_translation and not (
-                _check_existing(dest) == "our_symlink" or _is_install_of(dest, source)
+            if not target.needs_translation and not _is_install_of(
+                dest, source, key=key, name=skill_name
             ):
                 warnings.warn(
-                    f"{dest} is not an installation of {key!r}; leaving it alone",
+                    f"{dest} is not an installation of {key!r}; leaving it alone "
+                    f"(delete it yourself if it is an older copy of this skill)",
                     stacklevel=2,
                 )
                 continue
@@ -801,12 +1041,66 @@ def uninstall(
                     f"{', '.join(sharing)}",
                     stacklevel=2,
                 )
-            if dest.is_symlink() or dest.is_file():
-                dest.unlink()
-            elif dest.is_dir():
-                shutil.rmtree(dest)
+            _remove_tree(dest)
             removed[target_name] = dest
 
+        if scope == "project" and not target.needs_translation:
+            removed.update(
+                _remove_legacy_artifacts(
+                    skill,
+                    target.host_name,
+                    project_dir,
+                    key,
+                    skip=set(targets) | set(removed),
+                )
+            )
+
+    return removed
+
+
+def _remove_legacy_artifacts(
+    skill: Skill, host: str, project_dir: Path, key: str, *, skip: set
+) -> dict[str, Path]:
+    """Remove the rules-file installs an earlier version wrote for ``host``, when ours.
+
+    Ours means: a file, or our marked section of a shared file, whose content is what
+    this package writes for the skill today. Anything else (edited, or written for an
+    older version of the skill) is left with a warning that names the explicit
+    uninstall.
+    """
+    removed = {}
+    skill_name = skill.meta.name
+    for path in _legacy_artifacts(host, project_dir, skill_name):
+        name, target = next(
+            (n, t)
+            for n, t in AGENT_TARGETS.items()
+            if t.needs_translation
+            and t.host_name == host
+            and t.format_project_path(project_dir, skill_name) == path
+        )
+        if name in skip:
+            continue
+        if target.appends and path.is_symlink():
+            continue  # never edit through a link (GEMINI.md -> AGENTS.md)
+        translator = translators.get(target.format)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")  # the translation's lossy-field notices
+            expected = translator(skill) if translator is not None else None
+        text = path.read_text(errors="replace")
+        current = _section_body(text, skill_name) if target.appends else text
+        if expected is not None and current == expected:
+            if target.appends:
+                _remove_section(path, skill_name)
+            else:
+                path.unlink()
+            removed[name] = path
+        else:
+            warnings.warn(
+                f"{path} holds an older rules-file install of {skill_name!r} for {host} "
+                f"that differs from this skill; remove it with uninstall({key!r}, "
+                f"agent_targets=[{name!r}])",
+                stacklevel=3,
+            )
     return removed
 
 
@@ -986,10 +1280,19 @@ def link_skills(
             )
             continue
         dest = target_path / name
-        _create_link(skill_dir, dest, copy=copy, force=force)
+        _create_link(skill_dir, dest, copy=copy, force=force, name=name)
         installed[name] = dest
 
     return installed
+
+
+def _section_body(content: str, skill_name: str) -> str | None:
+    """The text :func:`_append_or_create` wrote between a skill's markers, if present."""
+    marker = f"<!-- skill:{skill_name} -->\n"
+    end_marker = f"\n<!-- /skill:{skill_name} -->"
+    start = content.find(marker)
+    end = content.find(end_marker, start + len(marker)) if start >= 0 else -1
+    return content[start + len(marker) : end] if end >= 0 else None
 
 
 def _remove_section(path: Path, skill_name: str) -> bool:
